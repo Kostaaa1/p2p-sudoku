@@ -1,0 +1,61 @@
+import { useRef, useState } from "react";
+import usePeer from "./hooks/usePeer";
+import useStore from "./store/store";
+import { useNavigate } from "react-router-dom";
+
+const PeerConnection = () => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [input, setInput] = useState<string>("");
+  const { handleConnect } = usePeer();
+  const navigate = useNavigate();
+
+  const { peerId } = useStore();
+  const copyPeerId = () => {
+    navigator.clipboard.writeText(peerId);
+  };
+
+  return (
+    <div className="w-[520px] flex h-max flex-col justify-between rounded-md bg-slate-200 p-3 font-semibold text-gray-600 shadow-md shadow-gray-500 outline outline-1 whitespace-nowrap outline-white">
+      <div className="flex w-full items-center justify-between">
+        <div className="inline-flex">
+          <label className="font-semibold">My peer id: &nbsp;</label>
+          <p className="font-bold text-yellow-600 underline">{peerId}</p>
+        </div>
+        <button
+          className="bg-slate-400 text-sm text-white"
+          onClick={copyPeerId}
+        >
+          Copy
+        </button>
+      </div>
+      <div className="">
+        <div className="flex py-2 w-full items-center justify-center">
+          <label className="font-semibold">Connect to id: </label>
+          <input
+            ref={inputRef}
+            autoFocus
+            type="text"
+            onChange={(e) => setInput(e.target.value)}
+            value={input}
+            placeholder="Id"
+            className="custom-input w-full"
+          />
+        </div>
+      </div>
+      <button
+        className="bg-slate-400 text-sm text-white"
+        onClick={() => handleConnect(input)}
+      >
+        Connect
+      </button>
+      <button
+        className="bg-red-400 text-sm text-white [--p:259_94%_51%] duration-200 transition-colors"
+        onClick={() => navigate(-1)}
+      >
+        Go Back
+      </button>
+    </div>
+  );
+};
+
+export default PeerConnection;
