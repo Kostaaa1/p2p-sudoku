@@ -35,6 +35,7 @@ function Sudoku() {
     sudoku,
     setIsWinner,
     isWinner,
+    INIT_INVALID_CELLS_STRING,
   } = useSudokuStore();
 
   const { inputRefs, focusInput, handleChangeInput, allCellsFilled } =
@@ -56,8 +57,13 @@ function Sudoku() {
     }
 
     // Incremented mistakes
-    if (mistakes < 5 && invalidCells && invalidCells.length > 0) {
-      console.log("ran");
+    if (
+      mistakes < 5 &&
+      invalidCells &&
+      invalidCells.length > 0 &&
+      INIT_INVALID_CELLS_STRING !== JSON.stringify(invalidCells)
+    ) {
+      console.log("ran increment", JSON.stringify(invalidCells));
       incrementMistakes();
     }
   }, [invalidCells]);
@@ -66,6 +72,7 @@ function Sudoku() {
     // Lost condition, 5 Mistakes:
     if (mistakes === 5) {
       setIsWinner(false);
+      return;
     }
   }, [mistakes]);
 

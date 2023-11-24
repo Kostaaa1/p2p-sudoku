@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import useStore from "../store/store";
 import toast from "react-hot-toast";
 import useLocalStorage from "./useLocalStorage";
@@ -7,9 +7,8 @@ import useSudokuStore from "../store/sudokuStore";
 const useSudoku = () => {
   const inputRefs = useRef<HTMLInputElement[]>([]);
 
-  const { setIsToastRan } = useStore();
-  const { cacheMistakes, cacheInvalid, cacheAdded, cacheGame, clearCache } =
-    useLocalStorage();
+  const { setIsModalOpen, setIsToastRan } = useStore();
+  const { clearCache } = useLocalStorage();
 
   const {
     setSudoku,
@@ -21,6 +20,7 @@ const useSudoku = () => {
     mistakes,
     focusedCell,
     isWinner,
+    setIsWinner,
     addInvalidCell,
     resetMistakes,
     setFocusedCell,
@@ -38,37 +38,18 @@ const useSudoku = () => {
     ["5", "1", "", "", "9", "", "", "", ""],
   ];
 
-  // const [sudoku, setSudoku] = useState<string[][]>(() => {
-  //   const cachedGame = getCachedGame();
-  //   return cachedGame ?? initSudoku;
-  // });
-
-  // const [invalidCells, setInvalidCells] = useState<TCell[]>(() => {
-  //   const cachedInvalid = getCachedInvalid();
-  //   return cachedInvalid ?? [];
-  // });
-
-  // const [addedCells, setAddedCells] = useState<TCell[]>(() => {
-  //   const cachedAdded = getCachedAdded();
-  //   return cachedAdded ?? [];
-  // });
-
-  // const { isWinner, setIsToastRan } = useStore();
-  // const [mistakes, setMistakes] = useState<number>(0);
-
-  // const [focusedCell, setFocusedCell] = useState<TCell>({
-  //   col: 0,
-  //   row: 0,
-  //   value: sudoku[0][0],
-  // });
-
   const resetSudokuBoard = () => {
+    console.log("ran");
+    clearCache();
     setSudoku(initSudoku);
     setAddedCells([]);
     setInvalidCells([]);
     resetMistakes();
-    clearCache();
-    console.log("ran");
+
+    if (isWinner !== null) {
+      setIsWinner(false);
+      setIsModalOpen(false);
+    }
   };
 
   const toastMessageConstructor = ({
@@ -85,23 +66,6 @@ const useSudoku = () => {
     setIsToastRan(true);
   };
 
-  // Main function for checking sudoku board everytime board gets updated:
-  // const addInvalidValue = (data: TCell) => {
-  //   setInvalidCells((state) => {
-  //     if (
-  //       state &&
-  //       !state.some(
-  //         (x) =>
-  //           x.col === data.col && x.row === data.row && x.value === data.value
-  //       )
-  //     ) {
-  //       return [data, ...state];
-  //     } else {
-  //       return state;
-  //     }
-  //   });
-  // };
-
   const deleteFocusedCell = () => {
     const { col, row, value } = focusedCell;
 
@@ -111,37 +75,7 @@ const useSudoku = () => {
         (x) => x.row !== row || x.col !== col || x.value !== value
       )
     );
-
-    // setInvalidCells(
-    //   (state) => state?.filter((x) => x.value !== value) || state
-    // );
-    // setAddedCells(
-    //   (state) =>
-    //     state?.filter(
-    //       (x) => x.row !== row || x.col !== col || x.value !== value
-    //     )
-    // );
   };
-
-  // useEffect(() => {
-  //   console.log("updated mistakes");
-  //   cacheMistakes(mistakes);
-  // }, [mistakes]);
-
-  // useEffect(() => {
-  //   console.log("updated addedCells");
-  //   cacheAdded(addedCells);
-  // }, [addedCells]);
-
-  // useEffect(() => {
-  //   console.log("updated invalidCells");
-  //   cacheInvalid(invalidCells);
-  // }, [invalidCells]);
-
-  // useEffect(() => {
-  //   console.log("updated sudoku");
-  //   cacheGame(sudoku);
-  // }, [sudoku]);
 
   const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isWinner !== null) return;
@@ -161,7 +95,6 @@ const useSudoku = () => {
     focusedCell.value.length > value.length
       ? deleteFocusedCell()
       : setAddedCells([newCell, ...addedCells]);
-    // : setAddedCells((state) => (state ? [newCell, ...state] : state));
 
     // Update Sudoku Cell:
     const newBoard = [...sudoku];

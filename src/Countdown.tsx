@@ -5,13 +5,13 @@ import useStore from "./store/store";
 import { DataConnection } from "peerjs";
 import { updateCountdown } from "./utils/utils";
 import { PeerResponse } from "./types/types";
+import useSudokuStore from "./store/sudokuStore";
 
 const Countdown = () => {
   const { resetSudokuBoard } = useSudoku();
+  const { isWinner, setIsWinner } = useSudokuStore();
   const {
     connection,
-    isWinner,
-    setIsWinner,
     isCountdownActive,
     setIsCountdownActive,
     STARTING_TIME,

@@ -16,40 +16,8 @@ type TUseSudokuStore = {
   mistakes: number;
   incrementMistakes: () => void;
   resetMistakes: () => void;
+  INIT_INVALID_CELLS_STRING: string | null;
 };
-
-// const [sudoku, setSudoku] = useState<string[][]>(() => {
-//     const cachedGame = getCachedGame();
-//     return cachedGame ?? initSudoku;
-//   });
-
-//   const [invalidCells, setInvalidCells] = useState<TCell[]>(() => {
-//     const cachedInvalid = getCachedInvalid();
-//     return cachedInvalid ?? [];
-//   });
-
-//   const [addedCells, setAddedCells] = useState<TCell[]>(() => {
-//     const cachedAdded = getCachedAdded();
-//     return cachedAdded ?? [];
-//   });
-
-//   const { isWinner, setIsToastRan } = useStore();
-//   const [mistakes, setMistakes] = useState<number>(0);
-
-//   const [focusedCell, setFocusedCell] = useState<TCell>({
-//     col: 0,
-//     row: 0,
-//     value: sudoku[0][0],
-//   });
-
-// const getCachedMistakes = () => {
-//   const cachedGame = localStorage.getItem("mistakes");
-//   if (cachedGame) {
-//     return JSON.parse(cachedGame);
-//   } else {
-//     return null;
-//   }
-// };
 
 const getGame = () => {
   const cachedGame = localStorage.getItem("game");
@@ -73,8 +41,13 @@ const getGame = () => {
   }
 };
 
-const getInvalidCells = () => {
+const getStringifiedInvalid = () => {
   const cachedInvalids = localStorage.getItem("invalid");
+  return cachedInvalids;
+};
+
+const getInvalidCells = () => {
+  const cachedInvalids = getStringifiedInvalid();
   if (cachedInvalids) {
     return JSON.parse(cachedInvalids);
   } else {
@@ -108,6 +81,7 @@ const cacheInvalid = (invalid: TCell[]) =>
   localStorage.setItem("invalid", JSON.stringify(invalid));
 
 const useSudokuStore = create<TUseSudokuStore>((set) => ({
+  INIT_INVALID_CELLS_STRING: getStringifiedInvalid(),
   sudoku: getGame(),
   setSudoku: (sudoku: string[][]) => set({ sudoku }),
   focusedCell: { col: 0, row: 0, value: getGame()[0][0] },
