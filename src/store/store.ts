@@ -7,10 +7,8 @@ type TUseStore = {
   connection: DataConnection | null;
   setConnection: (val: DataConnection) => void;
   peer: Peer;
-  isWinner: boolean | null;
-  setIsWinner: (isWinner: boolean) => void;
-  // modalMsg: string | null;
-  // setModalMsg: (val: string) => void;
+  // isWinner: boolean | null;
+  // setIsWinner: (isWinner: boolean) => void;
   isCountdownActive: boolean;
   setIsCountdownActive: (val: boolean) => void;
   STARTING_TIME: string;
@@ -58,12 +56,12 @@ const useStore = create<TUseStore>((set) => ({
       connection: connection,
     })),
   ////
-  isWinner: null,
-  setIsWinner: (isWinner: boolean) =>
-    set((state) => ({
-      ...state,
-      isWinner,
-    })),
+  // isWinner: null,
+  // setIsWinner: (isWinner: boolean) =>
+  //   set((state) => ({
+  //     ...state,
+  //     isWinner,
+  //   })),
   isToastRan: false,
   setIsToastRan: (isToastRan: boolean) =>
     set((state) => ({

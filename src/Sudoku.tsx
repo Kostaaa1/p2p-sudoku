@@ -9,6 +9,7 @@ import hornPath from "./assets/horn.mp3";
 import useStore from "./store/store";
 import { toastMessageConstructor } from "./utils/utils";
 import { PeerResponse } from "./types/types";
+import useSudokuStore from "./store/sudokuStore";
 
 function Sudoku() {
   const booRef = useRef<HTMLAudioElement>(null);
@@ -20,25 +21,24 @@ function Sudoku() {
     peerId,
     isModalOpen,
     setIsModalOpen,
-    isWinner,
-    setIsWinner,
     isCountdownActive,
     setIsCountdownActive,
   } = useStore();
 
   const {
-    inputRefs,
     mistakes,
-    setMistakes,
-    addedCells,
+    incrementMistakes,
     focusedCell,
-    invalidCells,
     setFocusedCell,
+    invalidCells,
+    addedCells,
     sudoku,
-    focusInput,
-    handleChangeInput,
-    allCellsFilled,
-  } = useSudoku();
+    setIsWinner,
+    isWinner,
+  } = useSudokuStore();
+
+  const { inputRefs, focusInput, handleChangeInput, allCellsFilled } =
+    useSudoku();
 
   const closeModal = () => setIsModalOpen(false);
   useEffect(() => {
@@ -57,7 +57,8 @@ function Sudoku() {
 
     // Incremented mistakes
     if (mistakes < 5 && invalidCells && invalidCells.length > 0) {
-      setMistakes((state) => state + 1);
+      console.log("ran");
+      incrementMistakes();
     }
   }, [invalidCells]);
 

@@ -1,12 +1,4 @@
-import React, {
-  Dispatch,
-  FC,
-  SetStateAction,
-  useCallback,
-  useMemo,
-  memo,
-  ChangeEvent,
-} from "react";
+import React, { FC, useCallback, useMemo, memo, ChangeEvent } from "react";
 import { twMerge } from "tailwind-merge";
 import { TCell } from "./types/types";
 
@@ -17,7 +9,7 @@ interface FieldProps {
   invalidCells: TCell[];
   addedCells: TCell[];
   focusedCell: TCell;
-  setFocusedCell: Dispatch<SetStateAction<TCell>>;
+  setFocusedCell: (cell: TCell) => void;
   inputRefs: React.MutableRefObject<HTMLInputElement[]>;
   focusInput: () => void;
   isWinner: boolean | null;
