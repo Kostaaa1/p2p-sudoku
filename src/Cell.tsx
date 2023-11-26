@@ -101,6 +101,8 @@ const Cell: FC<FieldProps> = memo(
     }) => {
       if (isWinner !== null) return;
 
+      // "build": "tsc && vite build",
+
       const { col, row, value } = focusedCell;
       if (value === newValue && row === rowId && col === colId) return;
 
