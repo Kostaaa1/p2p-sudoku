@@ -19,8 +19,6 @@ function Sudoku() {
     isToastRan,
     connection,
     peerId,
-    isModalOpen,
-    setIsModalOpen,
     isCountdownActive,
     setIsCountdownActive,
   } = useStore();
@@ -36,6 +34,8 @@ function Sudoku() {
     setIsWinner,
     isWinner,
     INIT_INVALID_CELLS_STRING,
+    isModalOpen,
+    setIsModalOpen,
   } = useSudokuStore();
 
   const { inputRefs, focusInput, handleChangeInput, allCellsFilled } =
@@ -48,15 +48,11 @@ function Sudoku() {
     }
   }, [sudoku]);
 
-  // Conditions For winning or losing, need to make ite better.
-  // If mistake has been made, increment it. At 5 mistakes, game is over
   useEffect(() => {
-    // Winning condition:
     if (allCellsFilled && mistakes < 5 && invalidCells.length === 0) {
       setIsWinner(true);
     }
 
-    // Incremented mistakes
     if (
       mistakes < 5 &&
       invalidCells &&
@@ -69,7 +65,6 @@ function Sudoku() {
   }, [invalidCells]);
 
   useEffect(() => {
-    // Lost condition, 5 Mistakes:
     if (mistakes === 5) {
       setIsWinner(false);
       return;
@@ -86,7 +81,7 @@ function Sudoku() {
       booRef.current.play();
 
       connection?.send({
-        type: "end_game_condition",
+        type: "end_game",
         data: {
           isWinner: false,
           message: "Time's up, you both lost, or tied idk...",
@@ -104,7 +99,7 @@ function Sudoku() {
       booRef.current.play();
 
       connection?.send({
-        type: "end_game_condition",
+        type: "end_game",
         data: {
           isWinner: !isWinner,
           message: "Youu won! The opponent made 5 mistakes!",
@@ -122,7 +117,7 @@ function Sudoku() {
       hornRef.current.play();
 
       connection?.send({
-        type: "end_game_condition",
+        type: "end_game",
         data: {
           isWinner: !isWinner,
           message: "You lost. The opponent solved before you!",

@@ -1,43 +1,46 @@
 import { useEffect } from "react";
 import { twMerge } from "tailwind-merge";
-import useSudoku from "./hooks/useSudoku";
 import useStore from "./store/store";
 import { DataConnection } from "peerjs";
 import { updateCountdown } from "./utils/utils";
-import { PeerResponse } from "./types/types";
 import useSudokuStore from "./store/sudokuStore";
 
 const Countdown = () => {
-  const { resetSudokuBoard } = useSudoku();
-  const { isWinner, setIsWinner } = useSudokuStore();
+  const { isWinner, setIsWinner, resetGame } = useSudokuStore();
   const {
     connection,
     isCountdownActive,
     setIsCountdownActive,
-    STARTING_TIME,
+    startingTime,
     END_TIME,
+    setStartingTime,
     time,
     setTime,
   } = useStore();
 
   useEffect(() => {
     if (!isCountdownActive) return;
-    let startingTime = parseInt(STARTING_TIME.split(":")[0]) * 60;
+    console.log("startingTime", startingTime);
+
+    let start = parseInt(startingTime.split(":")[0]) * 60;
+    const seconds = parseInt(startingTime.split(":")[1]);
+
+    if (seconds > 0) start += seconds;
 
     const handleCountdown = (connection?: DataConnection | null) => {
       return setInterval(() => {
-        if (startingTime > 0) {
-          startingTime--;
+        if (start > 0) {
+          start--;
 
           if (connection) {
             connection.send({
               type: "countdown",
-              data: startingTime,
-            } as PeerResponse);
+              data: start,
+            });
           } else {
-            updateCountdown(startingTime, setTime);
+            updateCountdown(start, setTime);
           }
-        } else if (startingTime === 0) {
+        } else if (start === 0) {
           setIsWinner(false);
           return;
         }
@@ -49,14 +52,21 @@ const Countdown = () => {
     return () => {
       clearInterval(interval);
     };
-  }, [STARTING_TIME, isCountdownActive, isWinner]);
+  }, [isCountdownActive, isWinner]);
 
-  const startCount = () => setIsCountdownActive(true);
+  const startCount = () => {
+    if (isWinner === null) {
+      setIsCountdownActive(true);
+    }
+  };
+
   const resetCount = () => {
-    if (time !== STARTING_TIME) {
+    if (time !== startingTime && isWinner === null) {
+      console.log("reset");
       setIsCountdownActive(false);
-      setTime(STARTING_TIME);
-      resetSudokuBoard();
+      resetGame();
+      setTime("15:00");
+      setStartingTime("15:00");
     }
   };
 

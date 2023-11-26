@@ -101,10 +101,10 @@ const Cell: FC<FieldProps> = memo(
     }) => {
       if (isWinner !== null) return;
 
-      focusInput();
       const { col, row, value } = focusedCell;
       if (value === newValue && row === rowId && col === colId) return;
 
+      focusInput();
       setFocusedCell({
         row: rowId,
         col: colId,
@@ -112,12 +112,12 @@ const Cell: FC<FieldProps> = memo(
       });
     };
 
-    const rightBorder = shouldRenderRightBorder(colId);
-    const bottomBorder = shouldRenderBottomBorder(rowId);
+    const addRightBorder = shouldRenderRightBorder(colId);
+    const addBottomBorder = shouldRenderBottomBorder(rowId);
     const inputClassNames = [
       "h-full border border-r-0 border-b-0 border-[#BEC6D4] cursor-pointer text-3xl bg-opacity-100 bg-transparent font-semibold text-center w-full caret-transparent",
-      rightBorder && "border-r-2 border-r-blue-800",
-      bottomBorder && "border-b-2 border-b-blue-800",
+      addRightBorder && "border-r-2 border-r-blue-800",
+      addBottomBorder && "border-b-2 border-b-blue-800",
     ];
 
     return (
@@ -136,7 +136,7 @@ const Cell: FC<FieldProps> = memo(
             row: rowId,
             col: colId,
             value: colVal,
-          }) && "text-black",
+          }) && "text-green-600",
           parseInt(focusedCell.value) === parseInt(colVal) &&
             "bg-blue-900 bg-opacity-25",
           isIncluded(invalidCells, {

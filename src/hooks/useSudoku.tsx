@@ -1,14 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import useStore from "../store/store";
 import toast from "react-hot-toast";
-import useLocalStorage from "./useLocalStorage";
 import useSudokuStore from "../store/sudokuStore";
 
 const useSudoku = () => {
   const inputRefs = useRef<HTMLInputElement[]>([]);
 
-  const { setIsModalOpen, setIsToastRan } = useStore();
-  const { clearCache } = useLocalStorage();
+  const { setIsToastRan } = useStore();
 
   const {
     setSudoku,
@@ -20,37 +18,10 @@ const useSudoku = () => {
     mistakes,
     focusedCell,
     isWinner,
-    setIsWinner,
     addInvalidCell,
-    resetMistakes,
+    resetGame,
     setFocusedCell,
   } = useSudokuStore();
-
-  const initSudoku = [
-    ["", "9", "4", "1", "", "", "5", "", "7"],
-    ["", "7", "", "", "8", "", "", "", ""],
-    ["", "", "6", "", "", "4", "1", "2", ""],
-    ["", "", "1", "", "", "", "", "", "2"],
-    ["", "", "", "8", "6", "", "9", "7", ""],
-    ["", "6", "", "2", "", "7", "", "", ""],
-    ["2", "3", "", "4", "1", "8", "7", "", "6"],
-    ["6", "4", "", "7", "", "5", "3", "1", "9"],
-    ["5", "1", "", "", "9", "", "", "", ""],
-  ];
-
-  const resetSudokuBoard = () => {
-    console.log("ran");
-    clearCache();
-    setSudoku(initSudoku);
-    setAddedCells([]);
-    setInvalidCells([]);
-    resetMistakes();
-
-    if (isWinner !== null) {
-      setIsWinner(false);
-      setIsModalOpen(false);
-    }
-  };
 
   const toastMessageConstructor = ({
     winner,
@@ -68,7 +39,6 @@ const useSudoku = () => {
 
   const deleteFocusedCell = () => {
     const { col, row, value } = focusedCell;
-
     setInvalidCells(invalidCells?.filter((x) => x.value !== value));
     setAddedCells(
       addedCells?.filter(
@@ -81,6 +51,7 @@ const useSudoku = () => {
     if (isWinner !== null) return;
 
     const { value } = e.target;
+
     const { col: colId, row: rowId } = focusedCell;
     const newCell = { row: rowId, col: colId, value };
 
@@ -238,7 +209,7 @@ const useSudoku = () => {
   return {
     handleChangeInput,
     inputRefs,
-    resetSudokuBoard,
+    resetGame,
     sudoku,
     setSudoku,
     addedCells,

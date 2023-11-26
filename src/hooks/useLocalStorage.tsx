@@ -1,9 +1,4 @@
-import { useEffect } from "react";
-import { TCell } from "../types/types";
-import useSudokuStore from "../store/sudokuStore";
-
 const useLocalStorage = () => {
-  const { mistakes, invalidCells, addedCells, sudoku } = useSudokuStore();
   const clearCache = () => {
     localStorage.clear();
   };
@@ -44,36 +39,12 @@ const useLocalStorage = () => {
     }
   };
 
-  const cacheMistakes = (number: number) =>
-    localStorage.setItem("mistakes", JSON.stringify(number));
-
-  const cacheGame = (game: string[][]) =>
-    localStorage.setItem("game", JSON.stringify(game));
-
-  const cacheInvalid = (invalid: TCell[]) =>
-    localStorage.setItem("invalid", JSON.stringify(invalid));
-
-  const cacheAdded = (added: TCell[]) =>
-    localStorage.setItem("added", JSON.stringify(added));
-
-  useEffect(() => {
-    console.log("ran caching");
-    cacheInvalid(invalidCells);
-    cacheAdded(addedCells);
-    cacheGame(sudoku);
-    cacheMistakes(mistakes);
-  }, [mistakes, addedCells, invalidCells, sudoku]);
-
   return {
     getCachedMistakes,
-    cacheMistakes,
     getCachedGame,
     getCachedInvalid,
     getCachedAdded,
     clearCache,
-    cacheGame,
-    cacheInvalid,
-    cacheAdded,
   };
 };
 

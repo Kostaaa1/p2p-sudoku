@@ -6,20 +6,20 @@ import { useEffect } from "react";
 import useStore from "./store/store";
 import { toastMessageConstructor, updateCountdown } from "./utils/utils";
 import { PeerResponse } from "./types/types";
+import useSudokuStore from "./store/sudokuStore";
 
 function App() {
   const location = useLocation();
 
   const {
     setIsToastRan,
-    setIsWinner,
     setTime,
     peer,
     setIsCountdownActive,
-    setIsModalOpen,
     setConnection,
     setPeerId,
   } = useStore();
+  const { setIsModalOpen, setIsWinner } = useSudokuStore();
 
   useEffect(() => {
     peer.on("open", (id) => {
@@ -34,7 +34,7 @@ function App() {
       conn.on("data", (res) => {
         const { data, type } = res as PeerResponse;
 
-        if (type === "end_game_condition") {
+        if (type === "end_game") {
           const { isWinner, message } = data;
           console.log("toast: ", message);
 

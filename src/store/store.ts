@@ -1,5 +1,6 @@
 import Peer, { DataConnection } from "peerjs";
 import { create } from "zustand";
+import { getCached } from "../utils/utils";
 
 type TUseStore = {
   peerId: string;
@@ -7,28 +8,28 @@ type TUseStore = {
   connection: DataConnection | null;
   setConnection: (val: DataConnection) => void;
   peer: Peer;
-  // isWinner: boolean | null;
-  // setIsWinner: (isWinner: boolean) => void;
   isCountdownActive: boolean;
   setIsCountdownActive: (val: boolean) => void;
-  STARTING_TIME: string;
-  END_TIME: string;
   time: string;
   setTime: (time: string) => void;
   isToastRan: boolean;
   setIsToastRan: (val: boolean) => void;
-  isModalOpen: boolean;
-  setIsModalOpen: (val: boolean) => void;
+  startingTime: string;
+  setStartingTime: (val: string) => void;
+  END_TIME: string;
 };
 
 const STARTING_TIME = "15:00";
 const END_TIME = "00:00";
 
+const startingTime = getCached("countdown") || STARTING_TIME;
+
 const useStore = create<TUseStore>((set) => ({
   //// Countdown:
-  STARTING_TIME,
+  startingTime,
+  setStartingTime: (startingTime: string) => set({ startingTime }),
   END_TIME,
-  time: STARTING_TIME,
+  time: startingTime,
   setTime: (time: string) =>
     set((state) => ({
       ...state,
@@ -40,7 +41,6 @@ const useStore = create<TUseStore>((set) => ({
       ...state,
       isCountdownActive,
     })),
-  /////
   //// Peer:
   peer: new Peer(),
   peerId: "",
@@ -56,12 +56,6 @@ const useStore = create<TUseStore>((set) => ({
       connection: connection,
     })),
   ////
-  // isWinner: null,
-  // setIsWinner: (isWinner: boolean) =>
-  //   set((state) => ({
-  //     ...state,
-  //     isWinner,
-  //   })),
   isToastRan: false,
   setIsToastRan: (isToastRan: boolean) =>
     set((state) => ({

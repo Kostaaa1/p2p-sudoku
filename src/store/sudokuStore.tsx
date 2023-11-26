@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { TCell } from "../types/types";
+import { cache, getCached } from "../utils/utils";
 
 type TUseSudokuStore = {
   sudoku: string[][];
@@ -12,117 +13,80 @@ type TUseSudokuStore = {
   focusedCell: TCell;
   setFocusedCell: (cell: TCell) => void;
   isWinner: null | boolean;
-  setIsWinner: (isWinner: boolean) => void;
+  setIsWinner: (isWinner: boolean | null) => void;
   mistakes: number;
   incrementMistakes: () => void;
   resetMistakes: () => void;
   INIT_INVALID_CELLS_STRING: string | null;
+  resetGame: () => void;
+  isModalOpen: boolean;
+  setIsModalOpen: (val: boolean) => void;
 };
-
-const getGame = () => {
-  const cachedGame = localStorage.getItem("game");
-
-  if (cachedGame) {
-    return JSON.parse(cachedGame);
-  } else {
-    const initSudoku = [
-      ["", "9", "4", "1", "", "", "5", "", "7"],
-      ["", "7", "", "", "8", "", "", "", ""],
-      ["", "", "6", "", "", "4", "1", "2", ""],
-      ["", "", "1", "", "", "", "", "", "2"],
-      ["", "", "", "8", "6", "", "9", "7", ""],
-      ["", "6", "", "2", "", "7", "", "", ""],
-      ["2", "3", "", "4", "1", "8", "7", "", "6"],
-      ["6", "4", "", "7", "", "5", "3", "1", "9"],
-      ["5", "1", "", "", "9", "", "", "", ""],
-    ];
-
-    return initSudoku;
-  }
-};
-
-const getStringifiedInvalid = () => {
-  const cachedInvalids = localStorage.getItem("invalid");
-  return cachedInvalids;
-};
-
-const getInvalidCells = () => {
-  const cachedInvalids = getStringifiedInvalid();
-  if (cachedInvalids) {
-    return JSON.parse(cachedInvalids);
-  } else {
-    return [];
-  }
-};
-
-const getAddedCells = () => {
-  const cachedAdded = localStorage.getItem("added");
-  if (cachedAdded) {
-    return JSON.parse(cachedAdded);
-  } else {
-    return [];
-  }
-};
-
-const getMistakes = () => {
-  const cachedMistakes = localStorage.getItem("mistakes");
-  if (cachedMistakes) {
-    return JSON.parse(cachedMistakes);
-  } else {
-    return 0;
-  }
-};
-
-const cacheMistakes = (number: number) => {
-  localStorage.setItem("mistakes", JSON.stringify(number));
-};
-
-const cacheInvalid = (invalid: TCell[]) =>
-  localStorage.setItem("invalid", JSON.stringify(invalid));
 
 const useSudokuStore = create<TUseSudokuStore>((set) => ({
-  INIT_INVALID_CELLS_STRING: getStringifiedInvalid(),
-  sudoku: getGame(),
-  setSudoku: (sudoku: string[][]) => set({ sudoku }),
-  focusedCell: { col: 0, row: 0, value: getGame()[0][0] },
+  INIT_INVALID_CELLS_STRING: localStorage.getItem("invalid"),
+  resetGame: () =>
+    set((state) => {
+      localStorage.clear();
+      return {
+        ...state,
+        invalidCells: [],
+        addedCells: [],
+        mistakes: 0,
+        sudoku: getCached("game"),
+        isWinner: state.isWinner !== null ? null : state.isWinner,
+        isModalOpen: state.isModalOpen ? false : true,
+      };
+    }),
+  sudoku: getCached("game"),
+  setSudoku: (sudoku: string[][]) =>
+    set(() => {
+      // Update localstorage:
+      cache({ key: "game", data: sudoku });
+      return { sudoku };
+    }),
+  focusedCell: { col: 0, row: 0, value: getCached("game")[0][0] },
   setFocusedCell: (focusedCell: TCell) => set({ focusedCell }),
-  invalidCells: getInvalidCells(),
+  invalidCells: getCached("invalid"),
+  setInvalidCells: (cells: TCell[]) =>
+    set(() => {
+      cache({ key: "invalid", data: cells });
+      return { invalidCells: cells };
+    }),
   addInvalidCell: (data: TCell) =>
     set((state) => {
-      if (
-        !state.invalidCells.some(
-          (x) =>
-            x.col === data.col && x.row === data.row && x.value === data.value
-        )
-      ) {
+      const condition = !state.invalidCells.some(
+        (x) =>
+          x.col === data.col && x.row === data.row && x.value === data.value
+      );
+
+      if (condition) {
         const updateddCells = [data, ...state.invalidCells];
-        cacheInvalid(updateddCells);
+        cache({ key: "invalid", data: updateddCells });
         return { invalidCells: updateddCells };
       } else {
         return state;
       }
     }),
-  setInvalidCells: (cells: TCell[]) =>
-    set((state) => ({
-      ...state,
-      invalidCells: cells,
-    })),
-  addedCells: getAddedCells(),
+  addedCells: getCached("added"),
   setAddedCells: (cells: TCell[]) =>
-    set((state) => ({
-      ...state,
-      addedCells: cells,
-    })),
+    set(() => {
+      cache({ key: "added", data: cells });
+      return { addedCells: cells };
+    }),
   isWinner: null,
-  setIsWinner: (isWinner: boolean) => set({ isWinner }),
-  mistakes: getMistakes(),
+  setIsWinner: (isWinner: boolean | null) => set({ isWinner }),
+  mistakes: getCached("mistakes"),
   resetMistakes: () => set({ mistakes: 0 }),
   incrementMistakes: () =>
     set((state) => {
       const updatedMistakes = state.mistakes + 1;
-      // cacheMistakes(updatedMistakes);
+      //update localstorage
+      cache({ key: "mistakes", data: updatedMistakes });
       return { ...state, mistakes: updatedMistakes };
     }),
+  isModalOpen: false,
+  setIsModalOpen: (isModalOpen: boolean) => set({ isModalOpen }),
 }));
 
 export default useSudokuStore;
