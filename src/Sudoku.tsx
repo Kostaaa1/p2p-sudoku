@@ -8,7 +8,6 @@ import booPath from "./assets/boo.mp3";
 import hornPath from "./assets/horn.mp3";
 import useStore from "./store/store";
 import { toastMessageConstructor } from "./utils/utils";
-import { PeerResponse } from "./types/types";
 import useSudokuStore from "./store/sudokuStore";
 
 function Sudoku() {
@@ -34,14 +33,11 @@ function Sudoku() {
     setIsWinner,
     isWinner,
     INIT_INVALID_CELLS_STRING,
-    isModalOpen,
-    setIsModalOpen,
   } = useSudokuStore();
 
   const { inputRefs, focusInput, handleChangeInput, allCellsFilled } =
     useSudoku();
 
-  const closeModal = () => setIsModalOpen(false);
   useEffect(() => {
     if (!isCountdownActive && sudoku) {
       setIsCountdownActive(true);
@@ -59,7 +55,6 @@ function Sudoku() {
       invalidCells.length > 0 &&
       INIT_INVALID_CELLS_STRING !== JSON.stringify(invalidCells)
     ) {
-      console.log("ran increment", JSON.stringify(invalidCells));
       incrementMistakes();
     }
   }, [invalidCells]);
@@ -74,7 +69,6 @@ function Sudoku() {
   useEffect(() => {
     if (isWinner === null || isToastRan) return;
     setIsCountdownActive(false);
-    setIsModalOpen(true);
 
     if (booRef.current && mistakes < 5 && isWinner === false) {
       booRef.current.volume = 0.1;
@@ -86,7 +80,7 @@ function Sudoku() {
           isWinner: false,
           message: "Time's up, you both lost, or tied idk...",
         },
-      } as PeerResponse);
+      });
 
       toastMessageConstructor({
         winner: isWinner,
@@ -104,7 +98,7 @@ function Sudoku() {
           isWinner: !isWinner,
           message: "Youu won! The opponent made 5 mistakes!",
         },
-      } as PeerResponse);
+      });
 
       toastMessageConstructor({
         winner: isWinner,
@@ -122,7 +116,7 @@ function Sudoku() {
           isWinner: !isWinner,
           message: "You lost. The opponent solved before you!",
         },
-      } as PeerResponse);
+      });
 
       toastMessageConstructor({
         winner: isWinner,
@@ -202,9 +196,7 @@ function Sudoku() {
       <audio ref={hornRef}>
         <source src={hornPath} type="audio/mp3" />
       </audio>
-      {isWinner !== null && isModalOpen && (
-        <Modal closeModal={closeModal} mistakes={mistakes} />
-      )}
+      {isWinner !== null && <Modal mistakes={mistakes} />}
       <Toaster
         position="top-center"
         reverseOrder={false}

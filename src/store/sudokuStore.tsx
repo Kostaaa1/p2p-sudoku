@@ -19,8 +19,6 @@ type TUseSudokuStore = {
   resetMistakes: () => void;
   INIT_INVALID_CELLS_STRING: string | null;
   resetGame: () => void;
-  isModalOpen: boolean;
-  setIsModalOpen: (val: boolean) => void;
 };
 
 const useSudokuStore = create<TUseSudokuStore>((set) => ({
@@ -35,7 +33,6 @@ const useSudokuStore = create<TUseSudokuStore>((set) => ({
         mistakes: 0,
         sudoku: getCached("game"),
         isWinner: state.isWinner !== null ? null : state.isWinner,
-        isModalOpen: state.isModalOpen ? false : true,
       };
     }),
   sudoku: getCached("game"),
@@ -85,8 +82,8 @@ const useSudokuStore = create<TUseSudokuStore>((set) => ({
       cache({ key: "mistakes", data: updatedMistakes });
       return { ...state, mistakes: updatedMistakes };
     }),
-  isModalOpen: false,
-  setIsModalOpen: (isModalOpen: boolean) => set({ isModalOpen }),
+  // isModalOpen: false,
+  // setIsModalOpen: (isModalOpen: boolean) => set({ isModalOpen }),
 }));
 
 export default useSudokuStore;

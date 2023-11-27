@@ -62,13 +62,6 @@ const useStore = create<TUseStore>((set) => ({
       ...state,
       isToastRan,
     })),
-  // const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  isModalOpen: false,
-  setIsModalOpen: (isModalOpen: boolean) =>
-    set((state) => ({
-      ...state,
-      isModalOpen,
-    })),
 }));
 
 export default useStore;

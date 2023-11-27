@@ -4,10 +4,9 @@ import useSudokuStore from "./store/sudokuStore";
 
 interface ModalProps {
   mistakes: number;
-  closeModal: () => void;
 }
 
-const Modal: FC<ModalProps> = ({ closeModal, mistakes }) => {
+const Modal: FC<ModalProps> = ({ mistakes }) => {
   const { isWinner, resetGame } = useSudokuStore();
 
   return (
@@ -40,12 +39,9 @@ const Modal: FC<ModalProps> = ({ closeModal, mistakes }) => {
           >
             {isWinner === false ? "Try Again!" : "Play Again!"}
           </button>
-          <button
-            onClick={closeModal}
-            className="block h-max w-full items-center justify-center bg-slate-400 text-white transition-colors duration-100 hover:bg-slate-500"
-          >
+          {/* <button className="block h-max w-full items-center justify-center bg-slate-400 text-white transition-colors duration-100 hover:bg-slate-500">
             Cancel
-          </button>
+          </button> */}
         </div>
       </div>
       {isWinner && <Confetti />}

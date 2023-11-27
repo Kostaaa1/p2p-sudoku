@@ -5,7 +5,6 @@ import useSudokuStore from "../store/sudokuStore";
 
 const useSudoku = () => {
   const inputRefs = useRef<HTMLInputElement[]>([]);
-
   const { setIsToastRan } = useStore();
 
   const {

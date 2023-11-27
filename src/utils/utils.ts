@@ -1,5 +1,6 @@
 import toast from "react-hot-toast";
 import { SudokuCache, SudokuCacheTypes } from "../types/types";
+import { generateSudokuBoard } from "./generateSudoku";
 
 // Need to add sudoku generator and sudoku solver, it is not easy. I need to understand it.
 export const getCached = (key: SudokuCacheTypes) => {
@@ -16,8 +17,12 @@ export const getCached = (key: SudokuCacheTypes) => {
         return 0;
       case "countdown":
         return "15:00";
-      case "game":
-        return getSudokuGameBoard();
+      case "game": {
+        const board = generateSudokuBoard();
+        cache({ key: "game", data: board });
+
+        return board;
+      }
       default:
         return null;
     }
@@ -60,27 +65,27 @@ export const toastMessageConstructor = ({
   toast(newMessage);
 };
 
-const getSudokuGameBoard = () => {
-  return [
-    ["", "9", "4", "1", "", "", "5", "", "7"],
-    ["", "7", "", "", "8", "", "", "", ""],
-    ["", "", "6", "", "", "4", "1", "2", ""],
-    ["", "", "1", "", "", "", "", "", "2"],
-    ["", "", "", "8", "6", "", "9", "7", ""],
-    ["", "6", "", "2", "", "7", "", "", ""],
-    ["2", "3", "", "4", "1", "8", "7", "", "6"],
-    ["6", "4", "", "7", "", "5", "3", "1", "9"],
-    ["5", "1", "", "", "9", "", "", "", ""],
-  ];
-};
+// const getSudokuGameBoard = () => {
+//   return [
+//     ["", "9", "4", "1", "", "", "5", "", "7"],
+//     ["", "7", "", "", "8", "", "", "", ""],
+//     ["", "", "6", "", "", "4", "1", "2", ""],
+//     ["", "", "1", "", "", "", "", "", "2"],
+//     ["", "", "", "8", "6", "", "9", "7", ""],
+//     ["", "6", "", "2", "", "7", "", "", ""],
+//     ["2", "3", "", "4", "1", "8", "7", "", "6"],
+//     ["6", "4", "", "7", "", "5", "3", "1", "9"],
+//     ["5", "1", "", "", "9", "", "", "", ""],
+//   ];
+// };
 
-// Sudoku solver:
 // Sudoku validator:
 // const validateSudoku = (sudoku: string[][]) => {
 //   for (let i = 0; i < 9; i++) {
 //     const rowSet = new Set();
 //     const colSet = new Set();
 //     const gridSet = new Set();
+//
 //     for (let j = 0; j < 9; j++) {
 //       const rowValue = sudoku[i][j];
 //       const colValue = sudoku[j][i];

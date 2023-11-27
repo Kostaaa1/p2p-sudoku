@@ -64,9 +64,10 @@ const Countdown = () => {
     if (time !== startingTime && isWinner === null) {
       console.log("reset");
       setIsCountdownActive(false);
-      resetGame();
       setTime("15:00");
       setStartingTime("15:00");
+
+      resetGame();
     }
   };
 

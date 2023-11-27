@@ -14,32 +14,12 @@ type PeerCountdown = {
 export type PeerResponse = PeerCountdown | PeerEndGameData;
 
 // Local storage types:
-type LSSudoku = {
-  key: "game";
-  data: string[][];
-};
-type LSInvalid = {
-  key: "invalid";
-  data: TCell[];
-};
-type LSAdded = {
-  key: "added";
-  data: TCell[];
-};
-type LSMistakes = {
-  key: "mistakes";
-  data: number;
-};
-type LSCountdown = {
-  key: "countdown";
-  data: string;
-};
 export type SudokuCache =
-  | LSCountdown
-  | LSSudoku
-  | LSInvalid
-  | LSMistakes
-  | LSAdded;
+  | { key: "countdown"; data: string }
+  | { key: "game"; data: string[][] }
+  | { key: "invalid"; data: TCell[] }
+  | { key: "mistakes"; data: number }
+  | { key: "is_winner"; data: boolean | null }
+  | { key: "added"; data: TCell[] };
 
-// wtf is this
 export type SudokuCacheTypes = SudokuCache["key"];

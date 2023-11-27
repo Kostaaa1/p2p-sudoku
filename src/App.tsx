@@ -19,7 +19,7 @@ function App() {
     setConnection,
     setPeerId,
   } = useStore();
-  const { setIsModalOpen, setIsWinner } = useSudokuStore();
+  const { setIsWinner } = useSudokuStore();
 
   useEffect(() => {
     peer.on("open", (id) => {
@@ -37,9 +37,7 @@ function App() {
         if (type === "end_game") {
           const { isWinner, message } = data;
           console.log("toast: ", message);
-
           setIsCountdownActive(false);
-          setIsModalOpen(true);
 
           toastMessageConstructor({ winner: isWinner, message });
           setIsToastRan(true);
