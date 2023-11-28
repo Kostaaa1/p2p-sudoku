@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo } from "react";
 import useStore from "../store/store";
 import toast from "react-hot-toast";
 import useSudokuStore from "../store/sudokuStore";
 
 const useSudoku = () => {
-  const inputRefs = useRef<HTMLInputElement[]>([]);
+  // const inputRefs = useRef<HTMLInputElement[]>([]);
   const { setIsToastRan } = useStore();
 
   const {
@@ -14,7 +14,6 @@ const useSudoku = () => {
     addedCells,
     setInvalidCells,
     invalidCells,
-    mistakes,
     focusedCell,
     isWinner,
     addInvalidCell,
@@ -133,95 +132,13 @@ const useSudoku = () => {
     }
   }, [sudoku]);
 
-  const focusInput = useCallback(() => {
-    const { row, col } = focusedCell;
-    const inputRef = inputRefs.current[row * 9 + col];
-
-    if (inputRef) {
-      inputRef.focus();
-      inputRef.setSelectionRange(1, 1);
-    }
-  }, [focusedCell]);
-
-  // Keyboard Controls
-  useEffect(() => {
-    if (isWinner === null) {
-      const click = (e: KeyboardEvent) => {
-        const arrows = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
-
-        const { key } = e;
-        if (!arrows.includes(key)) return;
-
-        const { col, row } = focusedCell;
-        e.preventDefault();
-
-        switch (key) {
-          case "ArrowUp":
-            if (row > 0) {
-              setFocusedCell({
-                row: row - 1,
-                col,
-                value: sudoku[row - 1][col],
-              });
-            }
-            break;
-          case "ArrowDown":
-            if (row < 8) {
-              setFocusedCell({
-                row: row + 1,
-                col,
-                value: sudoku[row + 1][col],
-              });
-            }
-            break;
-          case "ArrowLeft":
-            if (col > 0) {
-              setFocusedCell({
-                row,
-                col: col - 1,
-                value: sudoku[row][col - 1],
-              });
-            }
-            break;
-          case "ArrowRight":
-            if (col < 8) {
-              setFocusedCell({
-                row,
-                col: col + 1,
-                value: sudoku[row][col + 1],
-              });
-            }
-            break;
-          default:
-            break;
-        }
-      };
-      document.addEventListener("keydown", click);
-      focusInput();
-
-      return () => {
-        document.removeEventListener("keydown", click);
-      };
-    }
-  }, [focusedCell, focusInput]);
-
   return {
     handleChangeInput,
-    inputRefs,
     resetGame,
-    sudoku,
-    setSudoku,
-    addedCells,
-    setAddedCells,
-    invalidCells,
-    setInvalidCells,
-    focusedCell,
-    setFocusedCell,
-    mistakes,
-    focusInput,
-    isLastCellEmpty,
     allCellsFilled,
     toastMessageConstructor,
+    // inputRefs,
+    // focusInput,
   };
 };
 

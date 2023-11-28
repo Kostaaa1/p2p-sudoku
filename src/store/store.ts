@@ -30,11 +30,7 @@ const useStore = create<TUseStore>((set) => ({
   setStartingTime: (startingTime: string) => set({ startingTime }),
   END_TIME,
   time: startingTime,
-  setTime: (time: string) =>
-    set((state) => ({
-      ...state,
-      time,
-    })),
+  setTime: (time: string) => set({ time }),
   isCountdownActive: true,
   setIsCountdownActive: (isCountdownActive: boolean) =>
     set((state) => ({
@@ -55,7 +51,6 @@ const useStore = create<TUseStore>((set) => ({
       ...state,
       connection: connection,
     })),
-  ////
   isToastRan: false,
   setIsToastRan: (isToastRan: boolean) =>
     set((state) => ({

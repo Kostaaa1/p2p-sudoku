@@ -25,18 +25,14 @@ function Sudoku() {
   const {
     mistakes,
     incrementMistakes,
-    focusedCell,
-    setFocusedCell,
     invalidCells,
-    addedCells,
     sudoku,
     setIsWinner,
     isWinner,
     INIT_INVALID_CELLS_STRING,
   } = useSudokuStore();
 
-  const { inputRefs, focusInput, handleChangeInput, allCellsFilled } =
-    useSudoku();
+  const { allCellsFilled } = useSudoku();
 
   useEffect(() => {
     if (!isCountdownActive && sudoku) {
@@ -140,19 +136,7 @@ function Sudoku() {
                   key={colId}
                   className="flex h-full w-full items-center justify-center"
                 >
-                  <Cell
-                    handleChangeInput={handleChangeInput}
-                    colId={colId}
-                    colVal={colVal}
-                    rowId={rowId}
-                    invalidCells={invalidCells}
-                    addedCells={addedCells}
-                    focusedCell={focusedCell}
-                    setFocusedCell={setFocusedCell}
-                    inputRefs={inputRefs}
-                    focusInput={focusInput}
-                    isWinner={isWinner}
-                  />
+                  <Cell colId={colId} colVal={colVal} rowId={rowId} />
                 </div>
               ))}
             </div>

@@ -1,8 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import useStore from "./store/store";
 import { DataConnection } from "peerjs";
-import { updateCountdown } from "./utils/utils";
+import { getCached, updateCountdown } from "./utils/utils";
 import useSudokuStore from "./store/sudokuStore";
 
 const Countdown = () => {
@@ -11,12 +11,20 @@ const Countdown = () => {
     connection,
     isCountdownActive,
     setIsCountdownActive,
-    startingTime,
-    END_TIME,
-    setStartingTime,
-    time,
-    setTime,
+    // startingTime,
+    // END_TIME,
+    // setStartingTime,
+    // time,
+    // setTime,
   } = useStore();
+
+  const STARTING_TIME = "15:00";
+  const END_TIME = "00:00";
+
+  const [startingTime, setStartingTime] = useState<string>(
+    getCached("countdown") || STARTING_TIME
+  );
+  const [time, setTime] = useState<string>(startingTime);
 
   useEffect(() => {
     if (!isCountdownActive) return;
