@@ -247,6 +247,17 @@ const Cell: FC<FieldProps> = memo(({ colId, rowId, colVal }) => {
           col: colId,
           value: colVal,
         }) && "text-green-600",
+        isIncluded(invalidCells, {
+          row: rowId,
+          col: colId,
+          value: colVal,
+        }) &&
+          isIncluded(addedCells, {
+            row: rowId,
+            col: colId,
+            value: colVal,
+          }) &&
+          "text-red-700",
         parseInt(focusedCell.value) === parseInt(colVal) &&
           "bg-blue-900 bg-opacity-25",
         isIncluded(invalidCells, {

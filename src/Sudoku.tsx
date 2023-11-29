@@ -6,22 +6,17 @@ import Cell from "./Cell";
 import Modal from "./Modal";
 import booPath from "./assets/boo.mp3";
 import hornPath from "./assets/horn.mp3";
-import useStore from "./store/store";
+import useStore from "./store/peerStore";
 import { toastMessageConstructor } from "./utils/utils";
 import useSudokuStore from "./store/sudokuStore";
+import useCountdownStore from "./store/countdownStore";
 
 function Sudoku() {
   const booRef = useRef<HTMLAudioElement>(null);
   const hornRef = useRef<HTMLAudioElement>(null);
 
-  const {
-    isToastRan,
-    connection,
-    peerId,
-    isCountdownActive,
-    setIsCountdownActive,
-  } = useStore();
-
+  const { isToastRan, connection, peerId } = useStore();
+  const { isCountdownActive, setIsCountdownActive } = useCountdownStore();
   const {
     mistakes,
     incrementMistakes,
@@ -129,7 +124,7 @@ function Sudoku() {
       <div>
         <Countdown />
         <div className="flex h-[540px] w-[540px] flex-col items-center justify-center overflow-hidden border-2 border-blue-800">
-          {sudoku.map((rowVal, rowId) => (
+          {sudoku?.map((rowVal, rowId) => (
             <div key={rowId} className="flex h-full w-full">
               {rowVal.map((colVal, colId) => (
                 <div

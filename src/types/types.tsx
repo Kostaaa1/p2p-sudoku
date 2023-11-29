@@ -3,23 +3,27 @@ export type TCell = {
   row: number;
   value: string;
 };
-type PeerEndGameData = {
-  type: "end_game";
-  data: { isWinner: boolean; message: string };
-};
-type PeerCountdown = {
-  type: "countdown";
-  data: number;
-};
-export type PeerResponse = PeerCountdown | PeerEndGameData;
+export type PeerResponse =
+  | {
+      type: "countdown";
+      data: number;
+    }
+  | {
+      type: "end_game";
+      data: { isWinner: boolean; message: string };
+    }
+  | {
+      type: "sudoku";
+      data: string[][];
+    };
 
-// Local storage types:
-export type SudokuCache =
-  | { key: "countdown"; data: string }
-  | { key: "game"; data: string[][] }
-  | { key: "invalid"; data: TCell[] }
-  | { key: "mistakes"; data: number }
-  | { key: "is_winner"; data: boolean | null }
-  | { key: "added"; data: TCell[] };
+export type SudokuCacheMap = {
+  countdown: { key: "countdown"; data: string };
+  game: { key: "game"; data: string[][] };
+  invalid: { key: "invalid"; data: TCell[] };
+  mistakes: { key: "mistakes"; data: number };
+  added: { key: "added"; data: TCell[] };
+  is_winner: { key: "is_winner"; data: boolean | null };
+};
 
-export type SudokuCacheTypes = SudokuCache["key"];
+export type SudokuCacheMapKeys = keyof SudokuCacheMap;

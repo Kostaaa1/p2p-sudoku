@@ -1,4 +1,4 @@
-export function generateSudokuBoard() {
+export function generateSudokuBoard(): string[][] {
   // Initialize an empty 9x9 Sudoku board
   const board = Array.from({ length: 9 }, () => Array(9).fill(""));
 

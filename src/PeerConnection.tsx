@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import usePeer from "./hooks/usePeer";
-import useStore from "./store/store";
+import useStore from "./store/peerStore";
 import { useNavigate } from "react-router-dom";
 
 const PeerConnection = () => {

@@ -1,12 +1,10 @@
 import { useEffect, useMemo } from "react";
-import useStore from "../store/store";
+import useStore from "../store/peerStore";
 import toast from "react-hot-toast";
 import useSudokuStore from "../store/sudokuStore";
 
 const useSudoku = () => {
-  // const inputRefs = useRef<HTMLInputElement[]>([]);
   const { setIsToastRan } = useStore();
-
   const {
     setSudoku,
     sudoku,

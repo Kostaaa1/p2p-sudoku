@@ -1,37 +1,28 @@
 import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
-import useStore from "./store/store";
+import useStore from "./store/peerStore";
 import { DataConnection } from "peerjs";
-import { getCached, updateCountdown } from "./utils/utils";
+import { updateCountdown } from "./utils/utils";
 import useSudokuStore from "./store/sudokuStore";
+import useCountdownStore from "./store/countdownStore";
+import toast from "react-hot-toast";
 
 const Countdown = () => {
-  const { isWinner, setIsWinner, resetGame } = useSudokuStore();
-  const {
-    connection,
-    isCountdownActive,
-    setIsCountdownActive,
-    // startingTime,
-    // END_TIME,
-    // setStartingTime,
-    // time,
-    // setTime,
-  } = useStore();
-
   const STARTING_TIME = "15:00";
   const END_TIME = "00:00";
 
-  const [startingTime, setStartingTime] = useState<string>(
-    getCached("countdown") || STARTING_TIME
-  );
-  const [time, setTime] = useState<string>(startingTime);
+  const { isWinner, setIsWinner, resetGame } = useSudokuStore();
+  const { time, setTime, isCountdownActive, setIsCountdownActive } =
+    useCountdownStore();
+
+  const [initTime, setInitTime] = useState<string>(time);
+  const { connection } = useStore();
 
   useEffect(() => {
     if (!isCountdownActive) return;
-    console.log("startingTime", startingTime);
 
-    let start = parseInt(startingTime.split(":")[0]) * 60;
-    const seconds = parseInt(startingTime.split(":")[1]);
+    let start = parseInt(time.split(":")[0]) * 60;
+    const seconds = parseInt(time.split(":")[1]);
 
     if (seconds > 0) start += seconds;
 
@@ -54,7 +45,6 @@ const Countdown = () => {
         }
       }, 1000);
     };
-
     const interval = handleCountdown(connection || null);
 
     return () => {
@@ -62,30 +52,29 @@ const Countdown = () => {
     };
   }, [isCountdownActive, isWinner]);
 
-  const startCount = () => {
-    if (isWinner === null) {
-      setIsCountdownActive(true);
-    }
+  const start = () => {
+    if (isWinner === null) setIsCountdownActive(true);
   };
 
-  const resetCount = () => {
-    if (time !== startingTime && isWinner === null) {
+  const reset = () => {
+    if (time !== initTime && isWinner === null && !connection) {
       console.log("reset");
-      setIsCountdownActive(false);
-      setTime("15:00");
-      setStartingTime("15:00");
-
+      setInitTime(STARTING_TIME);
       resetGame();
+    }
+
+    if (connection) {
+      toast("You can not reset when playing against another player.");
     }
   };
 
   return (
     <div className="my-2 flex w-full items-center justify-between text-3xl font-semibold italic">
       <div className="flex items-center text-lg font-bold text-white">
-        <button onClick={startCount} className="mr-2 bg-green-600 px-3 py-1">
+        <button onClick={start} className="mr-2 bg-green-600 px-3 py-1">
           Start
         </button>
-        <button onClick={resetCount} className="bg-red-500 px-3 py-1 ">
+        <button onClick={reset} className="bg-red-500 px-3 py-1 ">
           Reset
         </button>
       </div>

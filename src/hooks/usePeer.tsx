@@ -1,21 +1,16 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import useStore from "../store/store";
+import useStore from "../store/peerStore";
 import { toastMessageConstructor, updateCountdown } from "../utils/utils";
 import { PeerResponse } from "../types/types";
 import useSudokuStore from "../store/sudokuStore";
+import useCountdownStore from "../store/countdownStore";
 
 const usePeer = () => {
   const navigate = useNavigate();
-  const { setIsWinner, setIsModalOpen } = useSudokuStore();
-  const {
-    setIsToastRan,
-    setTime,
-    connection,
-    peer,
-    setIsCountdownActive,
-    setConnection,
-  } = useStore();
+  const { setIsWinner, setSudoku } = useSudokuStore();
+  const { setIsToastRan, connection, peer, setConnection } = useStore();
+  const { setTime, setIsCountdownActive } = useCountdownStore();
 
   const navigateToSudoku = () => {
     localStorage.clear();
@@ -38,14 +33,13 @@ const usePeer = () => {
 
       conn.on("data", (res) => {
         const { data, type } = res as PeerResponse;
+        console.log("connection data recieved", data);
 
         if (type === "end_game") {
           const { isWinner, message } = data;
           console.log("toast: ", message);
 
           setIsCountdownActive(false);
-          setIsModalOpen(true);
-
           toastMessageConstructor({ winner: isWinner, message });
           setIsToastRan(true);
 
@@ -54,6 +48,11 @@ const usePeer = () => {
 
         if (type === "countdown") {
           updateCountdown(data, setTime);
+        }
+
+        if (type === "sudoku") {
+          console.log("got from: ", data);
+          setSudoku(data);
         }
       });
 

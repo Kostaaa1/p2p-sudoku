@@ -1,9 +1,12 @@
 import toast from "react-hot-toast";
-import { SudokuCache, SudokuCacheTypes } from "../types/types";
+import { SudokuCacheMap, SudokuCacheMapKeys } from "../types/types";
 import { generateSudokuBoard } from "./generateSudoku";
 
 // Need to add sudoku generator and sudoku solver, it is not easy. I need to understand it.
-export const getCached = (key: SudokuCacheTypes) => {
+export const getCached = <T extends SudokuCacheMapKeys>(
+  key: T
+): SudokuCacheMap[T]["data"] => {
+  1;
   const cachedAdded = localStorage.getItem(key);
 
   if (cachedAdded) {
@@ -12,25 +15,26 @@ export const getCached = (key: SudokuCacheTypes) => {
     switch (key) {
       case "added":
       case "invalid":
-        return [];
+        return [] as SudokuCacheMap[T]["data"];
       case "mistakes":
-        return 0;
+        return 0 as SudokuCacheMap[T]["data"];
       case "countdown":
-        return "15:00";
+        return "15:00" as SudokuCacheMap[T]["data"];
+      case "is_winner":
+        return null as SudokuCacheMap[T]["data"];
       case "game": {
         const board = generateSudokuBoard();
         cache({ key: "game", data: board });
-
-        return board;
+        return board as SudokuCacheMap[T]["data"];
       }
       default:
-        return null;
+        return "";
     }
   }
 };
 
 //cache local storage
-export const cache = ({ key, data }: SudokuCache) => {
+export const cache = ({ key, data }: SudokuCacheMap[keyof SudokuCacheMap]) => {
   try {
     localStorage.setItem(key, JSON.stringify(data));
   } catch (error) {
@@ -62,6 +66,7 @@ export const toastMessageConstructor = ({
 }) => {
   const emoji = winner ? "🎉🎉🎉" : "😢😢😢";
   const newMessage = `${emoji}${message}${emoji}`;
+
   toast(newMessage);
 };
 

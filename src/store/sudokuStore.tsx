@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { TCell } from "../types/types";
 import { cache, getCached } from "../utils/utils";
+import useCountdownStore from "./countdownStore";
 
 type TUseSudokuStore = {
   sudoku: string[][];
@@ -26,6 +27,8 @@ const useSudokuStore = create<TUseSudokuStore>((set) => ({
   resetGame: () =>
     set((state) => {
       localStorage.clear();
+      useCountdownStore.setState({ isCountdownActive: false, time: "15:00" });
+
       return {
         ...state,
         invalidCells: [],
@@ -38,7 +41,6 @@ const useSudokuStore = create<TUseSudokuStore>((set) => ({
   sudoku: getCached("game"),
   setSudoku: (sudoku: string[][]) =>
     set(() => {
-      // Update localstorage:
       cache({ key: "game", data: sudoku });
       return { sudoku };
     }),
@@ -66,24 +68,26 @@ const useSudokuStore = create<TUseSudokuStore>((set) => ({
       }
     }),
   addedCells: getCached("added"),
-  setAddedCells: (cells: TCell[]) =>
+  setAddedCells: (addedCells: TCell[]) =>
     set(() => {
-      cache({ key: "added", data: cells });
-      return { addedCells: cells };
+      cache({ key: "added", data: addedCells });
+      return { addedCells };
     }),
-  isWinner: null,
-  setIsWinner: (isWinner: boolean | null) => set({ isWinner }),
+  isWinner: getCached("is_winner"),
+  setIsWinner: (isWinner: boolean | null) =>
+    set(() => {
+      cache({ key: "is_winner", data: isWinner });
+      return { isWinner };
+    }),
+  // setIsWinner: (isWinner: boolean | null) => set({ isWinner }),
   mistakes: getCached("mistakes"),
   resetMistakes: () => set({ mistakes: 0 }),
   incrementMistakes: () =>
     set((state) => {
       const updatedMistakes = state.mistakes + 1;
-      //update localstorage
       cache({ key: "mistakes", data: updatedMistakes });
       return { ...state, mistakes: updatedMistakes };
     }),
-  // isModalOpen: false,
-  // setIsModalOpen: (isModalOpen: boolean) => set({ isModalOpen }),
 }));
 
 export default useSudokuStore;
