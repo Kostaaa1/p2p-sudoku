@@ -27,15 +27,19 @@ const useSudokuStore = create<TUseSudokuStore>((set) => ({
   resetGame: () =>
     set((state) => {
       localStorage.clear();
-      useCountdownStore.setState({ isCountdownActive: false, time: "15:00" });
+
+      const { getState, setState } = useCountdownStore;
+      const { STARTING_TIME } = getState();
+
+      setState({ time: STARTING_TIME });
+      cache({ key: "countdown", data: STARTING_TIME });
 
       return {
         ...state,
         invalidCells: [],
         addedCells: [],
         mistakes: 0,
-        sudoku: getCached("game"),
-        isWinner: state.isWinner !== null ? null : state.isWinner,
+        isWinner: null,
       };
     }),
   sudoku: getCached("game"),
@@ -56,7 +60,7 @@ const useSudokuStore = create<TUseSudokuStore>((set) => ({
     set((state) => {
       const condition = !state.invalidCells.some(
         (x) =>
-          x.col === data.col && x.row === data.row && x.value === data.value
+          x.col === data.col && x.row === data.row && x.value === data.value,
       );
 
       if (condition) {

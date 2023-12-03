@@ -64,18 +64,20 @@ const useSudoku = () => {
       : setAddedCells([newCell, ...addedCells]);
 
     // Update Sudoku Cell:
-    const newBoard = [...sudoku];
-    newBoard[rowId][colId] = newCell.value;
-    setSudoku(newBoard);
-    setFocusedCell(newCell);
+    if (sudoku) {
+      const newBoard = [...sudoku];
+      newBoard[rowId][colId] = newCell.value;
+      setSudoku(newBoard);
+      setFocusedCell(newCell);
+    }
   };
 
   const isLastCellEmpty = useMemo(() => {
-    return sudoku.flat().filter((x) => x === "").length === 1;
+    return sudoku?.flat().filter((x) => x === "").length === 1;
   }, [sudoku]);
 
   const allCellsFilled = useMemo(() => {
-    return sudoku.flat().every((x) => x !== "");
+    return sudoku?.flat().every((x) => x !== "");
   }, [isLastCellEmpty]);
 
   useEffect(() => {
@@ -86,14 +88,14 @@ const useSudoku = () => {
     }
 
     const { col, row } = focusedCell;
-    const value = sudoku[row][col];
+    const value = sudoku?.[row][col];
 
     // Checking row
-    const rowInvalidValues = sudoku[row]
+    const rowInvalidValues = sudoku?.[row]
       .map((cellValue, i) => (cellValue !== "" && cellValue === value ? i : -1))
       .filter((i) => i !== -1);
 
-    if (rowInvalidValues.length > 1) {
+    if (rowInvalidValues && value && rowInvalidValues.length > 1) {
       rowInvalidValues.forEach((i) => {
         addInvalidCell({ col: i, row, value });
       });
@@ -101,10 +103,10 @@ const useSudoku = () => {
 
     // Checking column
     const columnInvalidValues = sudoku
-      .map((row, i) => (row[col] !== "" && row[col] === value ? i : -1))
+      ?.map((row, i) => (row[col] !== "" && row[col] === value ? i : -1))
       .filter((x) => x !== -1);
 
-    if (columnInvalidValues.length > 1) {
+    if (columnInvalidValues && value && columnInvalidValues.length > 1) {
       columnInvalidValues.forEach((i) =>
         addInvalidCell({ col, row: i, value })
       );
@@ -117,15 +119,15 @@ const useSudoku = () => {
     const gridInvalidValues = [];
     for (let i = startRow; i < startRow + 3; i++) {
       for (let j = startCol; j < startCol + 3; j++) {
-        const gridVal = sudoku[i][j];
+        const gridVal = sudoku?.[i][j];
 
-        if (gridVal !== "" && gridVal === value) {
+        if (gridVal !== "" && value && gridVal === value) {
           gridInvalidValues.push({ row: i, col: j, value });
         }
       }
     }
 
-    if (gridInvalidValues.length > 1) {
+    if (gridInvalidValues && gridInvalidValues.length > 1) {
       gridInvalidValues.forEach((cell) => addInvalidCell(cell));
     }
   }, [sudoku]);

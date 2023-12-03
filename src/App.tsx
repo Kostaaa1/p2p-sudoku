@@ -1,22 +1,28 @@
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import Sudoku from "./Sudoku";
 import Modes from "./Modes";
 import PeerConnection from "./PeerConnection";
 import { useEffect } from "react";
-import useStore from "./store/peerStore";
-import { toastMessageConstructor, updateCountdown } from "./utils/utils";
+import usePeerStore from "./store/peerStore";
+import { toastMessageConstructor } from "./utils/utils";
 import { PeerResponse } from "./types/types";
 import useSudokuStore from "./store/sudokuStore";
 import useCountdownStore from "./store/countdownStore";
-import { generateSudokuBoard } from "./utils/generateSudoku";
 
 function App() {
   const location = useLocation();
+  const navigate = useNavigate();
 
-  const { connection, setIsToastRan, peer, setConnection, setPeerId } =
-    useStore();
-  const { setIsWinner, resetGame, setSudoku } = useSudokuStore();
-  const { setTime, setIsCountdownActive } = useCountdownStore();
+  const {
+    setIsToastRan,
+    peer,
+    setConnection,
+    setPeerId,
+    setIsOpponentReady,
+    isOpponentReady,
+  } = usePeerStore();
+  const { resetGame, setSudoku, setIsWinner } = useSudokuStore();
+  const { setIsCountdownActive, updateCountdown } = useCountdownStore();
 
   useEffect(() => {
     peer.on("open", (id) => {
@@ -27,13 +33,19 @@ function App() {
     peer.on("connection", (conn) => {
       console.log("On connection", conn, "peer: ", conn.peer);
       setConnection(conn);
+      resetGame();
+      navigate("/sudoku");
 
       conn.on("data", (res) => {
         const { data, type } = res as PeerResponse;
-        console.log("connection data recieved");
 
         if (type === "sudoku") {
           setSudoku(data);
+        }
+
+        if (type === "ready") {
+          console.log("ready data from APp", res);
+          setIsOpponentReady(data);
         }
 
         if (type === "end_game") {
@@ -48,7 +60,7 @@ function App() {
         }
 
         if (type === "countdown") {
-          updateCountdown(data, setTime);
+          updateCountdown(data);
         }
       });
     });
@@ -57,20 +69,6 @@ function App() {
       peer.destroy();
     };
   }, [peer]);
-
-  useEffect(() => {
-    console.log("NEW connection ACHIVED");
-    if (connection) {
-      resetGame();
-      const board = generateSudokuBoard();
-      console.log(board);
-
-      // connection?.send({
-      //   type: "sudoku",
-      //   data: board,
-      // });
-    }
-  }, [connection]);
 
   return (
     <Routes location={location} key={location.pathname}>

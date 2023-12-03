@@ -1,3 +1,15 @@
+// import { generate } from "sudoku-core";
+// export function generateSudokuBoard(): string[][] {
+//   const board = generate("medium");
+//   const newBoard = board.map((x) => (!x ? "" : x));
+
+//   const sudoku2D = Array.from({ length: 9 }, (_, y) =>
+//     newBoard.slice(y * 9, y * 9 + 9),
+//   );
+
+//   return sudoku2D as string[][];
+// }
+
 export function generateSudokuBoard(): string[][] {
   // Initialize an empty 9x9 Sudoku board
   const board = Array.from({ length: 9 }, () => Array(9).fill(""));
@@ -51,7 +63,7 @@ export function generateSudokuBoard(): string[][] {
   solveSudoku(board);
 
   let count = 0;
-  while (count < 39) {
+  while (count < 38) {
     const row = Math.floor(Math.random() * 9);
     const col = Math.floor(Math.random() * 9);
     if (board[row][col] !== "") {

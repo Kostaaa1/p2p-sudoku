@@ -4,7 +4,7 @@ import { generateSudokuBoard } from "./generateSudoku";
 
 // Need to add sudoku generator and sudoku solver, it is not easy. I need to understand it.
 export const getCached = <T extends SudokuCacheMapKeys>(
-  key: T
+  key: T,
 ): SudokuCacheMap[T]["data"] => {
   1;
   const cachedAdded = localStorage.getItem(key);
@@ -19,7 +19,7 @@ export const getCached = <T extends SudokuCacheMapKeys>(
       case "mistakes":
         return 0 as SudokuCacheMap[T]["data"];
       case "countdown":
-        return "15:00" as SudokuCacheMap[T]["data"];
+        return "00:30" as SudokuCacheMap[T]["data"];
       case "is_winner":
         return null as SudokuCacheMap[T]["data"];
       case "game": {
@@ -42,20 +42,20 @@ export const cache = ({ key, data }: SudokuCacheMap[keyof SudokuCacheMap]) => {
   }
 };
 
-export const updateCountdown = (
-  time: number,
-  setTime: (time: string) => void
-) => {
-  const minutes = Math.floor(time / 60);
-  const remainingSeconds = time % 60;
+// export const updateCountdown = (
+//   time: number,
+//   setTime: (time: string) => void
+// ) => {
+//   const minutes = Math.floor(time / 60);
+//   const remainingSeconds = time % 60;
 
-  const parsedTime = `${String(minutes).padStart(2, "0")}:${String(
-    remainingSeconds
-  ).padStart(2, "0")}`;
+//   const parsedTime = `${String(minutes).padStart(2, "0")}:${String(
+//     remainingSeconds
+//   ).padStart(2, "0")}`;
 
-  cache({ key: "countdown", data: parsedTime });
-  setTime(parsedTime);
-};
+//   cache({ key: "countdown", data: parsedTime });
+//   setTime(parsedTime);
+// };
 
 export const toastMessageConstructor = ({
   winner,

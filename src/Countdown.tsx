@@ -2,21 +2,41 @@ import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import useStore from "./store/peerStore";
 import { DataConnection } from "peerjs";
-import { updateCountdown } from "./utils/utils";
 import useSudokuStore from "./store/sudokuStore";
 import useCountdownStore from "./store/countdownStore";
 import toast from "react-hot-toast";
+import { generateSudokuBoard } from "./utils/generateSudoku";
 
 const Countdown = () => {
-  const STARTING_TIME = "15:00";
-  const END_TIME = "00:00";
-
-  const { isWinner, setIsWinner, resetGame } = useSudokuStore();
-  const { time, setTime, isCountdownActive, setIsCountdownActive } =
-    useCountdownStore();
+  const { isWinner, setIsWinner, resetGame, setSudoku } = useSudokuStore();
+  const {
+    STARTING_TIME,
+    END_TIME,
+    time,
+    isCountdownActive,
+    setIsCountdownActive,
+    updateCountdown,
+  } = useCountdownStore();
 
   const [initTime, setInitTime] = useState<string>(time);
   const { connection } = useStore();
+
+  const start = () => {
+    if (isWinner === null) setIsCountdownActive(true);
+  };
+  const reset = () => {
+    if (time !== initTime && isWinner === null && !connection) {
+      setInitTime(STARTING_TIME);
+      resetGame();
+
+      const newBoard = generateSudokuBoard();
+      setSudoku(newBoard);
+    }
+
+    if (connection) {
+      toast("You can not reset when playing against another player.");
+    }
+  };
 
   useEffect(() => {
     if (!isCountdownActive) return;
@@ -37,7 +57,7 @@ const Countdown = () => {
               data: start,
             });
           } else {
-            updateCountdown(start, setTime);
+            updateCountdown(start);
           }
         } else if (start === 0) {
           setIsWinner(false);
@@ -50,23 +70,8 @@ const Countdown = () => {
     return () => {
       clearInterval(interval);
     };
-  }, [isCountdownActive, isWinner]);
-
-  const start = () => {
-    if (isWinner === null) setIsCountdownActive(true);
-  };
-
-  const reset = () => {
-    if (time !== initTime && isWinner === null && !connection) {
-      console.log("reset");
-      setInitTime(STARTING_TIME);
-      resetGame();
-    }
-
-    if (connection) {
-      toast("You can not reset when playing against another player.");
-    }
-  };
+  }, []);
+  // }, [isCountdownActive, isWinner]);
 
   return (
     <div className="my-2 flex w-full items-center justify-between text-3xl font-semibold italic">
@@ -82,7 +87,7 @@ const Countdown = () => {
         className={twMerge(
           "underline",
           time === END_TIME && "animate-bounce text-red-500",
-          isCountdownActive && "text-green-600"
+          isCountdownActive && "text-green-600",
         )}
       >
         {time}

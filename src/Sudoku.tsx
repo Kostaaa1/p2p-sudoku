@@ -26,7 +26,6 @@ function Sudoku() {
     isWinner,
     INIT_INVALID_CELLS_STRING,
   } = useSudokuStore();
-
   const { allCellsFilled } = useSudoku();
 
   useEffect(() => {
@@ -60,9 +59,10 @@ function Sudoku() {
   useEffect(() => {
     if (isWinner === null || isToastRan) return;
     setIsCountdownActive(false);
+    localStorage.clear();
 
     if (booRef.current && mistakes < 5 && isWinner === false) {
-      booRef.current.volume = 0.1;
+      booRef.current.volume = 0.00;
       booRef.current.play();
 
       connection?.send({
@@ -80,7 +80,7 @@ function Sudoku() {
     }
 
     if (booRef.current && mistakes === 5 && isWinner === false) {
-      booRef.current.volume = 0.1;
+      booRef.current.volume = 0.00;
       booRef.current.play();
 
       connection?.send({
@@ -98,7 +98,7 @@ function Sudoku() {
     }
 
     if (hornRef.current && isWinner) {
-      hornRef.current.volume = 0.1;
+      hornRef.current.volume = 0.00;
       hornRef.current.play();
 
       connection?.send({
@@ -118,7 +118,7 @@ function Sudoku() {
 
   return (
     <div className="flex items-center text-blue-600">
-      <div className="text-center font-bold text-3xl text-blue-600 px-4 h-full ">
+      <div className="h-full px-4 text-center text-3xl font-bold text-blue-600 ">
         S<br></br>U<br></br>D<br></br>O<br></br>K<br></br>U<br></br>
       </div>
       <div>
@@ -137,17 +137,17 @@ function Sudoku() {
             </div>
           ))}
         </div>
-        <div className="text-sm flex w-full pt-1 items-center justify-between">
-          <span className="flex tracking-tighter text-black text-md font-semibold">
+        <div className="flex w-full items-center justify-between pt-1 text-sm">
+          <span className="text-md flex font-semibold tracking-tighter text-black">
             PeerID:{" "}
             <p
-              className="text-yellow-600 font-bold"
+              className="font-bold text-yellow-600"
               style={{ marginLeft: "8px" }}
             >
               {peerId}
             </p>
           </span>
-          <span className="flex tracking-tighter text-black text-lg font-semibold">
+          <span className="flex text-lg font-semibold tracking-tighter text-black">
             Mistakes:{" "}
             <p className="font-bold" style={{ marginLeft: "8px" }}>
               {`${mistakes}/5`}
@@ -155,10 +155,10 @@ function Sudoku() {
           </span>
         </div>
         {connection && (
-          <span className="flex tracking-tighter text-black text-sm font-semibold">
+          <span className="flex text-sm font-semibold tracking-tighter text-black">
             Connected to:{" "}
             <p
-              className="text-yellow-600 font-bold"
+              className="font-bold text-yellow-600"
               style={{ marginLeft: "8px" }}
             >
               {connection.peer}
@@ -166,7 +166,7 @@ function Sudoku() {
           </span>
         )}
       </div>
-      <div className="text-center font-bold text-3xl text-blue-600 px-4 h-full ">
+      <div className="h-full px-4 text-center text-3xl font-bold text-blue-600 ">
         S<br></br>U<br></br>D<br></br>O<br></br>K<br></br>U<br></br>
       </div>
       <audio ref={booRef}>

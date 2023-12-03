@@ -9,6 +9,10 @@ export type PeerResponse =
       data: number;
     }
   | {
+      type: "ready";
+      data: boolean;
+    }
+  | {
       type: "end_game";
       data: { isWinner: boolean; message: string };
     }

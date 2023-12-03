@@ -9,6 +9,9 @@ type TPeerStore = {
   peer: Peer;
   isToastRan: boolean;
   setIsToastRan: (val: boolean) => void;
+  // const [isOpponentReady, setIsOpponentReady] = useState<boolean>(false);
+  isOpponentReady: boolean;
+  setIsOpponentReady: (isReady: boolean) => void;
 };
 
 const usePeerStore = create<TPeerStore>((set) => ({
@@ -31,6 +34,8 @@ const usePeerStore = create<TPeerStore>((set) => ({
       ...state,
       isToastRan,
     })),
+  isOpponentReady: false,
+  setIsOpponentReady: (isOpponentReady: boolean) => set({ isOpponentReady }),
 }));
 
 export default usePeerStore;

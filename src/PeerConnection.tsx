@@ -2,20 +2,22 @@ import { useRef, useState } from "react";
 import usePeer from "./hooks/usePeer";
 import useStore from "./store/peerStore";
 import { useNavigate } from "react-router-dom";
+import useSudokuStore from "./store/sudokuStore";
 
 const PeerConnection = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [input, setInput] = useState<string>("");
   const { handleConnect } = usePeer();
   const navigate = useNavigate();
-
   const { peerId } = useStore();
+  const { resetGame } = useSudokuStore();
+
   const copyPeerId = () => {
     navigator.clipboard.writeText(peerId);
   };
 
   return (
-    <div className="w-[520px] flex h-max flex-col justify-between rounded-md bg-slate-200 p-3 font-semibold text-gray-600 shadow-md shadow-gray-500 outline outline-1 whitespace-nowrap outline-white">
+    <div className="flex h-max w-[520px] flex-col justify-between whitespace-nowrap rounded-md bg-slate-200 p-3 font-semibold text-gray-600 shadow-md shadow-gray-500 outline outline-1 outline-white">
       <div className="flex w-full items-center justify-between">
         <div className="inline-flex">
           <label className="font-semibold">My peer id: &nbsp;</label>
@@ -29,7 +31,7 @@ const PeerConnection = () => {
         </button>
       </div>
       <div className="">
-        <div className="flex py-2 w-full items-center justify-center">
+        <div className="flex w-full items-center justify-center py-2">
           <label className="font-semibold">Connect to id: </label>
           <input
             ref={inputRef}
@@ -44,12 +46,15 @@ const PeerConnection = () => {
       </div>
       <button
         className="bg-slate-400 text-sm text-white"
-        onClick={() => handleConnect(input)}
+        onClick={() => {
+          resetGame();
+          handleConnect(input);
+        }}
       >
         Connect
       </button>
       <button
-        className="bg-red-400 text-sm text-white [--p:259_94%_51%] duration-200 transition-colors"
+        className="bg-red-400 text-sm text-white transition-colors duration-200 [--p:259_94%_51%]"
         onClick={() => navigate(-1)}
       >
         Go Back

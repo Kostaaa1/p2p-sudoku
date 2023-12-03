@@ -57,7 +57,7 @@ const Cell: FC<FieldProps> = memo(({ colId, rowId, colVal }) => {
     if (!stack) return false;
     const { col, row, value } = obj;
     return stack.some(
-      (x) => x.col === col && x.row === row && x.value === value
+      (x) => x.col === col && x.row === row && x.value === value,
     );
   };
 
@@ -65,14 +65,14 @@ const Cell: FC<FieldProps> = memo(({ colId, rowId, colVal }) => {
     (rowId: number) => {
       return rowId === focusedCell.row;
     },
-    [focusedCell]
+    [focusedCell],
   );
 
   const highlightCol = useCallback(
     (colId: number) => {
       return colId === focusedCell.col;
     },
-    [focusedCell]
+    [focusedCell],
   );
 
   const highlight3x3Box = useCallback(
@@ -82,7 +82,7 @@ const Cell: FC<FieldProps> = memo(({ colId, rowId, colVal }) => {
         Math.floor(rowId / 3) === Math.floor(focusedCell.row / 3)
       );
     },
-    [focusedCell]
+    [focusedCell],
   );
 
   const isFieldClicked = useMemo(() => {
@@ -126,8 +126,8 @@ const Cell: FC<FieldProps> = memo(({ colId, rowId, colVal }) => {
     setInvalidCells(invalidCells?.filter((x) => x.value !== value));
     setAddedCells(
       addedCells?.filter(
-        (x) => x.row !== row || x.col !== col || x.value !== value
-      )
+        (x) => x.row !== row || x.col !== col || x.value !== value,
+      ),
     );
   };
 
@@ -240,7 +240,7 @@ const Cell: FC<FieldProps> = memo(({ colId, rowId, colVal }) => {
       className={twMerge(
         inputClassNames.join(" "),
         highlightRow(rowId) && "bg-blue-100",
-        highlightCol(colId) && "-blue-100",
+        highlightCol(colId) && "bg-blue-100",
         highlight3x3Box(rowId, colId) && "bg-blue-100",
         isIncluded(addedCells, {
           row: rowId,
@@ -265,7 +265,7 @@ const Cell: FC<FieldProps> = memo(({ colId, rowId, colVal }) => {
           col: colId,
           value: colVal,
         }) && "bg-red-300 bg-opacity-70",
-        isFieldClicked(rowId, colId) && "bg-blue-300 bg-opacity-80"
+        isFieldClicked(rowId, colId) && "bg-blue-300 bg-opacity-80",
       )}
     />
   );

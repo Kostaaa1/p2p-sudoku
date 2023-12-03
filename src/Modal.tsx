@@ -1,6 +1,9 @@
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import Confetti from "react-confetti";
 import useSudokuStore from "./store/sudokuStore";
+import usePeerStore from "./store/peerStore";
+import { IconLoader2 } from "@tabler/icons-react";
+import { twMerge } from "tailwind-merge";
 
 interface ModalProps {
   mistakes: number;
@@ -8,6 +11,20 @@ interface ModalProps {
 
 const Modal: FC<ModalProps> = ({ mistakes }) => {
   const { isWinner, resetGame } = useSudokuStore();
+  const { connection, isOpponentReady, setIsOpponentReady } = usePeerStore();
+
+  useEffect(() => {
+    console.log("rerun");
+  }, [isOpponentReady]);
+
+  const playAgain = () => {
+    if (connection) {
+      setIsOpponentReady(false);
+      connection.send({ type: "ready", data: isOpponentReady });
+    } else {
+      resetGame();
+    }
+  };
 
   return (
     <div className="absolute left-0 top-0 flex h-full w-full items-center justify-center bg-black bg-opacity-70 text-black">
@@ -34,14 +51,24 @@ const Modal: FC<ModalProps> = ({ mistakes }) => {
         </div>
         <div className="flex w-full flex-col items-center justify-center">
           <button
-            onClick={resetGame}
-            className="block h-max w-full items-center justify-center bg-blue-500 text-white transition-colors duration-100 hover:bg-blue-800"
+            onClick={playAgain}
+            disabled={isOpponentReady}
+            className={twMerge(
+              "block h-max w-full items-center justify-center text-white transition-colors duration-100",
+              !isOpponentReady
+                ? "bg-blue-500 hover:bg-blue-800"
+                : "bg-slate-400",
+            )}
           >
-            {isWinner === false ? "Try Again!" : "Play Again!"}
+            {isOpponentReady ? (
+              <div className="flex items-center justify-center">
+                <IconLoader2 className="mr-3 animate-spin text-gray-200" />
+                Waiting for the other player
+              </div>
+            ) : (
+              "Play Again"
+            )}
           </button>
-          {/* <button className="block h-max w-full items-center justify-center bg-slate-400 text-white transition-colors duration-100 hover:bg-slate-500">
-            Cancel
-          </button> */}
         </div>
       </div>
       {isWinner && <Confetti />}
