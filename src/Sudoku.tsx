@@ -6,10 +6,10 @@ import Cell from "./Cell";
 import Modal from "./Modal";
 import booPath from "./assets/boo.mp3";
 import hornPath from "./assets/horn.mp3";
-import useStore from "./store/peerStore";
+import useStore from "./state/peerStore";
 import { toastMessageConstructor } from "./utils/utils";
-import useSudokuStore from "./store/sudokuStore";
-import useCountdownStore from "./store/countdownStore";
+import useSudokuStore from "./state/sudokuStore";
+import useCountdownStore from "./state/countdownStore";
 
 function Sudoku() {
   const booRef = useRef<HTMLAudioElement>(null);
@@ -62,7 +62,7 @@ function Sudoku() {
     localStorage.clear();
 
     if (booRef.current && mistakes < 5 && isWinner === false) {
-      booRef.current.volume = 0.00;
+      booRef.current.volume = 0.0;
       booRef.current.play();
 
       connection?.send({
@@ -80,7 +80,7 @@ function Sudoku() {
     }
 
     if (booRef.current && mistakes === 5 && isWinner === false) {
-      booRef.current.volume = 0.00;
+      booRef.current.volume = 0.0;
       booRef.current.play();
 
       connection?.send({
@@ -98,7 +98,7 @@ function Sudoku() {
     }
 
     if (hornRef.current && isWinner) {
-      hornRef.current.volume = 0.00;
+      hornRef.current.volume = 0.0;
       hornRef.current.play();
 
       connection?.send({

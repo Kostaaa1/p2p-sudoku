@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
-import useStore from "../store/peerStore";
+import useStore from "../state/peerStore";
 import toast from "react-hot-toast";
-import useSudokuStore from "../store/sudokuStore";
+import useSudokuStore from "../state/sudokuStore";
 
 const useSudoku = () => {
   const { setIsToastRan } = useStore();
@@ -38,8 +38,8 @@ const useSudoku = () => {
     setInvalidCells(invalidCells?.filter((x) => x.value !== value));
     setAddedCells(
       addedCells?.filter(
-        (x) => x.row !== row || x.col !== col || x.value !== value
-      )
+        (x) => x.row !== row || x.col !== col || x.value !== value,
+      ),
     );
   };
 
@@ -108,7 +108,7 @@ const useSudoku = () => {
 
     if (columnInvalidValues && value && columnInvalidValues.length > 1) {
       columnInvalidValues.forEach((i) =>
-        addInvalidCell({ col, row: i, value })
+        addInvalidCell({ col, row: i, value }),
       );
     }
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { IconArrowLeft } from "@tabler/icons-react";
-import useSudokuStore from "./store/sudokuStore";
+import useSudokuStore from "./state/sudokuStore";
 
 const Modes = () => {
   const [isPlayAloneClicked, setIsPlayAloneClicked] = useState<boolean>(false);

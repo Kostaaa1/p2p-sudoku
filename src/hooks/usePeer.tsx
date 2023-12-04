@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom";
-import usePeerStore from "../store/peerStore";
+import usePeerStore from "../state/peerStore";
 import { toastMessageConstructor } from "../utils/utils";
 import { PeerResponse } from "../types/types";
-import useSudokuStore from "../store/sudokuStore";
-import useCountdownStore from "../store/countdownStore";
+import useSudokuStore from "../state/sudokuStore";
+import useCountdownStore from "../state/countdownStore";
 import { generateSudokuBoard } from "../utils/generateSudoku";
 
 const usePeer = () => {

@@ -1,34 +1,26 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { twMerge } from "tailwind-merge";
-import useStore from "./store/peerStore";
+import useStore from "./state/peerStore";
 import { DataConnection } from "peerjs";
-import useSudokuStore from "./store/sudokuStore";
-import useCountdownStore from "./store/countdownStore";
+import useSudokuStore from "./state/sudokuStore";
+import useCountdownStore from "./state/countdownStore";
 import toast from "react-hot-toast";
 import { generateSudokuBoard } from "./utils/generateSudoku";
+import { END_TIME } from "./state/constants";
 
 const Countdown = () => {
   const { isWinner, setIsWinner, resetGame, setSudoku } = useSudokuStore();
-  const {
-    STARTING_TIME,
-    END_TIME,
-    time,
-    isCountdownActive,
-    setIsCountdownActive,
-    updateCountdown,
-  } = useCountdownStore();
+  const { time, isCountdownActive, setIsCountdownActive, updateCountdown } =
+    useCountdownStore();
 
-  const [initTime, setInitTime] = useState<string>(time);
   const { connection } = useStore();
 
-  const start = () => {
+  const startCount = () => {
     if (isWinner === null) setIsCountdownActive(true);
   };
-  const reset = () => {
-    if (time !== initTime && isWinner === null && !connection) {
-      setInitTime(STARTING_TIME);
+  const resetCount = () => {
+    if (isWinner === null && !connection) {
       resetGame();
-
       const newBoard = generateSudokuBoard();
       setSudoku(newBoard);
     }
@@ -39,11 +31,10 @@ const Countdown = () => {
   };
 
   useEffect(() => {
-    if (!isCountdownActive) return;
+    if (!isCountdownActive && isWinner !== null) return;
 
     let start = parseInt(time.split(":")[0]) * 60;
     const seconds = parseInt(time.split(":")[1]);
-
     if (seconds > 0) start += seconds;
 
     const handleCountdown = (connection?: DataConnection | null) => {
@@ -66,20 +57,18 @@ const Countdown = () => {
       }, 1000);
     };
     const interval = handleCountdown(connection || null);
-
     return () => {
       clearInterval(interval);
     };
-  }, []);
-  // }, [isCountdownActive, isWinner]);
+  }, [!connection && resetCount]);
 
   return (
     <div className="my-2 flex w-full items-center justify-between text-3xl font-semibold italic">
       <div className="flex items-center text-lg font-bold text-white">
-        <button onClick={start} className="mr-2 bg-green-600 px-3 py-1">
+        <button onClick={startCount} className="mr-2 bg-green-600 px-3 py-1">
           Start
         </button>
-        <button onClick={reset} className="bg-red-500 px-3 py-1 ">
+        <button onClick={resetCount} className="bg-red-500 px-3 py-1 ">
           Reset
         </button>
       </div>

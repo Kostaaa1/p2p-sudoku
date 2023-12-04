@@ -7,14 +7,9 @@ type TStore = {
   time: string;
   setTime: (time: string) => void;
   updateCountdown: (time: number) => void;
-  STARTING_TIME: string;
-  END_TIME: string;
 };
 
 const useCountdownStore = create<TStore>((set) => ({
-  // STARTING_TIME: "15:00",
-  STARTING_TIME: "00:03",
-  END_TIME: "00:00",
   updateCountdown: (time: number) =>
     set(() => {
       const minutes = Math.floor(time / 60);
@@ -29,7 +24,7 @@ const useCountdownStore = create<TStore>((set) => ({
     }),
   time: getCached("countdown"),
   setTime: (time: string) => set({ time }),
-  isCountdownActive: true,
+  isCountdownActive: false,
   setIsCountdownActive: (isCountdownActive: boolean) =>
     set((state) => ({
       ...state,

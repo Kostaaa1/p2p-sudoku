@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { TCell } from "../types/types";
 import { cache, getCached } from "../utils/utils";
 import useCountdownStore from "./countdownStore";
+import { STARTING_TIME } from "./constants";
 
 type TUseSudokuStore = {
   sudoku: string[][];
@@ -28,10 +29,10 @@ const useSudokuStore = create<TUseSudokuStore>((set) => ({
     set((state) => {
       localStorage.clear();
 
-      const { getState, setState } = useCountdownStore;
-      const { STARTING_TIME } = getState();
+      const { setState } = useCountdownStore;
 
-      setState({ time: STARTING_TIME });
+
+      setState({ time: STARTING_TIME, isCountdownActive: true });
       cache({ key: "countdown", data: STARTING_TIME });
 
       return {

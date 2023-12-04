@@ -1,6 +1,7 @@
 import toast from "react-hot-toast";
 import { SudokuCacheMap, SudokuCacheMapKeys } from "../types/types";
 import { generateSudokuBoard } from "./generateSudoku";
+import { STARTING_TIME } from "../state/constants";
 
 // Need to add sudoku generator and sudoku solver, it is not easy. I need to understand it.
 export const getCached = <T extends SudokuCacheMapKeys>(
@@ -19,7 +20,7 @@ export const getCached = <T extends SudokuCacheMapKeys>(
       case "mistakes":
         return 0 as SudokuCacheMap[T]["data"];
       case "countdown":
-        return "00:30" as SudokuCacheMap[T]["data"];
+        return STARTING_TIME as SudokuCacheMap[T]["data"];
       case "is_winner":
         return null as SudokuCacheMap[T]["data"];
       case "game": {
