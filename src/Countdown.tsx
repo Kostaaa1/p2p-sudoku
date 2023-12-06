@@ -63,8 +63,8 @@ const Countdown = () => {
   }, [!connection && resetCount]);
 
   return (
-    <div className="my-2 flex w-full items-center justify-between text-3xl font-semibold italic">
-      <div className="flex items-center text-lg font-bold text-white">
+    <div className="my-2 flex w-full items-center justify-between text-3xl italic">
+      <div className="flex items-center text-lg text-white">
         <button onClick={startCount} className="mr-2 bg-green-600 px-3 py-1">
           Start
         </button>

@@ -22,7 +22,6 @@ const Modes = () => {
   };
 
   useEffect(() => {
-    console.log(localStorage.getItem("countdown"));
     if (isPlayAloneClicked) {
       setIsLocalStorageEmpty(localStorage.getItem("countdown") === null);
     }
@@ -36,9 +35,7 @@ const Modes = () => {
 
   return (
     <div className="flex flex-col items-center justify-center">
-      <h1 className="mb-14 text-5xl font-bold italic text-blue-600 underline">
-        Sudoku
-      </h1>
+      <h1 className="mb-14 text-5xl italic text-blue-600 underline">Sudoku</h1>
       <div className="border-1 flex h-max flex-col items-center justify-center border border-gray-200 p-4 pt-1 shadow-md shadow-gray-400">
         {!isPlayAloneClicked && (
           <div>
@@ -63,7 +60,7 @@ const Modes = () => {
           <div>
             <div
               onClick={() => setIsPlayAloneClicked((state) => !state)}
-              className="flex h-10 w-full cursor-pointer items-center font-semibold text-black transition-all duration-150 hover:text-opacity-50 hover:underline"
+              className="flex h-10 w-full cursor-pointer items-center text-black transition-all duration-150 hover:text-opacity-50 hover:underline"
             >
               <IconArrowLeft />
               Back

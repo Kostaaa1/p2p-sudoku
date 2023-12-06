@@ -32,8 +32,8 @@ const Modal: FC<ModalProps> = ({ mistakes }) => {
         <div className="pb-4">
           {isWinner === false && (
             <div>
-              <h4 className="pb-3 text-center text-2xl font-bold">Game Over</h4>
-              <p className="text-center font-semibold leading-4">
+              <h4 className="pb-3 text-center text-2xl">Game Over</h4>
+              <p className="text-center leading-4">
                 {mistakes === 5
                   ? "You have made 5 mistakes and lost this game. Try again!"
                   : "Time is up. Try again!"}

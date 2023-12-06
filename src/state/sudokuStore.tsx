@@ -31,7 +31,6 @@ const useSudokuStore = create<TUseSudokuStore>((set) => ({
 
       const { setState } = useCountdownStore;
 
-
       setState({ time: STARTING_TIME, isCountdownActive: true });
       cache({ key: "countdown", data: STARTING_TIME });
 
@@ -54,6 +53,7 @@ const useSudokuStore = create<TUseSudokuStore>((set) => ({
   invalidCells: getCached("invalid"),
   setInvalidCells: (cells: TCell[]) =>
     set(() => {
+      console.log("Cells from store", cells);
       cache({ key: "invalid", data: cells });
       return { invalidCells: cells };
     }),

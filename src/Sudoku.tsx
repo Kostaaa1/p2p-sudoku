@@ -118,7 +118,7 @@ function Sudoku() {
 
   return (
     <div className="flex items-center text-blue-600">
-      <div className="h-full px-4 text-center text-3xl font-bold text-blue-600 ">
+      <div className="h-full px-4 text-center text-3xl text-blue-600 ">
         S<br></br>U<br></br>D<br></br>O<br></br>K<br></br>U<br></br>
       </div>
       <div>
@@ -138,35 +138,29 @@ function Sudoku() {
           ))}
         </div>
         <div className="flex w-full items-center justify-between pt-1 text-sm">
-          <span className="text-md flex font-semibold tracking-tighter text-black">
-            PeerID:{" "}
-            <p
-              className="font-bold text-yellow-600"
-              style={{ marginLeft: "8px" }}
-            >
+          <span className="text-md flex tracking-tighter text-black">
+            PeerID:
+            <p className="text-yellow-600" style={{ marginLeft: "8px" }}>
               {peerId}
             </p>
           </span>
-          <span className="flex text-lg font-semibold tracking-tighter text-black">
-            Mistakes:{" "}
-            <p className="font-bold" style={{ marginLeft: "8px" }}>
+          <span className="flex text-lg tracking-tighter text-black">
+            Mistakes:
+            <p className="" style={{ marginLeft: "8px" }}>
               {`${mistakes}/5`}
             </p>
           </span>
         </div>
         {connection && (
-          <span className="flex text-sm font-semibold tracking-tighter text-black">
-            Connected to:{" "}
-            <p
-              className="font-bold text-yellow-600"
-              style={{ marginLeft: "8px" }}
-            >
+          <span className="flex text-sm tracking-tighter text-black">
+            Connected to:
+            <p className="text-yellow-600" style={{ marginLeft: "8px" }}>
               {connection.peer}
             </p>
           </span>
         )}
       </div>
-      <div className="h-full px-4 text-center text-3xl font-bold text-blue-600 ">
+      <div className="h-full px-4 text-center text-3xl text-blue-600 ">
         S<br></br>U<br></br>D<br></br>O<br></br>K<br></br>U<br></br>
       </div>
       <audio ref={booRef}>

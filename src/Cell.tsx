@@ -113,14 +113,6 @@ const Cell: FC<FieldProps> = memo(({ colId, rowId, colVal }) => {
     });
   };
 
-  const addRightBorder = shouldRenderRightBorder(colId);
-  const addBottomBorder = shouldRenderBottomBorder(rowId);
-  const inputClassNames = [
-    "h-full border border-r-0 border-b-0 border-[#BEC6D4] cursor-pointer text-3xl bg-opacity-100 bg-transparent font-semibold text-center w-full caret-transparent",
-    addRightBorder && "border-r-2 border-r-blue-800",
-    addBottomBorder && "border-b-2 border-b-blue-800",
-  ];
-
   const deleteFocusedCell = () => {
     const { col, row, value } = focusedCell;
     setInvalidCells(invalidCells?.filter((x) => x.value !== value));
@@ -133,7 +125,6 @@ const Cell: FC<FieldProps> = memo(({ colId, rowId, colVal }) => {
 
   const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isWinner !== null) return;
-
     const { value } = e.target;
 
     const { col: colId, row: rowId } = focusedCell;
@@ -229,6 +220,14 @@ const Cell: FC<FieldProps> = memo(({ colId, rowId, colVal }) => {
       };
     }
   }, [focusedCell, focusInput]);
+
+  const addRightBorder = shouldRenderRightBorder(colId);
+  const addBottomBorder = shouldRenderBottomBorder(rowId);
+  const inputClassNames = [
+    "h-full border border-r-0 border-b-0 border-[#BEC6D4] cursor-pointer text-3xl bg-opacity-100 bg-transparent text-center w-full caret-transparent",
+    addRightBorder && "border-r-2 border-r-blue-800",
+    addBottomBorder && "border-b-2 border-b-blue-800",
+  ];
 
   return (
     <input
