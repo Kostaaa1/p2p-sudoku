@@ -1,9 +1,9 @@
-import { FC, useEffect } from "react";
+import { FC, useEffect, useState } from "react";
 import Confetti from "react-confetti";
 import useSudokuStore from "./state/sudokuStore";
 import usePeerStore from "./state/peerStore";
-import { IconLoader2 } from "@tabler/icons-react";
 import { twMerge } from "tailwind-merge";
+import { IconLoaderQuarter } from "@tabler/icons-react";
 
 interface ModalProps {
   mistakes: number;
@@ -11,20 +11,24 @@ interface ModalProps {
 
 const Modal: FC<ModalProps> = ({ mistakes }) => {
   const { isWinner, resetGame } = useSudokuStore();
-  const { connection, isOpponentReady, setIsOpponentReady } = usePeerStore();
-
-  useEffect(() => {
-    console.log("rerun");
-  }, [isOpponentReady]);
+  const { connection, isOpponentReady } = usePeerStore();
+  const [isClicked, setIsClicked] = useState<boolean>(false);
 
   const playAgain = () => {
+    setIsClicked(true);
+
     if (connection) {
-      setIsOpponentReady(false);
-      connection.send({ type: "ready", data: isOpponentReady });
+      connection.send({ type: "ready", data: true });
     } else {
       resetGame();
     }
   };
+
+  useEffect(() => {
+    if (isClicked && isOpponentReady && connection) {
+      resetGame();
+    }
+  }, [connection, isClicked, isOpponentReady]);
 
   return (
     <div className="absolute left-0 top-0 flex h-full w-full items-center justify-center bg-black bg-opacity-70 text-black">
@@ -52,17 +56,15 @@ const Modal: FC<ModalProps> = ({ mistakes }) => {
         <div className="flex w-full flex-col items-center justify-center">
           <button
             onClick={playAgain}
-            disabled={isOpponentReady}
+            disabled={isClicked}
             className={twMerge(
-              "block h-max w-full items-center justify-center text-white transition-colors duration-100",
-              !isOpponentReady
-                ? "bg-blue-500 hover:bg-blue-800"
-                : "bg-slate-400",
+              "block h-max w-full items-center justify-center bg-blue-500 text-white transition-colors duration-100",
+              !isClicked ? "bg-blue-500 hover:bg-blue-800" : "bg-slate-400",
             )}
           >
-            {isOpponentReady ? (
+            {isClicked ? (
               <div className="flex items-center justify-center">
-                <IconLoader2 className="mr-3 animate-spin text-gray-200" />
+                <IconLoaderQuarter className="load-animation mr-3 text-gray-200" />
                 Waiting for the other player
               </div>
             ) : (

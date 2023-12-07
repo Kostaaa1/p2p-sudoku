@@ -60,3 +60,20 @@ input:focus,
 input:active {
   outline: none;
 }
+
+@keyframes pulse {
+  50% {
+      opacity: .5;
+  }
+}
+
+@keyframes spin {
+  to {
+      transform: rotate(360deg);
+  }
+}
+
+
+.load-animation {
+  animation: pulse .8s ease-in-out infinite, spin .8s linear infinite;
+}

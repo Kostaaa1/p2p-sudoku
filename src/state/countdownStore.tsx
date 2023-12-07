@@ -10,20 +10,21 @@ type TStore = {
 };
 
 const useCountdownStore = create<TStore>((set) => ({
-  updateCountdown: (time: number) =>
-    set(() => {
-      const minutes = Math.floor(time / 60);
-      const remainingSeconds = time % 60;
+  updateCountdown: (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const remainingSeconds = time % 60;
 
-      const parsedTime = `${String(minutes).padStart(2, "0")}:${String(
-        remainingSeconds,
-      ).padStart(2, "0")}`;
+    const parsedTime = `${String(minutes).padStart(2, "0")}:${String(
+      remainingSeconds,
+    ).padStart(2, "0")}`;
+    cache({ key: "countdown", data: parsedTime });
 
-      cache({ key: "countdown", data: parsedTime });
-      return { time: parsedTime };
-    }),
+    set({ time: parsedTime });
+  },
   time: getCached("countdown"),
-  setTime: (time: string) => set({ time }),
+  setTime: (time: string) => {
+    set({ time });
+  },
   isCountdownActive: false,
   setIsCountdownActive: (isCountdownActive: boolean) =>
     set((state) => ({

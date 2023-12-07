@@ -1,10 +1,10 @@
 import { useEffect, useMemo } from "react";
-import useStore from "../state/peerStore";
+import usePeerStore from "../state/peerStore";
 import toast from "react-hot-toast";
 import useSudokuStore from "../state/sudokuStore";
 
 const useSudoku = () => {
-  const { setIsToastRan } = useStore();
+  const { setIsToastRan } = usePeerStore();
   const {
     setSudoku,
     sudoku,
@@ -78,7 +78,7 @@ const useSudoku = () => {
 
   const allCellsFilled = useMemo(() => {
     return sudoku?.flat().every((x) => x !== "");
-  }, [isLastCellEmpty]);
+  }, [sudoku]);
 
   useEffect(() => {
     if (isWinner !== null) return;

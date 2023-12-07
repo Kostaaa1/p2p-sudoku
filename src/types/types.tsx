@@ -19,6 +19,10 @@ export type PeerResponse =
   | {
       type: "sudoku";
       data: string[][];
+    }
+  | {
+      type: "opponent_peer_id";
+      data: string;
     };
 
 export type SudokuCacheMap = {

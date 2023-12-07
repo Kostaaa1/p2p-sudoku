@@ -12,15 +12,8 @@ import useCountdownStore from "./state/countdownStore";
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
-
-  const {
-    setIsToastRan,
-    peer,
-    setConnection,
-    setPeerId,
-    setIsOpponentReady,
-    isOpponentReady,
-  } = usePeerStore();
+  const { setIsToastRan, peer, setConnection, setPeerId, setIsOpponentReady } =
+    usePeerStore();
   const { resetGame, setSudoku, setIsWinner } = useSudokuStore();
   const { setIsCountdownActive, updateCountdown } = useCountdownStore();
 
@@ -31,7 +24,7 @@ function App() {
     });
 
     peer.on("connection", (conn) => {
-      console.log("On connection", conn, "peer: ", conn.peer);
+      // console.log("On connection", conn, "peer: ", conn.peer);
       setConnection(conn);
       resetGame();
       navigate("/sudoku");
@@ -44,13 +37,11 @@ function App() {
         }
 
         if (type === "ready") {
-          console.log("ready data from APp", res);
           setIsOpponentReady(data);
         }
 
         if (type === "end_game") {
           const { isWinner, message } = data;
-          console.log("toast: ", message);
 
           setIsCountdownActive(false);
           setIsWinner(isWinner);

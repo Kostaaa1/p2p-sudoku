@@ -17,10 +17,10 @@ const PeerConnection = () => {
   };
 
   return (
-    <div className="flex h-max w-[520px] flex-col justify-between whitespace-nowrap rounded-md bg-slate-200 p-3 text-gray-600 shadow-md shadow-gray-500 outline outline-1 outline-white">
+    <div className="flex h-max w-[520px] flex-col justify-between whitespace-nowrap rounded-md bg-slate-200 p-3 font-bold text-gray-600 shadow-md shadow-gray-500 outline outline-1 outline-white">
       <div className="flex w-full items-center justify-between">
         <div className="inline-flex">
-          <label className="font-semibold">My peer id: &nbsp;</label>
+          <label className="">My peer id: &nbsp;</label>
           <p className="text-yellow-600 underline">{peerId}</p>
         </div>
         <button
@@ -32,7 +32,7 @@ const PeerConnection = () => {
       </div>
       <div className="">
         <div className="flex w-full items-center justify-center py-2">
-          <label className="">Connect to id: </label>
+          <label>Connect to id: </label>
           <input
             ref={inputRef}
             autoFocus

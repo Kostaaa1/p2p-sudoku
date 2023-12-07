@@ -6,7 +6,7 @@ import Cell from "./Cell";
 import Modal from "./Modal";
 import booPath from "./assets/boo.mp3";
 import hornPath from "./assets/horn.mp3";
-import useStore from "./state/peerStore";
+import usePeerStore from "./state/peerStore";
 import { toastMessageConstructor } from "./utils/utils";
 import useSudokuStore from "./state/sudokuStore";
 import useCountdownStore from "./state/countdownStore";
@@ -15,7 +15,7 @@ function Sudoku() {
   const booRef = useRef<HTMLAudioElement>(null);
   const hornRef = useRef<HTMLAudioElement>(null);
 
-  const { isToastRan, connection, peerId } = useStore();
+  const { isToastRan, connection, peerId } = usePeerStore();
   const { isCountdownActive, setIsCountdownActive } = useCountdownStore();
   const {
     mistakes,
@@ -117,8 +117,8 @@ function Sudoku() {
   }, [isToastRan, isWinner, mistakes]);
 
   return (
-    <div className="flex items-center text-blue-600">
-      <div className="h-full px-4 text-center text-3xl text-blue-600 ">
+    <div className="flex items-center font-semibold text-blue-600">
+      <div className="h-full px-4 text-center text-3xl font-bold text-blue-600">
         S<br></br>U<br></br>D<br></br>O<br></br>K<br></br>U<br></br>
       </div>
       <div>
@@ -160,7 +160,7 @@ function Sudoku() {
           </span>
         )}
       </div>
-      <div className="h-full px-4 text-center text-3xl text-blue-600 ">
+      <div className="h-full px-4 text-center text-3xl font-bold text-blue-600">
         S<br></br>U<br></br>D<br></br>O<br></br>K<br></br>U<br></br>
       </div>
       <audio ref={booRef}>

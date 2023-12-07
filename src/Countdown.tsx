@@ -1,43 +1,36 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
-import useStore from "./state/peerStore";
+import usePeerStore from "./state/peerStore";
 import { DataConnection } from "peerjs";
 import useSudokuStore from "./state/sudokuStore";
 import useCountdownStore from "./state/countdownStore";
 import toast from "react-hot-toast";
-import { generateSudokuBoard } from "./utils/generateSudoku";
-import { END_TIME } from "./state/constants";
+import { END_TIME, STARTING_TIME } from "./state/constants";
 
 const Countdown = () => {
-  const { isWinner, setIsWinner, resetGame, setSudoku } = useSudokuStore();
+  const { isWinner, setIsWinner, resetGame } = useSudokuStore();
   const { time, isCountdownActive, setIsCountdownActive, updateCountdown } =
     useCountdownStore();
+  const { connection } = usePeerStore();
 
-  const { connection } = useStore();
-
-  const startCount = () => {
-    if (isWinner === null) setIsCountdownActive(true);
-  };
-  const resetCount = () => {
-    if (isWinner === null && !connection) {
-      resetGame();
-      const newBoard = generateSudokuBoard();
-      setSudoku(newBoard);
-    }
-
+  const resetCount = async () => {
+    if (isWinner === null && !connection) resetGame();
     if (connection) {
       toast("You can not reset when playing against another player.");
     }
   };
+  const startCount = () => {
+    if (isWinner === null) setIsCountdownActive(true);
+  };
 
   useEffect(() => {
-    if (!isCountdownActive && isWinner !== null) return;
+    if (!isCountdownActive || isWinner !== null || !connection) return;
 
     let start = parseInt(time.split(":")[0]) * 60;
     const seconds = parseInt(time.split(":")[1]);
     if (seconds > 0) start += seconds;
 
-    const handleCountdown = (connection?: DataConnection | null) => {
+    const handleCountdown = (connection: DataConnection | null) => {
       return setInterval(() => {
         if (start > 0) {
           start--;
@@ -56,11 +49,12 @@ const Countdown = () => {
         }
       }, 1000);
     };
-    const interval = handleCountdown(connection || null);
+
+    const interval = handleCountdown(connection);
     return () => {
       clearInterval(interval);
     };
-  }, [!connection && resetCount]);
+  }, [isCountdownActive, connection ? time && connection : time]);
 
   return (
     <div className="my-2 flex w-full items-center justify-between text-3xl italic">

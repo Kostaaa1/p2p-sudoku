@@ -9,13 +9,8 @@ import { generateSudokuBoard } from "../utils/generateSudoku";
 const usePeer = () => {
   const navigate = useNavigate();
   const { setIsWinner, setSudoku } = useSudokuStore();
-  const {
-    setIsToastRan,
-    peer,
-    setConnection,
-    setIsOpponentReady,
-    isOpponentReady,
-  } = usePeerStore();
+  const { setIsToastRan, peer, setConnection, setIsOpponentReady } =
+    usePeerStore();
   const { setIsCountdownActive, updateCountdown } = useCountdownStore();
 
   const handleConnect = (id: string) => {
@@ -37,12 +32,10 @@ const usePeer = () => {
 
         if (type === "end_game") {
           const { isWinner, message } = data;
-          console.log("toast: ", message);
 
           setIsCountdownActive(false);
           toastMessageConstructor({ winner: isWinner, message });
           setIsToastRan(true);
-
           setIsWinner(isWinner);
         }
 

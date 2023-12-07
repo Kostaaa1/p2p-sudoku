@@ -3,6 +3,8 @@ import { TCell } from "../types/types";
 import { cache, getCached } from "../utils/utils";
 import useCountdownStore from "./countdownStore";
 import { STARTING_TIME } from "./constants";
+import { generateSudokuBoard } from "../utils/generateSudoku";
+import usePeerStore from "./peerStore";
 
 type TUseSudokuStore = {
   sudoku: string[][];
@@ -25,23 +27,28 @@ type TUseSudokuStore = {
 
 const useSudokuStore = create<TUseSudokuStore>((set) => ({
   INIT_INVALID_CELLS_STRING: localStorage.getItem("invalid"),
-  resetGame: () =>
-    set((state) => {
-      localStorage.clear();
+  resetGame: () => {
+    localStorage.clear();
+    const board = generateSudokuBoard();
 
-      const { setState } = useCountdownStore;
+    const { setTime, setIsCountdownActive } = useCountdownStore.getState();
+    const { setIsOpponentReady, setIsToastRan } = usePeerStore.getState();
 
-      setState({ time: STARTING_TIME, isCountdownActive: true });
-      cache({ key: "countdown", data: STARTING_TIME });
+    setIsToastRan(false);
+    setTime(STARTING_TIME);
+    setIsCountdownActive(true);
+    setIsOpponentReady(false);
+    cache({ key: "countdown", data: STARTING_TIME });
 
-      return {
-        ...state,
-        invalidCells: [],
-        addedCells: [],
-        mistakes: 0,
-        isWinner: null,
-      };
-    }),
+    return set((state) => ({
+      ...state,
+      sudoku: board,
+      isWinner: null,
+      invalidCells: [],
+      addedCells: [],
+      mistakes: 0,
+    }));
+  },
   sudoku: getCached("game"),
   setSudoku: (sudoku: string[][]) =>
     set(() => {
@@ -53,7 +60,6 @@ const useSudokuStore = create<TUseSudokuStore>((set) => ({
   invalidCells: getCached("invalid"),
   setInvalidCells: (cells: TCell[]) =>
     set(() => {
-      console.log("Cells from store", cells);
       cache({ key: "invalid", data: cells });
       return { invalidCells: cells };
     }),
@@ -84,7 +90,6 @@ const useSudokuStore = create<TUseSudokuStore>((set) => ({
       cache({ key: "is_winner", data: isWinner });
       return { isWinner };
     }),
-  // setIsWinner: (isWinner: boolean | null) => set({ isWinner }),
   mistakes: getCached("mistakes"),
   resetMistakes: () => set({ mistakes: 0 }),
   incrementMistakes: () =>
