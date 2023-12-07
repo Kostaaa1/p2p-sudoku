@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { twMerge } from "tailwind-merge";
 import usePeerStore from "./state/peerStore";
 import { DataConnection } from "peerjs";
 import useSudokuStore from "./state/sudokuStore";
 import useCountdownStore from "./state/countdownStore";
 import toast from "react-hot-toast";
-import { END_TIME, STARTING_TIME } from "./state/constants";
+import { END_TIME } from "./state/constants";
 
 const Countdown = () => {
   const { isWinner, setIsWinner, resetGame } = useSudokuStore();

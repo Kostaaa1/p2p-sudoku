@@ -24,7 +24,6 @@ function App() {
     });
 
     peer.on("connection", (conn) => {
-      // console.log("On connection", conn, "peer: ", conn.peer);
       setConnection(conn);
       resetGame();
       navigate("/sudoku");
