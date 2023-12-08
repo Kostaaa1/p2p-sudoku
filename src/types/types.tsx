@@ -35,3 +35,19 @@ export type SudokuCacheMap = {
 };
 
 export type SudokuCacheMapKeys = keyof SudokuCacheMap;
+
+export type DifficultySet = {
+  type: "difficulty";
+  id: number;
+  data: "Easy" | "Medium" | "Hard";
+  clicked: boolean;
+};
+
+export type TimeLimitSet = {
+  type: "time_limit";
+  id: number;
+  data: "12" | "15" | "20";
+  clicked: boolean;
+};
+
+export type DataSet = DifficultySet | TimeLimitSet;

@@ -1,4 +1,8 @@
-export function generateSudokuBoard(): string[][] {
+import { DifficultySet } from "../types/types";
+
+export function generateSudokuBoard(
+  difficulty: DifficultySet["data"],
+): string[][] {
   const sudokuGrid: string[][] = Array.from({ length: 9 }, () =>
     Array(9).fill(""),
   );
@@ -8,7 +12,7 @@ export function generateSudokuBoard(): string[][] {
   // Solve the Sudoku grid
   solveSudoku(sudokuGrid);
   // Remove some numbers to create the puzzle
-  createPuzzle(sudokuGrid);
+  createPuzzle(sudokuGrid, difficulty);
 
   return sudokuGrid;
 }
@@ -103,17 +107,17 @@ function solveSudoku(grid: string[][]) {
   solve();
 }
 
-function createPuzzle(grid: string[][]) {
-  function removeNumbers(difficultyLevel: "easy" | "medium" | "hard") {
+function createPuzzle(grid: string[][], difficulty: DifficultySet["data"]) {
+  function removeNumbers(difficultyLevel: DifficultySet["data"]) {
     let removalCount;
     switch (difficultyLevel) {
-      case "easy":
+      case "Easy":
         removalCount = 40;
         break;
-      case "medium":
+      case "Medium":
         removalCount = 50;
         break;
-      case "hard":
+      case "Hard":
         removalCount = 70;
         break;
       default:
@@ -127,5 +131,5 @@ function createPuzzle(grid: string[][]) {
     }
   }
 
-  removeNumbers("hard");
+  removeNumbers(difficulty);
 }

@@ -1,50 +1,50 @@
+import usePeerStore from "../store/peerStore";
+import useSudokuStore from "../store/sudokuStore";
+import { SudokuCacheMap, SudokuCacheMapKeys } from "../types/types";
+
 const useLocalStorage = () => {
-  const clearCache = () => {
-    localStorage.clear();
-  };
+  const { difficulty } = useSudokuStore();
+  const getCached = <T extends SudokuCacheMapKeys>(
+    key: T,
+  ): SudokuCacheMap[T]["data"] => {
+    1;
+    const cachedAdded = localStorage.getItem(key);
 
-  const getCachedMistakes = () => {
-    const cachedGame = localStorage.getItem("mistakes");
-    if (cachedGame) {
-      return JSON.parse(cachedGame);
-    } else {
-      return null;
-    }
-  };
-
-  const getCachedGame = () => {
-    const cachedGame = localStorage.getItem("game");
-    if (cachedGame) {
-      return JSON.parse(cachedGame);
-    } else {
-      return null;
-    }
-  };
-
-  const getCachedInvalid = () => {
-    const cachedInvalids = localStorage.getItem("invalid");
-    if (cachedInvalids) {
-      return JSON.parse(cachedInvalids);
-    } else {
-      return null;
-    }
-  };
-
-  const getCachedAdded = () => {
-    const cachedAdded = localStorage.getItem("added");
     if (cachedAdded) {
       return JSON.parse(cachedAdded);
     } else {
-      return null;
+      switch (key) {
+        case "added":
+        case "invalid":
+          return [] as SudokuCacheMap[T]["data"];
+        case "mistakes":
+          return 0 as SudokuCacheMap[T]["data"];
+        case "countdown":
+          return STARTING_TIME as SudokuCacheMap[T]["data"];
+        case "is_winner":
+          return null as SudokuCacheMap[T]["data"];
+        case "game": {
+          const board = generateSudokuBoard(difficulty);
+          cache({ key: "game", data: board });
+          return board as SudokuCacheMap[T]["data"];
+        }
+        default:
+          return "";
+      }
+    }
+  };
+
+  const cache = ({ key, data }: SudokuCacheMap[keyof SudokuCacheMap]) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch (error) {
+      console.error(`Error caching key ${key}`, error);
     }
   };
 
   return {
-    getCachedMistakes,
-    getCachedGame,
-    getCachedInvalid,
-    getCachedAdded,
-    clearCache,
+    getCached,
+    cache,
   };
 };
 

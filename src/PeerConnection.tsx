@@ -1,8 +1,8 @@
 import { useRef, useState } from "react";
 import usePeer from "./hooks/usePeer";
-import useStore from "./state/peerStore";
+import useStore from "./store/peerStore";
 import { useNavigate } from "react-router-dom";
-import useSudokuStore from "./state/sudokuStore";
+import useSudokuStore from "./store/sudokuStore";
 
 const PeerConnection = () => {
   const inputRef = useRef<HTMLInputElement>(null);

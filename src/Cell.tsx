@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import { twMerge } from "tailwind-merge";
 import { TCell } from "./types/types";
-import useSudokuStore from "./state/sudokuStore";
+import useSudokuStore from "./store/sudokuStore";
 
 interface FieldProps {
   colId: number;

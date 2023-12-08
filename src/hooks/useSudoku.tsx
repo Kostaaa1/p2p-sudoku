@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
-import usePeerStore from "../state/peerStore";
+import usePeerStore from "../store/peerStore";
 import toast from "react-hot-toast";
-import useSudokuStore from "../state/sudokuStore";
+import useSudokuStore from "../store/sudokuStore";
 
 const useSudoku = () => {
   const { setIsToastRan } = usePeerStore();

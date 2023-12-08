@@ -3,18 +3,19 @@ import Sudoku from "./Sudoku";
 import Modes from "./Modes";
 import PeerConnection from "./PeerConnection";
 import { useEffect } from "react";
-import usePeerStore from "./state/peerStore";
+import usePeerStore from "./store/peerStore";
 import { toastMessageConstructor } from "./utils/utils";
 import { PeerResponse } from "./types/types";
-import useSudokuStore from "./state/sudokuStore";
-import useCountdownStore from "./state/countdownStore";
+import useSudokuStore from "./store/sudokuStore";
+import useCountdownStore from "./store/countdownStore";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
   const { setIsToastRan, peer, setConnection, setPeerId, setIsOpponentReady } =
     usePeerStore();
-  const { resetGame, setSudoku, setIsWinner } = useSudokuStore();
+  const { resetGame, setSudoku, setIsWinner, isWinner } = useSudokuStore();
   const { setIsCountdownActive, updateCountdown } = useCountdownStore();
 
   useEffect(() => {
@@ -61,11 +62,29 @@ function App() {
   }, [peer]);
 
   return (
-    <Routes location={location} key={location.pathname}>
-      <Route path="/" element={<Modes />} />
-      <Route path="/sudoku/peer-connect" element={<PeerConnection />} />
-      <Route path="/sudoku" element={<Sudoku />} />
-    </Routes>
+    <>
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<Modes />} />
+        <Route path="/sudoku/peer-connect" element={<PeerConnection />} />
+        <Route path="/sudoku" element={<Sudoku />} />
+      </Routes>
+      <Toaster
+        position="top-center"
+        reverseOrder={false}
+        gutter={8}
+        containerClassName="width: 200px"
+        containerStyle={{}}
+        toastOptions={{
+          duration: 5000,
+          style: {
+            background: !isWinner ? "#ef4443" : "#00ba0fac",
+            fontWeight: "bold",
+            color: "#fff",
+            maxWidth: "100%",
+          },
+        }}
+      />
+    </>
   );
 }
 

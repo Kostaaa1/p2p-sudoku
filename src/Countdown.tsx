@@ -1,11 +1,10 @@
 import { useEffect } from "react";
 import { twMerge } from "tailwind-merge";
-import usePeerStore from "./state/peerStore";
+import usePeerStore from "./store/peerStore";
 import { DataConnection } from "peerjs";
-import useSudokuStore from "./state/sudokuStore";
-import useCountdownStore from "./state/countdownStore";
+import useSudokuStore from "./store/sudokuStore";
+import useCountdownStore from "./store/countdownStore";
 import toast from "react-hot-toast";
-import { END_TIME } from "./state/constants";
 
 const Countdown = () => {
   const { isWinner, setIsWinner, resetGame } = useSudokuStore();
@@ -24,7 +23,7 @@ const Countdown = () => {
   };
 
   useEffect(() => {
-    if (!isCountdownActive || isWinner !== null || !connection) return;
+    if (!isCountdownActive || isWinner !== null) return;
 
     let start = parseInt(time.split(":")[0]) * 60;
     const seconds = parseInt(time.split(":")[1]);
@@ -69,7 +68,7 @@ const Countdown = () => {
       <p
         className={twMerge(
           "underline",
-          time === END_TIME && "animate-bounce text-red-500",
+          time === "00:00" && "animate-bounce text-red-500",
           isCountdownActive && "text-green-600",
         )}
       >

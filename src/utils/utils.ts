@@ -1,7 +1,7 @@
 import toast from "react-hot-toast";
 import { SudokuCacheMap, SudokuCacheMapKeys } from "../types/types";
 import { generateSudokuBoard } from "./generateSudoku";
-import { STARTING_TIME } from "../state/constants";
+// import { STARTING_TIME } from "../store/constants";
 
 // Need to add sudoku generator and sudoku solver, it is not easy. I need to understand it.
 export const getCached = <T extends SudokuCacheMapKeys>(

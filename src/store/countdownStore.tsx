@@ -7,9 +7,13 @@ type TStore = {
   time: string;
   setTime: (time: string) => void;
   updateCountdown: (time: number) => void;
+  startingTime: string | null;
+  setStartingTime: (time: string) => void;
 };
 
 const useCountdownStore = create<TStore>((set) => ({
+  startingTime: null,
+  setStartingTime: (time: string) => set({ startingTime: `${time}:00` }),
   updateCountdown: (time: number) => {
     const minutes = Math.floor(time / 60);
     const remainingSeconds = time % 60;

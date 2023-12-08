@@ -1,8 +1,8 @@
 import { create } from "zustand";
-import { TCell } from "../types/types";
+import { DifficultySet, TCell } from "../types/types";
 import { cache, getCached } from "../utils/utils";
 import useCountdownStore from "./countdownStore";
-import { STARTING_TIME } from "./constants";
+// import { STARTING_TIME } from "./constants";
 import { generateSudokuBoard } from "../utils/generateSudoku";
 import usePeerStore from "./peerStore";
 
@@ -23,31 +23,48 @@ type TUseSudokuStore = {
   resetMistakes: () => void;
   INIT_INVALID_CELLS_STRING: string | null;
   resetGame: () => void;
+  difficulty: DifficultySet["data"] | null;
+  setDifficulty: (val: DifficultySet["data"]) => void;
 };
 
 const useSudokuStore = create<TUseSudokuStore>((set) => ({
+  difficulty: null,
+  setDifficulty: (difficulty: DifficultySet["data"]) => set({ difficulty }),
   INIT_INVALID_CELLS_STRING: localStorage.getItem("invalid"),
   resetGame: () => {
     localStorage.clear();
-    const board = generateSudokuBoard();
 
-    const { setTime, setIsCountdownActive } = useCountdownStore.getState();
+    const { startingTime, setTime, setIsCountdownActive } =
+      useCountdownStore.getState();
     const { setIsOpponentReady, setIsToastRan } = usePeerStore.getState();
 
     setIsToastRan(false);
-    setTime(STARTING_TIME);
     setIsCountdownActive(true);
     setIsOpponentReady(false);
-    cache({ key: "countdown", data: STARTING_TIME });
 
-    return set((state) => ({
-      ...state,
-      sudoku: board,
-      isWinner: null,
-      invalidCells: [],
-      addedCells: [],
-      mistakes: 0,
-    }));
+    if (startingTime) {
+      setTime(startingTime);
+      cache({ key: "countdown", data: startingTime });
+    }
+
+    set((state) => {
+      const currentDifficulty = state.difficulty;
+      if (currentDifficulty) {
+        const board = generateSudokuBoard(currentDifficulty);
+        cache({key: "game", data: board})
+
+        return {
+          ...state,
+          sudoku: board,
+          isWinner: null,
+          invalidCells: [],
+          addedCells: [],
+          mistakes: 0,
+        };
+      } else {
+        return state;
+      }
+    });
   },
   sudoku: getCached("game"),
   setSudoku: (sudoku: string[][]) =>

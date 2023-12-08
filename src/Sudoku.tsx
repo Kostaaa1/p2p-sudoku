@@ -1,15 +1,14 @@
 import { useEffect, useRef } from "react";
-import { Toaster } from "react-hot-toast";
 import useSudoku from "./hooks/useSudoku";
 import Countdown from "./Countdown";
 import Cell from "./Cell";
 import Modal from "./Modal";
 import booPath from "./assets/boo.mp3";
 import hornPath from "./assets/horn.mp3";
-import usePeerStore from "./state/peerStore";
+import usePeerStore from "./store/peerStore";
 import { toastMessageConstructor } from "./utils/utils";
-import useSudokuStore from "./state/sudokuStore";
-import useCountdownStore from "./state/countdownStore";
+import useSudokuStore from "./store/sudokuStore";
+import useCountdownStore from "./store/countdownStore";
 
 function Sudoku() {
   const booRef = useRef<HTMLAudioElement>(null);
@@ -170,22 +169,6 @@ function Sudoku() {
         <source src={hornPath} type="audio/mp3" />
       </audio>
       {isWinner !== null && <Modal mistakes={mistakes} />}
-      <Toaster
-        position="top-center"
-        reverseOrder={false}
-        gutter={8}
-        containerClassName="width: 200px"
-        containerStyle={{}}
-        toastOptions={{
-          duration: 5000,
-          style: {
-            background: !isWinner ? "#ef4443" : "#00ba0fac",
-            fontWeight: "bold",
-            color: "#fff",
-            maxWidth: "100%",
-          },
-        }}
-      />
     </div>
   );
 }

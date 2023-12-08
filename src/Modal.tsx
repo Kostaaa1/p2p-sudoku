@@ -1,7 +1,7 @@
 import { FC, useEffect, useState } from "react";
 import Confetti from "react-confetti";
-import useSudokuStore from "./state/sudokuStore";
-import usePeerStore from "./state/peerStore";
+import useSudokuStore from "./store/sudokuStore";
+import usePeerStore from "./store/peerStore";
 import { twMerge } from "tailwind-merge";
 import { IconLoaderQuarter } from "@tabler/icons-react";
 
