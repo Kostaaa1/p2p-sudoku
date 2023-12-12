@@ -4,15 +4,17 @@ import useSudokuStore from "./store/sudokuStore";
 import usePeerStore from "./store/peerStore";
 import { twMerge } from "tailwind-merge";
 import { IconLoaderQuarter } from "@tabler/icons-react";
+import useSudoku from "./hooks/useSudoku";
 
 interface ModalProps {
   mistakes: number;
 }
 
 const Modal: FC<ModalProps> = ({ mistakes }) => {
-  const { isWinner, resetGame } = useSudokuStore();
+  const { isWinner } = useSudokuStore();
   const { connection, isOpponentReady } = usePeerStore();
   const [isClicked, setIsClicked] = useState<boolean>(false);
+  const { resetGame } = useSudoku();
 
   const playAgain = () => {
     setIsClicked(true);
@@ -25,9 +27,7 @@ const Modal: FC<ModalProps> = ({ mistakes }) => {
   };
 
   useEffect(() => {
-    if (isClicked && isOpponentReady && connection) {
-      resetGame();
-    }
+    if (isClicked && isOpponentReady && connection) resetGame();
   }, [connection, isClicked, isOpponentReady]);
 
   return (

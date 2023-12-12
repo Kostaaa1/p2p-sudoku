@@ -109,20 +109,13 @@ function solveSudoku(grid: string[][]) {
 
 function createPuzzle(grid: string[][], difficulty: DifficultySet["data"]) {
   function removeNumbers(difficultyLevel: DifficultySet["data"]) {
-    let removalCount;
-    switch (difficultyLevel) {
-      case "Easy":
-        removalCount = 40;
-        break;
-      case "Medium":
-        removalCount = 50;
-        break;
-      case "Hard":
-        removalCount = 70;
-        break;
-      default:
-        removalCount = 70;
-    }
+    const data = {
+      Easy: 50,
+      Medium: 60,
+      Hard: 70,
+    };
+
+    const removalCount = data[difficultyLevel];
 
     for (let i = 0; i < removalCount; i++) {
       const row = Math.floor(Math.random() * 9);

@@ -23,9 +23,9 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  place-items: center;
   min-height: 100vh;
   background-color: rgba(236, 235, 235, 0.784);
+  overflow: hidden;
 }
 
 button {

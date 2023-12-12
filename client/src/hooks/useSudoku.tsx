@@ -2,9 +2,13 @@ import { useEffect, useMemo } from "react";
 import usePeerStore from "../store/peerStore";
 import toast from "react-hot-toast";
 import useSudokuStore from "../store/sudokuStore";
+import { TParsedGameCache } from "../types/types";
+import useCountdownStore from "../store/countdownStore";
+import { generateSudokuBoard } from "../utils/generateSudoku";
+import { countdownSet } from "../store/constants";
+import { cacheMainGame } from "../utils/utils";
 
 const useSudoku = () => {
-  const { setIsToastRan } = usePeerStore();
   const {
     setSudoku,
     sudoku,
@@ -15,9 +19,42 @@ const useSudoku = () => {
     focusedCell,
     isWinner,
     addInvalidCell,
-    resetGame,
     setFocusedCell,
+    setIsWinner,
+    setMistakes,
+    difficulty,
+    mistakes,
+    setInitInvalidCellsLength,
   } = useSudokuStore();
+  const { setIsToastRan, setIsOpponentReady } = usePeerStore();
+  const { setIsCountdownActive, setTime, time } = useCountdownStore();
+
+  const resetGame = (): TParsedGameCache | undefined => {
+    if (!difficulty) return;
+    localStorage.clear();
+    const board = generateSudokuBoard(difficulty);
+
+    setIsToastRan(false);
+    setIsCountdownActive(true);
+    setIsOpponentReady(false);
+    setSudoku(board);
+    setIsWinner(null);
+    setMistakes(0);
+    setAddedCells([]);
+    setInvalidCells([]);
+    setTime(countdownSet[difficulty]);
+
+    const data: TParsedGameCache = {
+      sudoku: board,
+      addedCells: [],
+      invalidCells: [],
+      isWinner: null,
+      mistakes: 0,
+      time: countdownSet[difficulty],
+    };
+
+    return data;
+  };
 
   const toastMessageConstructor = ({
     winner,
@@ -34,6 +71,7 @@ const useSudoku = () => {
   };
 
   const deleteFocusedCell = () => {
+    if (!focusedCell) return;
     const { col, row, value } = focusedCell;
     setInvalidCells(invalidCells?.filter((x) => x.value !== value));
     setAddedCells(
@@ -44,7 +82,7 @@ const useSudoku = () => {
   };
 
   const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (isWinner !== null) return;
+    if (isWinner !== null || !focusedCell) return;
 
     const { value } = e.target;
 
@@ -81,7 +119,7 @@ const useSudoku = () => {
   }, [sudoku]);
 
   useEffect(() => {
-    if (isWinner !== null) return;
+    if (isWinner !== null || !focusedCell) return;
 
     if (isLastCellEmpty || allCellsFilled) {
       setInvalidCells([...invalidCells]);
@@ -132,13 +170,63 @@ const useSudoku = () => {
     }
   }, [sudoku]);
 
+  // From usePersist storage:
+  const setAll = (data: string) => {
+    const parsed: TParsedGameCache = JSON.parse(data);
+    const { time, addedCells, invalidCells, isWinner, mistakes, sudoku } =
+      parsed;
+
+    if (time) setTime(time);
+    setInitInvalidCellsLength(invalidCells.length);
+    setFocusedCell({ row: 0, col: 0, value: sudoku[0][0] });
+    setAddedCells(addedCells);
+    setInvalidCells(invalidCells);
+    setSudoku(sudoku);
+    setMistakes(mistakes);
+    setIsWinner(isWinner);
+  };
+
+  useEffect(() => {
+    const func = () => {
+      if (!sudoku || !difficulty || addedCells.length === 0) return;
+
+      const data: TParsedGameCache = {
+        addedCells,
+        invalidCells,
+        isWinner,
+        mistakes,
+        sudoku,
+        time,
+      };
+
+      console.log("beforeunload called", data);
+      cacheMainGame(data);
+      setAll(JSON.stringify(data));
+    };
+
+    window.addEventListener("beforeunload", func);
+    return () => {
+      window.removeEventListener("beforeunload", func);
+    };
+  }, [addedCells, difficulty, invalidCells, time, sudoku, mistakes, isWinner]);
+
+  useEffect(() => {
+    const game = localStorage.getItem("main_game");
+    if (game) {
+      setAll(game);
+      return;
+    }
+
+    if (!difficulty) return;
+    const gameData = resetGame();
+    setAll(JSON.stringify(gameData));
+  }, [difficulty]);
+
   return {
     handleChangeInput,
     resetGame,
     allCellsFilled,
     toastMessageConstructor,
-    // inputRefs,
-    // focusInput,
   };
 };
 

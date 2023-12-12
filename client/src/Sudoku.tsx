@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 import useSudoku from "./hooks/useSudoku";
-import Countdown from "./Countdown";
 import Cell from "./Cell";
 import Modal from "./Modal";
 import booPath from "./assets/boo.mp3";
@@ -9,6 +8,7 @@ import usePeerStore from "./store/peerStore";
 import { toastMessageConstructor } from "./utils/utils";
 import useSudokuStore from "./store/sudokuStore";
 import useCountdownStore from "./store/countdownStore";
+import Countdown from "./Countdown";
 
 function Sudoku() {
   const booRef = useRef<HTMLAudioElement>(null);
@@ -23,7 +23,7 @@ function Sudoku() {
     sudoku,
     setIsWinner,
     isWinner,
-    INIT_INVALID_CELLS_STRING,
+    initInvalidCellsLength,
   } = useSudokuStore();
   const { allCellsFilled } = useSudoku();
 
@@ -42,11 +42,11 @@ function Sudoku() {
       mistakes < 5 &&
       invalidCells &&
       invalidCells.length > 0 &&
-      INIT_INVALID_CELLS_STRING !== JSON.stringify(invalidCells)
+      initInvalidCellsLength !== invalidCells.length
     ) {
       incrementMistakes();
     }
-  }, [invalidCells]);
+  }, [invalidCells, initInvalidCellsLength]);
 
   useEffect(() => {
     if (mistakes === 5) {
@@ -116,13 +116,14 @@ function Sudoku() {
   }, [isToastRan, isWinner, mistakes]);
 
   return (
-    <div className="flex items-center font-semibold text-blue-600">
+    <div className="flex items-center justify-center font-semibold text-blue-600">
       <div className="h-full px-4 text-center text-3xl font-bold text-blue-600">
         S<br></br>U<br></br>D<br></br>O<br></br>K<br></br>U<br></br>
       </div>
       <div>
         <Countdown />
-        <div className="flex h-[540px] w-[540px] flex-col items-center justify-center overflow-hidden border-2 border-blue-800">
+        <div className="relative flex h-[540px] w-[540px] flex-col items-center justify-center overflow-hidden border-2 border-blue-800">
+          {/* <div className="absolute top-0 h-full w-full border border-gray-100 bg-gray-800 bg-opacity-10 bg-clip-padding backdrop-blur-sm backdrop-filter"></div> */}
           {sudoku?.map((rowVal, rowId) => (
             <div key={rowId} className="flex h-full w-full">
               {rowVal.map((colVal, colId) => (

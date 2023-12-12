@@ -9,18 +9,19 @@ import { PeerResponse } from "./types/types";
 import useSudokuStore from "./store/sudokuStore";
 import useCountdownStore from "./store/countdownStore";
 import { Toaster } from "react-hot-toast";
+import useSudoku from "./hooks/useSudoku";
 
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
   const { setIsToastRan, peer, setConnection, setPeerId, setIsOpponentReady } =
     usePeerStore();
-  const { resetGame, setSudoku, setIsWinner, isWinner } = useSudokuStore();
+  const { setSudoku, setIsWinner, isWinner } = useSudokuStore();
   const { setIsCountdownActive, updateCountdown } = useCountdownStore();
+  const { resetGame } = useSudoku();
 
   useEffect(() => {
     peer.on("open", (id) => {
-      console.log("this is my peer id on OPEN:", id);
       setPeerId(id);
     });
 

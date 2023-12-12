@@ -7,7 +7,7 @@ import React, {
   useRef,
 } from "react";
 import { twMerge } from "tailwind-merge";
-import { TCell } from "./types/types";
+import { ArrowFunctions, TCell } from "./types/types";
 import useSudokuStore from "./store/sudokuStore";
 
 interface FieldProps {
@@ -63,20 +63,21 @@ const Cell: FC<FieldProps> = memo(({ colId, rowId, colVal }) => {
 
   const highlightRow = useCallback(
     (rowId: number) => {
-      return rowId === focusedCell.row;
+      return rowId === focusedCell?.row;
     },
     [focusedCell],
   );
 
   const highlightCol = useCallback(
     (colId: number) => {
-      return colId === focusedCell.col;
+      return colId === focusedCell?.col;
     },
     [focusedCell],
   );
 
   const highlight3x3Box = useCallback(
     (rowId: number, colId: number) => {
+      if (!focusedCell) return;
       return (
         Math.floor(colId / 3) === Math.floor(focusedCell.col / 3) &&
         Math.floor(rowId / 3) === Math.floor(focusedCell.row / 3)
@@ -87,7 +88,7 @@ const Cell: FC<FieldProps> = memo(({ colId, rowId, colVal }) => {
 
   const isFieldClicked = useMemo(() => {
     return (rowId: number, colId: number) => {
-      return focusedCell.col === colId && focusedCell.row === rowId;
+      return focusedCell?.col === colId && focusedCell.row === rowId;
     };
   }, [focusedCell]);
 
@@ -100,7 +101,7 @@ const Cell: FC<FieldProps> = memo(({ colId, rowId, colVal }) => {
     rowId: number;
     newValue: string;
   }) => {
-    if (isWinner !== null) return;
+    if (isWinner !== null || !focusedCell) return;
 
     const { col, row, value } = focusedCell;
     if (value === newValue && row === rowId && col === colId) return;
@@ -114,6 +115,7 @@ const Cell: FC<FieldProps> = memo(({ colId, rowId, colVal }) => {
   };
 
   const deleteFocusedCell = () => {
+    if (!focusedCell) return;
     const { col, row, value } = focusedCell;
     setInvalidCells(invalidCells?.filter((x) => x.value !== value));
     setAddedCells(
@@ -124,7 +126,7 @@ const Cell: FC<FieldProps> = memo(({ colId, rowId, colVal }) => {
   };
 
   const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (isWinner !== null) return;
+    if (isWinner !== null || !focusedCell || !sudoku) return;
     const { value } = e.target;
 
     const { col: colId, row: rowId } = focusedCell;
@@ -150,6 +152,7 @@ const Cell: FC<FieldProps> = memo(({ colId, rowId, colVal }) => {
   };
 
   const focusInput = useCallback(() => {
+    if (!focusedCell) return;
     const { row, col } = focusedCell;
     const inputRef = inputRefs.current[row * 9 + col];
 
@@ -161,60 +164,59 @@ const Cell: FC<FieldProps> = memo(({ colId, rowId, colVal }) => {
 
   // Keyboard Controls
   useEffect(() => {
-    if (isWinner === null) {
+    if (isWinner === null && sudoku && focusedCell) {
+      const { col, row } = focusedCell;
+
+      const arrowFunctions: ArrowFunctions = {
+        ArrowUp: () => {
+          if (row > 0) {
+            setFocusedCell({
+              row: row - 1,
+              col: col,
+              value: sudoku[row - 1][col],
+            });
+          }
+        },
+        ArrowDown: () => {
+          if (row < 8) {
+            setFocusedCell({
+              row: row + 1,
+              col: col,
+              value: sudoku[row + 1][col],
+            });
+          }
+        },
+        ArrowLeft: () => {
+          if (col > 0) {
+            setFocusedCell({
+              row: row,
+              col: col - 1,
+              value: sudoku[row][col - 1],
+            });
+          }
+        },
+        ArrowRight: () => {
+          if (col < 8) {
+            setFocusedCell({
+              row: row,
+              col: col + 1,
+              value: sudoku[row][col + 1],
+            });
+          }
+        },
+      };
+
       const click = (e: KeyboardEvent) => {
-        const arrows = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
-
         const { key } = e;
-        if (!arrows.includes(key)) return;
-
-        const { col, row } = focusedCell;
-        e.preventDefault();
-
-        switch (key) {
-          case "ArrowUp":
-            if (row > 0) {
-              setFocusedCell({
-                row: row - 1,
-                col,
-                value: sudoku[row - 1][col],
-              });
-            }
-            break;
-          case "ArrowDown":
-            if (row < 8) {
-              setFocusedCell({
-                row: row + 1,
-                col,
-                value: sudoku[row + 1][col],
-              });
-            }
-            break;
-          case "ArrowLeft":
-            if (col > 0) {
-              setFocusedCell({
-                row,
-                col: col - 1,
-                value: sudoku[row][col - 1],
-              });
-            }
-            break;
-          case "ArrowRight":
-            if (col < 8) {
-              setFocusedCell({
-                row,
-                col: col + 1,
-                value: sudoku[row][col + 1],
-              });
-            }
-            break;
-          default:
-            break;
+        if (arrowFunctions[key]) {
+          e.preventDefault();
+          arrowFunctions[key]();
         }
       };
-      focusInput();
-      document.addEventListener("keydown", click);
 
+      focusInput();
+
+      document.addEventListener("keydown", click);
       return () => {
         document.removeEventListener("keydown", click);
       };
@@ -257,7 +259,8 @@ const Cell: FC<FieldProps> = memo(({ colId, rowId, colVal }) => {
             value: colVal,
           }) &&
           "text-red-700",
-        parseInt(focusedCell.value) === parseInt(colVal) &&
+        focusedCell &&
+          parseInt(focusedCell.value) === parseInt(colVal) &&
           "bg-blue-900 bg-opacity-25",
         isIncluded(invalidCells, {
           row: rowId,

@@ -25,22 +25,21 @@ export type PeerResponse =
       data: string;
     };
 
-export type SudokuCacheMap = {
-  countdown: { key: "countdown"; data: string };
-  game: { key: "game"; data: string[][] };
-  invalid: { key: "invalid"; data: TCell[] };
-  mistakes: { key: "mistakes"; data: number };
-  added: { key: "added"; data: TCell[] };
-  is_winner: { key: "is_winner"; data: boolean | null };
-};
-
-export type SudokuCacheMapKeys = keyof SudokuCacheMap;
-
 export type DifficultySet = {
   type: "difficulty";
   id: number;
   data: "Easy" | "Medium" | "Hard";
   clicked: boolean;
+};
+
+export type TParsedGameCache = {
+  sudoku: string[][];
+  invalidCells: TCell[];
+  addedCells: TCell[];
+  mistakes: number;
+  isWinner: boolean | null;
+  time: string | null;
+  // difficulty: DifficultySet["data"];
 };
 
 export type TimeLimitSet = {
@@ -49,5 +48,7 @@ export type TimeLimitSet = {
   data: "12" | "15" | "20";
   clicked: boolean;
 };
-
 export type DataSet = DifficultySet | TimeLimitSet;
+export type ArrowFunctions = {
+  [key: string]: () => void;
+};

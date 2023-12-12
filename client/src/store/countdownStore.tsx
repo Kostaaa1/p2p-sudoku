@@ -1,19 +1,18 @@
 import { create } from "zustand";
-import { cache, getCached } from "../utils/utils";
 
 type TStore = {
   isCountdownActive: boolean;
   setIsCountdownActive: (val: boolean) => void;
-  time: string;
+  time: string | null;
   setTime: (time: string) => void;
   updateCountdown: (time: number) => void;
   startingTime: string | null;
-  setStartingTime: (time: string) => void;
 };
 
+const startingTime = localStorage.getItem("countdown");
+
 const useCountdownStore = create<TStore>((set) => ({
-  startingTime: null,
-  setStartingTime: (time: string) => set({ startingTime: `${time}:00` }),
+  startingTime,
   updateCountdown: (time: number) => {
     const minutes = Math.floor(time / 60);
     const remainingSeconds = time % 60;
@@ -21,14 +20,11 @@ const useCountdownStore = create<TStore>((set) => ({
     const parsedTime = `${String(minutes).padStart(2, "0")}:${String(
       remainingSeconds,
     ).padStart(2, "0")}`;
-    cache({ key: "countdown", data: parsedTime });
 
     set({ time: parsedTime });
   },
-  time: getCached("countdown"),
-  setTime: (time: string) => {
-    set({ time });
-  },
+  time: null,
+  setTime: (time: string) => set({ time }),
   isCountdownActive: false,
   setIsCountdownActive: (isCountdownActive: boolean) =>
     set((state) => ({

@@ -8,7 +8,7 @@ import { generateSudokuBoard } from "../utils/generateSudoku";
 
 const usePeer = () => {
   const navigate = useNavigate();
-  const { setIsWinner, setSudoku } = useSudokuStore();
+  const { setIsWinner, setSudoku, difficulty } = useSudokuStore();
   const { setIsToastRan, peer, setConnection, setIsOpponentReady } =
     usePeerStore();
   const { setIsCountdownActive, updateCountdown } = useCountdownStore();
@@ -20,11 +20,13 @@ const usePeer = () => {
 
     if (conn) {
       conn.on("open", () => {
-        const board = generateSudokuBoard();
-        setSudoku(board);
+        if (difficulty) {
+          const board = generateSudokuBoard(difficulty);
+          setSudoku(board);
 
-        conn.send({ type: "sudoku", data: board });
-        navigate("/sudoku");
+          conn.send({ type: "sudoku", data: board });
+          navigate("/sudoku");
+        }
       });
 
       conn.on("data", (res) => {
