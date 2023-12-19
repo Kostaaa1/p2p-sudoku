@@ -5,11 +5,8 @@ type TPeerStore = {
   peerId: string;
   setPeerId: (id: string) => void;
   connection: DataConnection | null;
-  setConnection: (val: DataConnection) => void;
+  setConnection: (val: DataConnection | null) => void;
   peer: Peer;
-  isToastRan: boolean;
-  setIsToastRan: (val: boolean) => void;
-  // const [isOpponentReady, setIsOpponentReady] = useState<boolean>(false);
   isOpponentReady: boolean;
   setIsOpponentReady: (isReady: boolean) => void;
 };
@@ -23,16 +20,10 @@ const usePeerStore = create<TPeerStore>((set) => ({
       peerId,
     })),
   connection: null,
-  setConnection: (connection: DataConnection) =>
+  setConnection: (connection: DataConnection | null) =>
     set((state) => ({
       ...state,
       connection: connection,
-    })),
-  isToastRan: false,
-  setIsToastRan: (isToastRan: boolean) =>
-    set((state) => ({
-      ...state,
-      isToastRan,
     })),
   isOpponentReady: false,
   setIsOpponentReady: (isOpponentReady: boolean) => set({ isOpponentReady }),

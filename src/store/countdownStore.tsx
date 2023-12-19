@@ -1,4 +1,7 @@
 import { create } from "zustand";
+import { getCached } from "../utils/utils";
+import useSudokuStore from "./sudokuStore";
+import { countdownSet } from "./constants";
 
 type TStore = {
   isCountdownActive: boolean;
@@ -11,6 +14,8 @@ type TStore = {
 
 const startingTime = localStorage.getItem("countdown");
 
+const difficulty = useSudokuStore.getState().difficulty;
+
 const useCountdownStore = create<TStore>((set) => ({
   startingTime,
   updateCountdown: (time: number) => {
@@ -18,14 +23,17 @@ const useCountdownStore = create<TStore>((set) => ({
     const remainingSeconds = time % 60;
 
     const parsedTime = `${String(minutes).padStart(2, "0")}:${String(
-      remainingSeconds,
+      remainingSeconds
     ).padStart(2, "0")}`;
 
     set({ time: parsedTime });
   },
-  time: null,
+  time:
+    difficulty && !getCached("time")
+      ? countdownSet[difficulty]
+      : getCached("time"),
   setTime: (time: string) => set({ time }),
-  isCountdownActive: false,
+  isCountdownActive: true,
   setIsCountdownActive: (isCountdownActive: boolean) =>
     set((state) => ({
       ...state,
