@@ -1,14 +1,17 @@
-import { useEffect } from "react";
+import { FC, useEffect } from "react";
 import { twMerge } from "tailwind-merge";
 import usePeerStore from "../store/peerStore";
 import { DataConnection } from "peerjs";
 import useSudokuStore from "../store/sudokuStore";
 import useCountdownStore from "../store/countdownStore";
 import toast from "react-hot-toast";
-import useSudoku from "../hooks/useSudoku";
+import { DifficultySet, TParsedGameCache } from "../types/types";
 
-const Countdown = () => {
-  const { startNewGame } = useSudoku();
+type TCountdownProps = {
+  startNewGame: (difficulty: DifficultySet["data"]) => TParsedGameCache;
+};
+
+const Countdown: FC<TCountdownProps> = ({ startNewGame }) => {
   const { isWinner, setIsWinner, difficulty } = useSudokuStore();
   const { time, isCountdownActive, updateCountdown } = useCountdownStore();
   const { connection } = usePeerStore();

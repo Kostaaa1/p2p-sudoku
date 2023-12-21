@@ -1,10 +1,6 @@
 import { create } from "zustand";
 import { DifficultySet, TCell, TFocusedCell } from "../types/types";
-import {
-  getCached,
-  getCachedDifficulty,
-  isCellIncludedInStack,
-} from "../utils/utils";
+import { getCached, getCachedDifficulty, isObjectEqual } from "../utils/utils";
 
 type TUseSudokuStore = {
   sudoku: string[][] | null;
@@ -14,9 +10,11 @@ type TUseSudokuStore = {
   invalidCells: TCell[];
   setInvalidCells: (cell: TCell[]) => void;
   addInvalidCell: (cell: TCell) => void;
-  // removeInvalidCell: (cell: TCell) => void;
-  addedCells: TCell[];
-  setAddedCells: (cell: TCell[]) => void;
+  removeInvalidCell: (cell: TCell) => void;
+  insertedCells: TCell[];
+  setInsertedCells: (cell: TCell[]) => void;
+  addInsertedCell: (cell: TCell) => void;
+  removeInsertedCell: (cell: TCell) => void;
   isWinner: null | boolean;
   setIsWinner: (isWinner: boolean | null) => void;
   mistakes: number;
@@ -29,6 +27,8 @@ type TUseSudokuStore = {
   setInitInvalidCellsLength: (val: number | null) => void;
   isToastRan: boolean;
   setIsToastRan: (val: boolean) => void;
+  lastInsertedCell: TCell | null;
+  setLastInsertedCell: (val: TCell) => void;
 };
 
 const emptySudoku = Array.from({ length: 9 }, () =>
@@ -36,10 +36,11 @@ const emptySudoku = Array.from({ length: 9 }, () =>
 );
 
 const useSudokuStore = create<TUseSudokuStore>((set) => ({
+  lastInsertedCell: null,
+  setLastInsertedCell: (lastInsertedCell: TCell) => set({ lastInsertedCell }),
   difficulty: getCachedDifficulty(),
   setDifficulty: (difficulty: DifficultySet["data"] | null) => {
-    if (difficulty)
-      localStorage.setItem("difficulty", JSON.stringify(difficulty));
+    if (difficulty) localStorage.setItem("difficulty", JSON.stringify(difficulty));
     set({ difficulty });
   },
   initInvalidCellsLength: null,
@@ -49,40 +50,38 @@ const useSudokuStore = create<TUseSudokuStore>((set) => ({
   setSudoku: (sudoku: string[][]) => set({ sudoku }),
   focusedCell: { col: 0, row: 0 },
   setFocusedCell: (focusedCell: TCell) => set({ focusedCell }),
+  // Invalid cells:
   invalidCells: getCached("invalidCells") || [],
   setInvalidCells: (cells: TCell[]) => set({ invalidCells: cells }),
   addInvalidCell: (data: TCell) =>
     set((state) => {
       const condition = !state.invalidCells.some(
-        (x) =>
-          x.col === data.col && x.row === data.row && x.value === data.value
+        (x) => x.col === data.col && x.row === data.row && x.value === data.value
       );
-      return condition
-        ? { invalidCells: [data, ...state.invalidCells] }
-        : state;
+      return condition ? { invalidCells: [data, ...state.invalidCells] } : state;
     }),
-  // removeInvalidCell: (data: TCell) =>
-  //   set((state) => {
-  //     console.log("removed called", data);
-  //     const { invalidCells } = state;
-  //     const { col, row, value } = data;
-  //     return invalidCells.length > 0
-  //       ? {
-  //           invalidCells: invalidCells.filter(
-  //             (x) => !(x.row === row && x.col === col && x.value === value)
-  //           ),
-  //         }
-  //       : state;
-  //   }),
-  addedCells: getCached("addedCells") || [],
-  setAddedCells: (addedCells: TCell[]) => set({ addedCells }),
+  removeInvalidCell: (cell: TCell) =>
+    set((state) => ({
+      invalidCells: state.invalidCells.filter(
+        (invCell) => !isObjectEqual(invCell, cell)
+      ),
+    })),
+  insertedCells: getCached("insertedCells") || [],
+  setInsertedCells: (insertedCells: TCell[]) => set({ insertedCells }),
+  addInsertedCell: (cell: TCell) =>
+    set((state) => ({ insertedCells: [cell, ...state.insertedCells] })),
+  removeInsertedCell: (newCell: TCell) =>
+    set((state) => ({
+      insertedCells: state.insertedCells.filter(
+        (cell) => !isObjectEqual(cell, newCell)
+      ),
+    })),
   isWinner: getCached("isWinner") || null,
   setIsWinner: (isWinner: boolean | null) => set({ isWinner }),
   mistakes: getCached("mistakes") || 0,
   setMistakes: (mistakes: number) => set({ mistakes }),
   resetMistakes: () => set({ mistakes: 0 }),
-  incrementMistakes: () =>
-    set((state) => ({ ...state, mistakes: state.mistakes + 1 })),
+  incrementMistakes: () => set((state) => ({ ...state, mistakes: state.mistakes + 1 })),
   isToastRan: false,
   setIsToastRan: (isToastRan: boolean) =>
     set((state) => ({

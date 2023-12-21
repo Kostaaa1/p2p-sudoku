@@ -1,18 +1,4 @@
-import toast from "react-hot-toast";
-import { DifficultySet, TCell, TParsedGameCache } from "../types/types";
-import { keys } from "lodash";
-
-export const toastMessageConstructor = ({
-  winner,
-  message,
-}: {
-  winner: boolean;
-  message: string;
-}) => {
-  const emoji = winner ? "🎉🎉🎉" : "😢😢😢";
-  const newMessage = `${emoji}${message}${emoji}`;
-  toast(newMessage);
-};
+import { DifficultySet, TCell, TFocusedCell, TParsedGameCache } from "../types/types";
 
 export const getCached = (key: keyof TParsedGameCache) => {
   const storedGame = localStorage.getItem("main_game");
@@ -29,7 +15,10 @@ export const isCellIncludedInStack = (stack: TCell[], cell: TCell) => {
   return stack.some((x) => x.row === row && x.col === col && x.value === value);
 };
 
-const isObjectEqual = (o1: TCell, o2: TCell): boolean => {
+export const isObjectEqual = (
+  o1: TCell | TFocusedCell,
+  o2: TCell | TFocusedCell
+): boolean => {
   const keys1 = Object.keys(o1) as (keyof TCell)[];
   const keys2 = Object.keys(o2) as (keyof TCell)[];
 

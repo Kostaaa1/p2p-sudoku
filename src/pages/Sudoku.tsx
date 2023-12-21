@@ -5,12 +5,10 @@ import Modal from "../components/Modal";
 import booPath from "../assets/boo.mp3";
 import hornPath from "../assets/horn.mp3";
 import usePeerStore from "../store/peerStore";
-import { toastMessageConstructor } from "../utils/utils";
 import useSudokuStore from "../store/sudokuStore";
 import useCountdownStore from "../store/countdownStore";
 import Countdown from "../components/Countdown";
 import DifficultyOptions from "../components/DifficultyOptions";
-import { IconLoader2 } from "@tabler/icons-react";
 
 function Sudoku() {
   const booRef = useRef<HTMLAudioElement>(null);
@@ -18,20 +16,8 @@ function Sudoku() {
 
   const { connection, peerId } = usePeerStore();
   const { isCountdownActive, setIsCountdownActive } = useCountdownStore();
-  const {
-    isToastRan,
-    mistakes,
-    incrementMistakes,
-    invalidCells,
-    sudoku,
-    setIsWinner,
-    focusedCell,
-    addedCells,
-    isWinner,
-    difficulty,
-    initInvalidCellsLength,
-  } = useSudokuStore();
-  const { allCellsFilled, handleChangeInput } = useSudoku();
+  const { isToastRan, mistakes, sudoku, setIsWinner, isWinner } = useSudokuStore();
+  const { startNewGame, toastMessageConstructor, handleChangeInput } = useSudoku();
 
   useEffect(() => {
     if (!isCountdownActive && sudoku) {
@@ -39,43 +25,20 @@ function Sudoku() {
     }
   }, [sudoku]);
 
-  useEffect(() => {
-    if (allCellsFilled && mistakes < 5 && invalidCells.length === 0) {
-      setIsWinner(true);
-    }
+  // useEffect(() => {
+  //   if (allCellsFilled && mistakes < 5 && invalidCells.length === 0) {
+  //     setIsWinner(true);
+  //   }
 
-    // if (
-    //   mistakes < 5 &&
-    //   invalidCells &&
-    //   invalidCells.length > 0 &&
-    //   initInvalidCellsLength &&
-    //   invalidCells.length !== 0 &&
-    //   initInvalidCellsLength !== invalidCells.length
-    // ) {
-    //   incrementMistakes();
-    // }
-    // console.log("initInvalidCellsLength", initInvalidCellsLength);
-    // console.log("invalidCells", invalidCells);
-    // console.log("mistakes", mistakes);
-
-    // if (
-    //   mistakes < 5 &&
-    //   initInvalidCellsLength !== null &&
-    //   invalidCells.length > initInvalidCellsLength
-    // ) {
-    //   console.log("true");
-    //   incrementMistakes();
-    // }
-
-    // if (
-    //   (initInvalidCellsLength !== invalidCells.length &&
-    //     initInvalidCellsLength &&
-    //     initInvalidCellsLength === 0) ||
-    //   (mistakes < 5 && invalidCells.length > 0)
-    // ) {
-    //   incrementMistakes();
-    // }
-  }, [invalidCells, initInvalidCellsLength]);
+  //   if (
+  //     mistakes < 5 &&
+  //     initInvalidCellsLength &&
+  //     invalidCells.length !== 0 &&
+  //     initInvalidCellsLength !== invalidCells.length
+  //   ) {
+  //     incrementMistakes();
+  //   }
+  // }, [invalidCells, initInvalidCellsLength]);
 
   useEffect(() => {
     if (mistakes === 5) {
@@ -158,7 +121,7 @@ function Sudoku() {
       <div>
         <div className="h-12 flex w-full items-center justify-between">
           <DifficultyOptions />
-          <Countdown />
+          <Countdown startNewGame={startNewGame} />
         </div>
         <div className="relative flex h-[540px] w-[540px] flex-col items-center justify-center overflow-hidden border-2 border-blue-800">
           {/* {!allCellsFilled && (

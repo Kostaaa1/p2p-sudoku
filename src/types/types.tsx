@@ -1,14 +1,9 @@
-export type TCell = {
-  row: number;
-  col: number;
-  value: string;
-};
-
 export type TFocusedCell = {
   row: number;
   col: number;
   value?: string;
 };
+export type TCell = TFocusedCell & { value: string };
 
 export type PeerResponse =
   | {
@@ -42,7 +37,7 @@ export type DifficultySet = {
 export type TParsedGameCache = {
   sudoku: string[][] | null;
   invalidCells: TCell[];
-  addedCells: TCell[];
+  insertedCells: TCell[];
   mistakes: number;
   isWinner: boolean | null;
   time: string | null;
