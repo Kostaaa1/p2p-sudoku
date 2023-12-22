@@ -11,10 +11,7 @@ const Modes = () => {
             Sudoku
           </div>
           <div className="flex w-full justify-between">
-            <button
-              onClick={() => navigate("/sudoku")}
-              className="mr-2 w-full bg-blue-600"
-            >
+            <button onClick={() => navigate("/sudoku")} className="mr-2 w-full bg-blue-600">
               Singleplayer
             </button>
             <button

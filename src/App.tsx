@@ -4,10 +4,63 @@ import Modes from "./pages/Modes";
 import PeerConnection from "./pages/PeerConnection";
 import useSudokuStore from "./store/sudokuStore";
 import { Toaster } from "react-hot-toast";
+import usePeerStore from "./store/peerStore";
+import { useEffect } from "react";
+import useSudoku from "./hooks/useSudoku";
+import { PeerResponse } from "./types/types";
+import useCountdownStore from "./store/countdownStore";
 
 function App() {
   const location = useLocation();
   const { isWinner } = useSudokuStore();
+  const navigate = useNavigate();
+
+  const { peer, setConnection, setPeerId, setIsOpponentReady } = usePeerStore();
+  const { setSudoku, setIsWinner, setIsToastRan } = useSudokuStore();
+  const { setIsCountdownActive, updateCountdown } = useCountdownStore();
+  const { resetGame, toastMessageConstructor } = useSudoku();
+
+  useEffect(() => {
+    peer.on("open", (id) => {
+      console.log("this is my peer id on OPEN:", id);
+      setPeerId(id);
+    });
+
+    peer.on("connection", (conn) => {
+      // console.log("On connection", conn, "peer: ", conn.peer);
+      setConnection(conn);
+
+      navigate("/sudoku");
+      conn.on("data", (res) => {
+        const { data, type } = res as PeerResponse;
+        if (type === "sudoku") {
+          const { board, difficulty } = data;
+
+          resetGame(difficulty);
+          setSudoku(board);
+        }
+
+        if (type === "ready") {
+          setIsOpponentReady(data);
+        }
+
+        if (type === "end_game") {
+          const { isWinner, message } = data;
+          setIsCountdownActive(false);
+          setIsWinner(isWinner);
+          toastMessageConstructor({ winner: isWinner, message });
+          setIsToastRan(true);
+        }
+
+        if (type === "countdown") {
+          updateCountdown(data);
+        }
+      });
+    });
+    return () => {
+      peer.destroy();
+    };
+  }, [peer]);
 
   return (
     <>

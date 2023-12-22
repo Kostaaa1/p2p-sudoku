@@ -28,24 +28,21 @@ type TUseSudokuStore = {
   isToastRan: boolean;
   setIsToastRan: (val: boolean) => void;
   lastInsertedCell: TCell | null;
-  setLastInsertedCell: (val: TCell) => void;
+  setLastInsertedCell: (val: TCell | null) => void;
 };
 
-const emptySudoku = Array.from({ length: 9 }, () =>
-  Array.from({ length: 9 }, () => "")
-);
+const emptySudoku = Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => ""));
 
 const useSudokuStore = create<TUseSudokuStore>((set) => ({
   lastInsertedCell: null,
-  setLastInsertedCell: (lastInsertedCell: TCell) => set({ lastInsertedCell }),
+  setLastInsertedCell: (lastInsertedCell: TCell | null) => set({ lastInsertedCell }),
   difficulty: getCachedDifficulty(),
   setDifficulty: (difficulty: DifficultySet["data"] | null) => {
     if (difficulty) localStorage.setItem("difficulty", JSON.stringify(difficulty));
     set({ difficulty });
   },
   initInvalidCellsLength: null,
-  setInitInvalidCellsLength: (val: number | null) =>
-    set({ initInvalidCellsLength: val }),
+  setInitInvalidCellsLength: (val: number | null) => set({ initInvalidCellsLength: val }),
   sudoku: getCached("sudoku") || emptySudoku,
   setSudoku: (sudoku: string[][]) => set({ sudoku }),
   focusedCell: { col: 0, row: 0 },
@@ -62,9 +59,7 @@ const useSudokuStore = create<TUseSudokuStore>((set) => ({
     }),
   removeInvalidCell: (cell: TCell) =>
     set((state) => ({
-      invalidCells: state.invalidCells.filter(
-        (invCell) => !isObjectEqual(invCell, cell)
-      ),
+      invalidCells: state.invalidCells.filter((invCell) => !isObjectEqual(invCell, cell)),
     })),
   insertedCells: getCached("insertedCells") || [],
   setInsertedCells: (insertedCells: TCell[]) => set({ insertedCells }),
@@ -72,9 +67,7 @@ const useSudokuStore = create<TUseSudokuStore>((set) => ({
     set((state) => ({ insertedCells: [cell, ...state.insertedCells] })),
   removeInsertedCell: (newCell: TCell) =>
     set((state) => ({
-      insertedCells: state.insertedCells.filter(
-        (cell) => !isObjectEqual(cell, newCell)
-      ),
+      insertedCells: state.insertedCells.filter((cell) => !isObjectEqual(cell, newCell)),
     })),
   isWinner: getCached("isWinner") || null,
   setIsWinner: (isWinner: boolean | null) => set({ isWinner }),

@@ -16,8 +16,10 @@ function Sudoku() {
 
   const { connection, peerId } = usePeerStore();
   const { isCountdownActive, setIsCountdownActive } = useCountdownStore();
-  const { isToastRan, mistakes, sudoku, setIsWinner, isWinner } = useSudokuStore();
-  const { startNewGame, toastMessageConstructor, handleChangeInput } = useSudoku();
+  const { invalidCells, isToastRan, mistakes, sudoku, setIsWinner, isWinner } =
+    useSudokuStore();
+  const { allCellsFilled, startNewGame, toastMessageConstructor, handleChangeInput } =
+    useSudoku();
 
   useEffect(() => {
     if (!isCountdownActive && sudoku) {
@@ -25,20 +27,11 @@ function Sudoku() {
     }
   }, [sudoku]);
 
-  // useEffect(() => {
-  //   if (allCellsFilled && mistakes < 5 && invalidCells.length === 0) {
-  //     setIsWinner(true);
-  //   }
-
-  //   if (
-  //     mistakes < 5 &&
-  //     initInvalidCellsLength &&
-  //     invalidCells.length !== 0 &&
-  //     initInvalidCellsLength !== invalidCells.length
-  //   ) {
-  //     incrementMistakes();
-  //   }
-  // }, [invalidCells, initInvalidCellsLength]);
+  useEffect(() => {
+    if (allCellsFilled && mistakes < 5 && invalidCells.length === 0) {
+      setIsWinner(true);
+    }
+  }, [allCellsFilled, mistakes, invalidCells]);
 
   useEffect(() => {
     if (mistakes === 5) {
@@ -135,10 +128,7 @@ function Sudoku() {
           {sudoku?.map((rowVal, rowId) => (
             <div key={rowId} className="flex h-full w-full">
               {rowVal.map((colVal, colId) => (
-                <div
-                  key={colId}
-                  className="flex h-full w-full items-center justify-center"
-                >
+                <div key={colId} className="flex h-full w-full items-center justify-center">
                   <Cell
                     colId={colId}
                     colVal={colVal}

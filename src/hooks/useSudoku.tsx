@@ -2,17 +2,16 @@ import { useEffect, useMemo } from "react";
 import usePeerStore from "../store/peerStore";
 import toast from "react-hot-toast";
 import useSudokuStore from "../store/sudokuStore";
-import { DifficultySet, TCell, TFocusedCell, TParsedGameCache } from "../types/types";
+import { DifficultySet, TCell, TParsedGameCache } from "../types/types";
 import useCountdownStore from "../store/countdownStore";
 import { countdownSet } from "../store/constants";
 import { generateSudokuBoard } from "../utils/generateSudoku";
-import { isCellIncludedInStack, isObjectEqual } from "../utils/utils";
+import { isCellIncludedInStack } from "../utils/utils";
 
 const useSudoku = () => {
   const {
     setSudoku,
     sudoku,
-
     setInvalidCells,
     invalidCells,
     focusedCell,
@@ -80,6 +79,10 @@ const useSudoku = () => {
     return sudoku?.flat().every((x) => x !== "");
   }, [sudoku]);
 
+  useEffect(() => {
+    console.log("allCellsFilled", allCellsFilled);
+  }, [allCellsFilled]);
+
   const toastMessageConstructor = ({
     winner,
     message,
@@ -94,83 +97,11 @@ const useSudoku = () => {
     setIsToastRan(true);
   };
 
-  useEffect(() => {
-    if (isLastCellEmpty || allCellsFilled) setInvalidCells([...invalidCells]);
-    if (!sudoku || isWinner !== null) return;
-    const { col, row } = focusedCell;
-    const value = sudoku?.[row][col];
+  const mutateInvalidCells = (payload: { type: "add" | "remove"; cell: TCell }) => {
+    if (!sudoku || !lastInsertedCell) return;
 
-    let shouldIncrement: boolean = false;
-
-    // Checking row
-    const rowInvalidValues = sudoku?.[row]
-      .map((cellValue, i) =>
-        cellValue !== "" && cellValue === value ? { row, col: i, value } : -1
-      )
-      .filter((i) => i !== -1) as TCell[];
-    if (rowInvalidValues.length > 1) {
-      shouldIncrement = true;
-      rowInvalidValues.forEach((cell) => {
-        addInvalidCell(cell);
-      });
-    }
-
-    // Checking column
-    const columnInvalidValues = sudoku
-      ?.map((row, i) =>
-        row[col] !== "" && row[col] === value ? { row: i, col, value } : -1
-      )
-      .filter((x) => x !== -1) as TCell[];
-    if (columnInvalidValues.length > 1) {
-      shouldIncrement = true;
-      columnInvalidValues.forEach((colCell) => addInvalidCell(colCell));
-    }
-    // Checking 3x3 Box
-    const startRow = Math.floor(row / 3) * 3;
-    const startCol = Math.floor(col / 3) * 3;
-    const gridInvalidValues: TCell[] = [];
-    for (let i = startRow; i < startRow + 3; i++) {
-      for (let j = startCol; j < startCol + 3; j++) {
-        const gridVal = sudoku?.[i][j];
-        const gridCell = { row: i, col: j, value };
-        if (gridVal !== "" && value && gridVal === value) {
-          gridInvalidValues.push(gridCell);
-        }
-      }
-    }
-    if (gridInvalidValues.length > 1) {
-      shouldIncrement = true;
-      gridInvalidValues.forEach((cell) => addInvalidCell(cell));
-    }
-
-    if (shouldIncrement) incrementMistakes();
-  }, [sudoku]);
-
-  const deleteFocusedCell = () => {
-    const { row, col, value } = focusedCell;
-    if (!value || !sudoku) return;
-
-    const cell: TCell = { row, col, value };
-    const targettedCells = invalidCells.filter(
-      (x) =>
-        x.value === value &&
-        (x.row === row ||
-          x.col === col ||
-          (Math.floor(x.row / 3) === Math.floor(row / 3) &&
-            Math.floor(x.col / 3) === Math.floor(col / 3)))
-    );
-
-    targettedCells.forEach((cell) => {
-      if (!isValid(cell)) removeInvalidCell(cell);
-    });
-
-    removeInvalidCell(cell);
-    removeInsertedCell(cell);
-  };
-
-  const isValid = (cell: TCell) => {
-    // Check if cell can be deleted.....
-    const { row, col, value } = cell;
+    const { cell, type } = payload;
+    const { col, row, value } = cell;
     const stack: TCell[] = [];
 
     // Checking row
@@ -188,10 +119,9 @@ const useSudoku = () => {
     }
     // Checking column
     const columnInvalidValues = sudoku
-      ?.map((row, i) =>
-        row[col] !== "" && row[col] === value ? { row: i, col, value } : -1
-      )
+      ?.map((row, i) => (row[col] !== "" && row[col] === value ? { row: i, col, value } : -1))
       .filter((x) => x !== -1) as TCell[];
+
     if (columnInvalidValues.length > 1) {
       columnInvalidValues.forEach((colCell) => {
         if (colCell.value === value && !isCellIncludedInStack(stack, colCell)) {
@@ -202,44 +132,67 @@ const useSudoku = () => {
     // Checking 3x3 Box
     const startRow = Math.floor(row / 3) * 3;
     const startCol = Math.floor(col / 3) * 3;
-    const gridInvalidValues = [];
+
     for (let i = startRow; i < startRow + 3; i++) {
       for (let j = startCol; j < startCol + 3; j++) {
         const gridVal = sudoku?.[i][j];
         if (gridVal !== "" && value && gridVal === value) {
-          gridInvalidValues.push({ row: i, col: j, value });
+          const gridCell = { row: i, col: j, value: gridVal };
+          if (gridVal === value && !isCellIncludedInStack(stack, gridCell)) {
+            stack.push(gridCell);
+          }
         }
       }
     }
-    if (gridInvalidValues.length > 1) {
-      gridInvalidValues.forEach((gridCell) => {
-        if (gridCell.value === value && !isCellIncludedInStack(stack, gridCell)) {
-          stack.push(gridCell);
-        }
-      });
+
+    if (type === "add" && stack.length > 1) {
+      // if (stack.length > 0) incrementMistakes();
+      stack.forEach((cell) => addInvalidCell(cell));
     }
 
-    const removedFocusedStack = stack.filter(
-      (x) => !(x.row === row && x.col === col && x.value === value)
-    );
+    if (type === "remove") {
+      const removedFocusedStack = stack.filter(
+        (x) => !(x.row === row && x.col === col && x.value === value)
+      );
+      if (removedFocusedStack.length === 1) return false;
+    }
 
-    if (removedFocusedStack.length === 1) return false;
     return true;
   };
 
-  // useEffect(() => {
-  //   if (!lastInsertedCell) return;
-  //   if (
-  //     isCellIncludedInStack(invalidCells, lastInsertedCell) &&
-  //     isCellIncludedInStack(insertedCells, lastInsertedCell)
-  //   ) {
-  //     incrementMistakes();
-  //   }
-  // }, [lastInsertedCell, insertedCells, invalidCells]);
+  useEffect(() => {
+    if (isLastCellEmpty || allCellsFilled) setInvalidCells([...invalidCells]);
+    if (!sudoku || isWinner !== null || !lastInsertedCell || lastInsertedCell.value === "")
+      return;
+
+    // mutateInvalidCells({ type: "add", cell: lastInsertedCell });
+  }, [sudoku]);
+
+  const deleteFocusedCell = () => {
+    const { row, col, value } = focusedCell;
+    if (!value || !sudoku) return;
+
+    const cell: TCell = { row, col, value };
+    removeInvalidCell(cell);
+    removeInsertedCell(cell);
+
+    const targettedCells = invalidCells.filter(
+      (x) =>
+        x.value === value &&
+        (x.row === row ||
+          x.col === col ||
+          (Math.floor(x.row / 3) === Math.floor(row / 3) &&
+            Math.floor(x.col / 3) === Math.floor(col / 3)))
+    );
+
+    targettedCells.forEach((cell) => {
+      console.log("cellremoving ", cell);
+      if (!mutateInvalidCells({ type: "remove", cell })) removeInvalidCell(cell);
+    });
+  };
 
   const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isWinner !== null) return;
-
     const { value } = e.target;
     const { row: rowId, col: colId, value: focusedValue } = focusedCell;
 
@@ -259,12 +212,12 @@ const useSudoku = () => {
       : addInsertedCell(newCell);
 
     // Update Sudoku Cell:
-    if (sudoku) {
-      const newBoard = [...sudoku];
-      newBoard[rowId][colId] = newCell.value;
-      setSudoku(newBoard);
-      setFocusedCell(newCell);
-    }
+    // if (sudoku) {
+    //   const newBoard = [...sudoku];
+    //   newBoard[rowId][colId] = newCell.value;
+    //   setSudoku(newBoard);
+    //   setFocusedCell(newCell);
+    // }
   };
 
   // From usePersist storage:
@@ -281,6 +234,7 @@ const useSudoku = () => {
       setSudoku(sudoku);
       setMistakes(mistakes);
       setIsWinner(isWinner);
+      setLastInsertedCell(null);
     }
   };
 
@@ -288,7 +242,7 @@ const useSudoku = () => {
     if (connection) return;
 
     const func = () => {
-      if (!difficulty || insertedCells.length === 0) return;
+      if (!difficulty || (insertedCells.length === 0 && insertedCells.length === 0)) return;
 
       const data: TParsedGameCache = {
         insertedCells,
@@ -309,16 +263,7 @@ const useSudoku = () => {
     return () => {
       window.removeEventListener("beforeunload", func);
     };
-  }, [
-    insertedCells,
-    difficulty,
-    invalidCells,
-    time,
-    sudoku,
-    mistakes,
-    isWinner,
-    connection,
-  ]);
+  }, [insertedCells, difficulty, invalidCells, time, sudoku, mistakes, isWinner, connection]);
 
   useEffect(() => {
     if (connection) return;

@@ -10,9 +10,6 @@
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
   background-color: rgb(192, 192, 192);
-
-  /* font-synthesis: none; */
-  /* text-rendering: ngoptimizeLegibility; */
   -webkit-font-smoothi: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
@@ -24,7 +21,7 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: rgba(236, 235, 235, 0.784);
+  background-color: rgba(238, 238, 238, 0.784);
   overflow: hidden;
 }
 

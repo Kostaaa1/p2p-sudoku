@@ -12,7 +12,7 @@ export const getCachedDifficulty = (): DifficultySet["data"] | null => {
 
 export const isCellIncludedInStack = (stack: TCell[], cell: TCell) => {
   const { col, row, value } = cell;
-  return stack.some((x) => x.row === row && x.col === col && x.value === value);
+  return stack.some((obj) => obj.row === row && obj.col === col && obj.value === value);
 };
 
 export const isObjectEqual = (
