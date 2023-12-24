@@ -8,10 +8,11 @@ import useSudoku from "./useSudoku";
 
 const usePeer = () => {
   const navigate = useNavigate();
-  const { setIsToastRan, setIsWinner, setSudoku, difficulty } = useSudokuStore();
+  const { setIsToastRan, setIsWinner, setSudoku, difficulty, toastMessageConstructor } =
+    useSudokuStore();
   const { peer, setConnection, setIsOpponentReady } = usePeerStore();
   const { setIsCountdownActive, updateCountdown } = useCountdownStore();
-  const { resetGame, toastMessageConstructor } = useSudoku();
+  const { resetGame } = useSudoku();
   const handleConnect = (id: string) => {
     if (id.length === 0) return;
     const conn = peer.connect(id);
@@ -32,7 +33,7 @@ const usePeer = () => {
           setIsCountdownActive(false);
           setIsToastRan(true);
           setIsWinner(isWinner);
-          toastMessageConstructor({ winner: isWinner, message });
+          toastMessageConstructor(isWinner, message);
         }
         if (type === "ready") {
           console.log("ready data from usePeer", res);

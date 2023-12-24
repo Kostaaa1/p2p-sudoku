@@ -1,110 +1,25 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import useSudoku from "../hooks/useSudoku";
 import Cell from "../components/Cell";
 import Modal from "../components/Modal";
-import booPath from "../assets/boo.mp3";
-import hornPath from "../assets/horn.mp3";
 import usePeerStore from "../store/peerStore";
 import useSudokuStore from "../store/sudokuStore";
-import useCountdownStore from "../store/countdownStore";
 import Countdown from "../components/Countdown";
 import DifficultyOptions from "../components/DifficultyOptions";
+import useGenerateCellStyles from "../hooks/useGenerateCellStyles";
+import { twMerge } from "tailwind-merge";
+import useKeyboardArrows from "../hooks/useKeyboardArrows";
 
 function Sudoku() {
-  const booRef = useRef<HTMLAudioElement>(null);
-  const hornRef = useRef<HTMLAudioElement>(null);
+  const inputRefs = useRef<HTMLInputElement[]>([]);
 
   const { connection, peerId } = usePeerStore();
-  const { isCountdownActive, setIsCountdownActive } = useCountdownStore();
-  const { invalidCells, isToastRan, mistakes, sudoku, setIsWinner, isWinner } =
-    useSudokuStore();
-  const { allCellsFilled, startNewGame, toastMessageConstructor, handleChangeInput } =
-    useSudoku();
+  const { mistakes, sudoku, isWinner } = useSudokuStore();
+  const { startNewGame, handleChangeInput } = useSudoku();
 
-  useEffect(() => {
-    if (!isCountdownActive && sudoku) {
-      setIsCountdownActive(true);
-    }
-  }, [sudoku]);
-
-  useEffect(() => {
-    if (allCellsFilled && mistakes < 5 && invalidCells.length === 0) {
-      setIsWinner(true);
-    }
-  }, [allCellsFilled, mistakes, invalidCells]);
-
-  useEffect(() => {
-    if (mistakes === 5) {
-      setIsWinner(false);
-      return;
-    }
-  }, [mistakes]);
-
-  useEffect(() => {
-    if (isWinner === null || isToastRan) return;
-    setIsCountdownActive(false);
-    localStorage.clear();
-
-    if (booRef.current && mistakes < 5 && isWinner === false) {
-      booRef.current.volume = 0.1;
-      booRef.current.play();
-
-      toastMessageConstructor({
-        winner: isWinner,
-        message: "Times up, you lost! Try Again.",
-      });
-
-      if (connection) {
-        connection?.send({
-          type: "end_game",
-          data: {
-            isWinner: false,
-            message: "Time's up, you both lost, or tied idk...",
-          },
-        });
-      }
-    }
-
-    if (booRef.current && mistakes === 5 && isWinner === false) {
-      booRef.current.volume = 0.1;
-      booRef.current.play();
-
-      toastMessageConstructor({
-        winner: isWinner,
-        message: "You have made 5 mistakes, you are done! Try Again",
-      });
-
-      if (connection) {
-        connection?.send({
-          type: "end_game",
-          data: {
-            isWinner: !isWinner,
-            message: "Youu won! The opponent made 5 mistakes!",
-          },
-        });
-      }
-    }
-
-    if (hornRef.current && isWinner) {
-      hornRef.current.volume = 0.1;
-      hornRef.current.play();
-
-      toastMessageConstructor({
-        winner: isWinner,
-        message: "You Won!!!",
-      });
-
-      if (connection) {
-        connection?.send({
-          type: "end_game",
-          data: {
-            isWinner: !isWinner,
-            message: "You lost. The opponent solved before you!",
-          },
-        });
-      }
-    }
-  }, [isToastRan, isWinner, mistakes]);
+  const { handleInputClick } = useKeyboardArrows(inputRefs);
+  const { generateBorderStyle, generateCellStateStyle, generateHighlightStyle } =
+    useGenerateCellStyles();
 
   return (
     <div className="flex items-center justify-center font-semibold text-blue-600">
@@ -134,6 +49,15 @@ function Sudoku() {
                     colVal={colVal}
                     rowId={rowId}
                     handleChangeInput={handleChangeInput}
+                    handleInputClick={handleInputClick}
+                    cellRef={(el: HTMLInputElement) =>
+                      (inputRefs.current[rowId * 9 + colId] = el!)
+                    }
+                    className={twMerge(
+                      generateBorderStyle(colId, rowId),
+                      generateHighlightStyle(rowId, colId),
+                      generateCellStateStyle(rowId, colId, colVal)
+                    )}
                   />
                 </div>
               ))}
@@ -166,12 +90,6 @@ function Sudoku() {
       <div className="h-full px-4 text-center text-3xl font-bold text-blue-600">
         S<br></br>U<br></br>D<br></br>O<br></br>K<br></br>U<br></br>
       </div>
-      <audio ref={booRef}>
-        <source src={booPath} type="audio/mp3" />
-      </audio>
-      <audio ref={hornRef}>
-        <source src={hornPath} type="audio/mp3" />
-      </audio>
       {isWinner !== null && <Modal mistakes={mistakes} />}
     </div>
   );

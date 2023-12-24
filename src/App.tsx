@@ -9,6 +9,8 @@ import { useEffect } from "react";
 import useSudoku from "./hooks/useSudoku";
 import { PeerResponse } from "./types/types";
 import useCountdownStore from "./store/countdownStore";
+import booPath from "./assets/boo.mp3";
+import hornPath from "./assets/horn.mp3";
 
 function App() {
   const location = useLocation();
@@ -16,9 +18,9 @@ function App() {
   const navigate = useNavigate();
 
   const { peer, setConnection, setPeerId, setIsOpponentReady } = usePeerStore();
-  const { setSudoku, setIsWinner, setIsToastRan } = useSudokuStore();
+  const { setSudoku, setIsWinner, setIsToastRan, toastMessageConstructor } = useSudokuStore();
   const { setIsCountdownActive, updateCountdown } = useCountdownStore();
-  const { resetGame, toastMessageConstructor } = useSudoku();
+  const { resetGame, booRef, hornRef } = useSudoku();
 
   useEffect(() => {
     peer.on("open", (id) => {
@@ -48,7 +50,7 @@ function App() {
           const { isWinner, message } = data;
           setIsCountdownActive(false);
           setIsWinner(isWinner);
-          toastMessageConstructor({ winner: isWinner, message });
+          toastMessageConstructor(isWinner, message);
           setIsToastRan(true);
         }
 
@@ -69,6 +71,12 @@ function App() {
         <Route path="/sudoku/peer-connect" element={<PeerConnection />} />
         <Route path="/sudoku" element={<Sudoku />} />
       </Routes>
+      <audio ref={booRef}>
+        <source src={booPath} type="audio/mp3" />
+      </audio>
+      <audio ref={hornRef}>
+        <source src={hornPath} type="audio/mp3" />
+      </audio>
       <Toaster
         position="top-center"
         reverseOrder={false}

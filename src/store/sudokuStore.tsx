@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { DifficultySet, TCell, TFocusedCell } from "../types/types";
 import { getCached, getCachedDifficulty, isObjectEqual } from "../utils/utils";
+import toast from "react-hot-toast";
 
 type TUseSudokuStore = {
   sudoku: string[][] | null;
@@ -25,10 +26,12 @@ type TUseSudokuStore = {
   setDifficulty: (val: DifficultySet["data"] | null) => void;
   initInvalidCellsLength: number | null;
   setInitInvalidCellsLength: (val: number | null) => void;
-  isToastRan: boolean;
-  setIsToastRan: (val: boolean) => void;
   lastInsertedCell: TCell | null;
   setLastInsertedCell: (val: TCell | null) => void;
+  // Toast:
+  toastMessageConstructor: (winnder: boolean, message: string) => void;
+  isToastRan: boolean;
+  setIsToastRan: (val: boolean) => void;
 };
 
 const emptySudoku = Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => ""));
@@ -81,6 +84,13 @@ const useSudokuStore = create<TUseSudokuStore>((set) => ({
       ...state,
       isToastRan,
     })),
+  toastMessageConstructor: (winner: boolean, message: string) => {
+    const emoji = winner ? "🎉🎉🎉" : "😢😢😢";
+    const newMessage = `${emoji}${message}${emoji}`;
+
+    toast(newMessage);
+    set({ isToastRan: true });
+  },
 }));
 
 export default useSudokuStore;

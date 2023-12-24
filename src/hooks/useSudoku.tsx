@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import usePeerStore from "../store/peerStore";
 import toast from "react-hot-toast";
 import useSudokuStore from "../store/sudokuStore";
@@ -9,6 +9,9 @@ import { generateSudokuBoard } from "../utils/generateSudoku";
 import { isCellIncludedInStack } from "../utils/utils";
 
 const useSudoku = () => {
+  const booRef = useRef<HTMLAudioElement>(null);
+  const hornRef = useRef<HTMLAudioElement>(null);
+
   const {
     setSudoku,
     sudoku,
@@ -27,14 +30,16 @@ const useSudoku = () => {
     setInitInvalidCellsLength,
     incrementMistakes,
     removeInsertedCell,
+    toastMessageConstructor,
     setLastInsertedCell,
     lastInsertedCell,
     addInsertedCell,
     setInsertedCells,
+    isToastRan,
     insertedCells,
   } = useSudokuStore();
   const { connection, setIsOpponentReady } = usePeerStore();
-  const { setIsCountdownActive, setTime, time } = useCountdownStore();
+  const { setIsCountdownActive, setTime, time, isCountdownActive } = useCountdownStore();
 
   const startNewGame = (
     diff: DifficultySet["data"],
@@ -78,24 +83,6 @@ const useSudoku = () => {
   const allCellsFilled = useMemo(() => {
     return sudoku?.flat().every((x) => x !== "");
   }, [sudoku]);
-
-  useEffect(() => {
-    console.log("allCellsFilled", allCellsFilled);
-  }, [allCellsFilled]);
-
-  const toastMessageConstructor = ({
-    winner,
-    message,
-  }: {
-    winner: boolean;
-    message: string;
-  }) => {
-    const emoji = winner ? "🎉🎉🎉" : "😢😢😢";
-    const newMessage = `${emoji}${message}${emoji}`;
-
-    toast(newMessage);
-    setIsToastRan(true);
-  };
 
   const mutateInvalidCells = (payload: { type: "add" | "remove"; cell: TCell }) => {
     if (!sudoku || !lastInsertedCell) return;
@@ -145,8 +132,9 @@ const useSudoku = () => {
       }
     }
 
+    console.log("STACK:::::::::", stack);
     if (type === "add" && stack.length > 1) {
-      // if (stack.length > 0) incrementMistakes();
+      if (stack.length > 0) incrementMistakes();
       stack.forEach((cell) => addInvalidCell(cell));
     }
 
@@ -164,9 +152,9 @@ const useSudoku = () => {
     if (isLastCellEmpty || allCellsFilled) setInvalidCells([...invalidCells]);
     if (!sudoku || isWinner !== null || !lastInsertedCell || lastInsertedCell.value === "")
       return;
-
+    console.log("called");
     // mutateInvalidCells({ type: "add", cell: lastInsertedCell });
-  }, [sudoku]);
+  }, [lastInsertedCell]);
 
   const deleteFocusedCell = () => {
     const { row, col, value } = focusedCell;
@@ -186,7 +174,6 @@ const useSudoku = () => {
     );
 
     targettedCells.forEach((cell) => {
-      console.log("cellremoving ", cell);
       if (!mutateInvalidCells({ type: "remove", cell })) removeInvalidCell(cell);
     });
   };
@@ -212,12 +199,12 @@ const useSudoku = () => {
       : addInsertedCell(newCell);
 
     // Update Sudoku Cell:
-    // if (sudoku) {
-    //   const newBoard = [...sudoku];
-    //   newBoard[rowId][colId] = newCell.value;
-    //   setSudoku(newBoard);
-    //   setFocusedCell(newCell);
-    // }
+    if (sudoku) {
+      const newBoard = [...sudoku];
+      newBoard[rowId][colId] = newCell.value;
+      setSudoku(newBoard);
+      setFocusedCell(newCell);
+    }
   };
 
   // From usePersist storage:
@@ -258,13 +245,13 @@ const useSudoku = () => {
 
       setAll(JSON.stringify(data));
     };
-
     window.addEventListener("beforeunload", func);
     return () => {
       window.removeEventListener("beforeunload", func);
     };
   }, [insertedCells, difficulty, invalidCells, time, sudoku, mistakes, isWinner, connection]);
 
+  // Main Game Setter, whenever difficulty changes new game gets rendered ( only if there is nothing in storage, the storage gets saved before unloading):
   useEffect(() => {
     if (connection) return;
     const game = localStorage.getItem("main_game");
@@ -280,12 +267,89 @@ const useSudoku = () => {
     setAll(JSON.stringify(gameData));
   }, [difficulty]);
 
+  ///////// Winning conditions: //////////
+  useEffect(() => {
+    if (!isCountdownActive && sudoku) {
+      setIsCountdownActive(true);
+    }
+  }, [sudoku]);
+
+  useEffect(() => {
+    if (allCellsFilled && mistakes < 5 && invalidCells.length === 0) {
+      setIsWinner(true);
+    }
+  }, [allCellsFilled, mistakes, invalidCells]);
+
+  useEffect(() => {
+    if (mistakes === 5) {
+      setIsWinner(false);
+      return;
+    }
+  }, [mistakes]);
+
+  useEffect(() => {
+    if (isWinner === null || isToastRan) return;
+    setIsCountdownActive(false);
+    localStorage.clear();
+
+    if (booRef.current && mistakes < 5 && isWinner === false) {
+      booRef.current.volume = 0.1;
+      booRef.current.play();
+
+      toastMessageConstructor(isWinner, "Times up, you lost! Try Again.");
+      if (connection) {
+        connection?.send({
+          type: "end_game",
+          data: {
+            isWinner: false,
+            message: "Time's up, you both lost, or tied idk...",
+          },
+        });
+      }
+    }
+
+    if (booRef.current && mistakes === 5 && isWinner === false) {
+      booRef.current.volume = 0.1;
+      booRef.current.play();
+
+      toastMessageConstructor(isWinner, "You have made 5 mistakes, you are done! Try Again");
+
+      if (connection) {
+        connection?.send({
+          type: "end_game",
+          data: {
+            isWinner: !isWinner,
+            message: "Youu won! The opponent made 5 mistakes!",
+          },
+        });
+      }
+    }
+
+    if (hornRef.current && isWinner) {
+      hornRef.current.volume = 0.1;
+      hornRef.current.play();
+
+      toastMessageConstructor(isWinner, "You Won!!!");
+
+      if (connection) {
+        connection?.send({
+          type: "end_game",
+          data: {
+            isWinner: !isWinner,
+            message: "You lost. The opponent solved before you!",
+          },
+        });
+      }
+    }
+  }, [isToastRan, isWinner, mistakes]);
+
   return {
     handleChangeInput,
     resetGame,
     startNewGame,
     allCellsFilled,
-    toastMessageConstructor,
+    booRef,
+    hornRef,
   };
 };
 
