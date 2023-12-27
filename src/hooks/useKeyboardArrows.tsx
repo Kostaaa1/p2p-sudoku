@@ -1,31 +1,15 @@
 import { MutableRefObject, useCallback, useEffect } from "react";
-import useSudokuStore from "../store/sudokuStore";
 import { ArrowFunctions } from "../types/types";
+import { useSingleCell, useSingleCellActions } from "../store/cellStore";
+import useGameStateStore from "../store/gameStateStore";
+import useSudokuStore from "../store/sudokuStore";
 
 const useKeyboardArrows = (inputRefs: MutableRefObject<HTMLInputElement[]>) => {
-  const { focusedCell, setFocusedCell, isWinner, sudoku } = useSudokuStore();
+  const { focusedCell } = useSingleCell();
+  const { setFocusedCell } = useSingleCellActions();
 
-  const handleInputClick = ({
-    colId,
-    rowId,
-    newValue,
-  }: {
-    colId: number;
-    rowId: number;
-    newValue: string;
-  }) => {
-    if (isWinner !== null || !focusedCell) return;
-
-    const { col, row, value } = focusedCell;
-    if (value === newValue && row === rowId && col === colId) return;
-
-    focusInput();
-    setFocusedCell({
-      row: rowId,
-      col: colId,
-      value: newValue,
-    });
-  };
+  const isWinner = useGameStateStore((state) => state.isWinner);
+  const sudoku = useSudokuStore((state) => state.sudoku);
 
   const focusInput = useCallback(() => {
     if (!focusedCell) return;
@@ -37,6 +21,21 @@ const useKeyboardArrows = (inputRefs: MutableRefObject<HTMLInputElement[]>) => {
       inputRef.setSelectionRange(1, 1);
     }
   }, [focusedCell]);
+
+  const handleInputClick = useCallback(
+    ({ colId, rowId, newValue }: { colId: number; rowId: number; newValue: string }) => {
+      if (isWinner !== null || !focusedCell) return;
+      const { col, row, value } = focusedCell;
+      if (value === newValue && row === rowId && col === colId) return;
+      focusInput();
+      setFocusedCell({
+        row: rowId,
+        col: colId,
+        value: newValue,
+      });
+    },
+    [isWinner, focusedCell, focusInput, setFocusedCell]
+  );
 
   // Keyboard Controls
   useEffect(() => {

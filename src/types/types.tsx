@@ -34,13 +34,13 @@ export type DifficultySet = {
   clicked: boolean;
 };
 
-export type TParsedGameCache = {
-  sudoku: string[][] | null;
+export type TUnifiedGame = {
+  sudoku: string[][];
   invalidCells: TCell[];
   insertedCells: TCell[];
   mistakes: number;
   isWinner: boolean | null;
-  time: string | null;
+  time: string;
 };
 
 export type TimeLimitSet = {

@@ -12,7 +12,6 @@ export function generateSudokuBoard(difficulty: DifficultySet["data"]): string[]
   //   ["2", "8", "7", "4", "1", "9", "6", "3", "5"],
   //   ["3", "4", "5", "2", "8", "6", "", "7", ""],
   // ];
-  /////////////////////////////////////////////
   const sudokuGrid: string[][] = Array.from({ length: 9 }, () => Array(9).fill(""));
   // Fill the diagonal 3x3 subgrids with random numbers
   fillDiagonalSubgrids(sudokuGrid);

@@ -1,12 +1,12 @@
-import React, { FC, memo } from "react";
+import React, { FC, MutableRefObject, memo } from "react";
 
 interface FieldProps {
   colId: number;
   rowId: number;
   colVal: string;
   className: string;
-  cellRef: (el: HTMLInputElement) => void;
   handleChangeInput: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  inputRefs: MutableRefObject<HTMLInputElement[]>;
   handleInputClick: ({
     colId,
     rowId,
@@ -19,10 +19,10 @@ interface FieldProps {
 }
 
 const Cell: FC<FieldProps> = memo(
-  ({ handleInputClick, className, cellRef, colId, rowId, colVal, handleChangeInput }) => {
+  ({ handleInputClick, inputRefs, className, colId, rowId, colVal, handleChangeInput }) => {
     return (
       <input
-        ref={cellRef}
+        ref={(el: HTMLInputElement) => (inputRefs.current[rowId * 9 + colId] = el!)}
         type="text"
         value={colVal}
         onChange={(e) => handleChangeInput(e)}

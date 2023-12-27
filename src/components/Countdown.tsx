@@ -1,20 +1,98 @@
 import { FC, useEffect } from "react";
 import { twMerge } from "tailwind-merge";
-import usePeerStore from "../store/peerStore";
 import { DataConnection } from "peerjs";
-import useSudokuStore from "../store/sudokuStore";
 import useCountdownStore from "../store/countdownStore";
 import toast from "react-hot-toast";
-import { DifficultySet, TParsedGameCache } from "../types/types";
 
-type TCountdownProps = {
-  startNewGame: (difficulty: DifficultySet["data"]) => TParsedGameCache;
+import usePeerStore from "../store/peerStore";
+import useGameStateStore from "../store/gameStateStore";
+import {
+  useInsertedCells,
+  useInsertedCellsActions,
+  useInvalidCells,
+  useInvalidCellsActions,
+  useSingleCellActions,
+} from "../store/cellStore";
+import useMistakesStore from "../store/mistakesStore";
+import useSudokuStore from "../store/sudokuStore";
+import { DifficultySet, TUnifiedGame } from "../types/types";
+
+type CountdownProps = {
+  startNewGame: (diff: DifficultySet["data"], sudoku?: string[][]) => void;
 };
 
-const Countdown: FC<TCountdownProps> = ({ startNewGame }) => {
-  const { isWinner, setIsWinner, difficulty } = useSudokuStore();
-  const { time, isCountdownActive, updateCountdown } = useCountdownStore();
-  const { connection } = usePeerStore();
+const Countdown: FC<CountdownProps> = ({ startNewGame }) => {
+  const isWinner = useGameStateStore((state) => state.isWinner);
+  const difficulty = useGameStateStore((state) => state.difficulty);
+  const { setIsWinner } = useGameStateStore((state) => state.actions);
+
+  const connection = usePeerStore((state) => state.connection);
+
+  const time = useCountdownStore((state) => state.time);
+  const isCountdownActive = useCountdownStore((state) => state.isCountdownActive);
+  const { updateCountdown, setIsCountdownActive } = useCountdownStore(
+    (state) => state.actions
+  );
+
+  const insertedCells = useInsertedCells();
+  const invalidCells = useInvalidCells();
+  const mistakes = useMistakesStore((state) => state.mistakes);
+  const sudoku = useSudokuStore((state) => state.sudoku);
+
+  // Actions:
+  const { setTime } = useCountdownStore((state) => state.actions);
+  const { setFocusedCell, setLastInsertedCell } = useSingleCellActions();
+  const { setInvalidCells } = useInvalidCellsActions();
+  const { setInsertedCells } = useInsertedCellsActions();
+  const { setSudoku } = useSudokuStore((state) => state.actions);
+  const { setMistakes } = useMistakesStore((state) => state.actions);
+  // useEffect(() => {
+  //   if (
+  //     isWinner === null &&
+  //     mistakes === 0 &&
+  //     invalidCells.length === 0 &&
+  //     insertedCells.length === 0
+  //   ) {
+  //     localStorage.removeItem("main_game");
+  //   }
+  // }, [invalidCells, insertedCells, mistakes, isWinner]);
+
+  useEffect(() => {
+    // Saving current game cache before the window unload, only if cells are added or mistakes are not 0
+    if (connection) return;
+
+    const func = () => {
+      // if (mistakes === 0 || invalidCells.length === 0 || insertedCells.length === 0) return;
+      if (mistakes > 0 || invalidCells.length > 0 || insertedCells.length > 0) {
+        console.log("invalidCells", invalidCells);
+        const data: TUnifiedGame = {
+          insertedCells,
+          invalidCells,
+          isWinner,
+          mistakes,
+          sudoku,
+          time: time as string,
+        };
+
+        localStorage.setItem("main_game", JSON.stringify(data));
+        localStorage.setItem("difficulty", JSON.stringify(difficulty));
+        // setAll(JSON.stringify(data));
+
+        setTime(time as string);
+        setInvalidCells(invalidCells);
+        setIsWinner(isWinner);
+        setSudoku(sudoku);
+        setInsertedCells(insertedCells);
+        setMistakes(mistakes);
+        setFocusedCell({ row: 0, col: 0, value: sudoku[0][0] });
+        setLastInsertedCell(null);
+      }
+    };
+    window.addEventListener("beforeunload", func);
+    return () => {
+      window.removeEventListener("beforeunload", func);
+    };
+  }, [insertedCells, time, difficulty, invalidCells, sudoku, mistakes, isWinner, connection]);
 
   const resetCount = async () => {
     if (difficulty && isWinner === null && !connection) {
@@ -45,7 +123,8 @@ const Countdown: FC<TCountdownProps> = ({ startNewGame }) => {
             updateCountdown(start);
           }
         } else if (start === 0) {
-          setIsWinner(false);
+          localStorage.removeItem("main_game");
+          setIsCountdownActive(false);
           return;
         }
       }, 1000);

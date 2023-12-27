@@ -1,36 +1,37 @@
 import { FC, useEffect, useState } from "react";
 import Confetti from "react-confetti";
-import useSudokuStore from "../store/sudokuStore";
-import usePeerStore from "../store/peerStore";
 import { twMerge } from "tailwind-merge";
 import { IconLoaderQuarter } from "@tabler/icons-react";
-import useSudoku from "../hooks/useSudoku";
+import usePeerStore from "../store/peerStore";
+import useGameStateStore from "../store/gameStateStore";
+import { DifficultySet } from "../types/types";
+import useMistakesStore from "../store/mistakesStore";
 
 interface ModalProps {
-  mistakes: number;
+  startNewGame: (dif: DifficultySet["data"]) => void;
+  resetGameState: (dif: DifficultySet["data"]) => void;
 }
 
-const Modal: FC<ModalProps> = ({ mistakes }) => {
-  const { isWinner, difficulty } = useSudokuStore();
-  const { connection, isOpponentReady } = usePeerStore();
+const Modal: FC<ModalProps> = ({ resetGameState, startNewGame }) => {
+  const connection = usePeerStore((state) => state.connection);
+  const isOpponentReady = usePeerStore((state) => state.isOpponentReady);
+  const difficulty = useGameStateStore((state) => state.difficulty);
+  const isWinner = useGameStateStore((state) => state.isWinner);
+  const mistakes = useMistakesStore((state) => state.mistakes);
+
   const [isClicked, setIsClicked] = useState<boolean>(false);
-  const { resetGame, startNewGame } = useSudoku();
 
   const playAgain = () => {
-    setIsClicked(true);
-
     if (connection) {
       connection.send({ type: "ready", data: true });
     } else {
-      // resetGame();
-      console.log(difficulty);
       if (difficulty) startNewGame(difficulty);
     }
+    setIsClicked(true);
   };
 
   useEffect(() => {
-    if (isClicked && isOpponentReady && connection && difficulty)
-      resetGame(difficulty);
+    if (isClicked && isOpponentReady && connection && difficulty) resetGameState(difficulty);
   }, [connection, difficulty, isClicked, isOpponentReady]);
 
   return (
@@ -49,9 +50,7 @@ const Modal: FC<ModalProps> = ({ mistakes }) => {
           )}
           {isWinner === true && (
             <div className="flex h-full flex-col items-center">
-              <h4 className="pb-2 text-2xl font-bold">
-                🎉🎉🎉 Congratulations! 🎉🎉🎉
-              </h4>
+              <h4 className="pb-2 text-2xl font-bold">🎉🎉🎉 Congratulations! 🎉🎉🎉</h4>
               <p className="font-semibold">You have won the game!</p>
             </div>
           )}

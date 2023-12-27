@@ -1,14 +1,15 @@
 import { ChangeEvent, useEffect, useRef } from "react";
 import { countdownSet } from "../store/constants";
-import usePeerStore from "../store/peerStore";
-import useSudokuStore from "../store/sudokuStore";
 import { DifficultySet } from "../types/types";
+import usePeerStore from "../store/peerStore";
+import useGameStateStore from "../store/gameStateStore";
 
 const DifficultyOptions = () => {
   const selectRef = useRef<HTMLSelectElement>(null);
+  const connection = usePeerStore((state) => state.connection);
+  const difficulty = useGameStateStore((state) => state.difficulty);
+  const { setDifficulty } = useGameStateStore((state) => state.actions);
 
-  const { connection } = usePeerStore();
-  const { difficulty, setDifficulty } = useSudokuStore();
   const diffOptions = Object.entries(countdownSet).map((x, id) => ({
     id,
     option: x[0],
@@ -21,6 +22,8 @@ const DifficultyOptions = () => {
   };
 
   useEffect(() => {
+    if (!connection) return;
+
     const activeValue = selectRef.current?.value;
     if (activeValue) {
       setDifficulty(activeValue as DifficultySet["data"]);
@@ -44,8 +47,7 @@ const DifficultyOptions = () => {
           >
             {diffOptions.map((opt) => (
               <option key={opt.id} value={opt.option}>
-                {opt.option[0].toUpperCase() +
-                  opt.option.slice(1, opt.option.length)}
+                {opt.option[0].toUpperCase() + opt.option.slice(1, opt.option.length)}
               </option>
             ))}
           </select>

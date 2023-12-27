@@ -1,27 +1,27 @@
 import { useEffect, useRef, useState } from "react";
-import usePeer from "../hooks/usePeer";
-import useStore from "../store/peerStore";
 import { useNavigate } from "react-router-dom";
-import useSudoku from "../hooks/useSudoku";
 import { DifficultySet } from "../types/types";
 import { IconArrowLeft, IconCheck } from "@tabler/icons-react";
 import { twMerge } from "tailwind-merge";
-import useSudokuStore from "../store/sudokuStore";
-import { countdownSet } from "../store/constants";
 import usePeerStore from "../store/peerStore";
+import useGameStateStore from "../store/gameStateStore";
 
 const PeerConnection = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [input, setInput] = useState<string>("");
-  // const { handleConnect } = usePeer();
   const navigate = useNavigate();
-  const { connection, setConnection } = usePeerStore();
-  const { peerId } = useStore();
-  const { resetGame } = useSudoku();
+
+  const connection = usePeerStore((state) => state.connection);
+  const { setConnection } = usePeerStore((state) => state.actions);
+  const peerId = usePeerStore((state) => state.peerId);
+
+  // const { resetGame } = useSudoku();
   const [isCopyClicked, setIsCopyClicked] = useState<boolean>(false);
   const [page, setPage] = useState<number>(0);
   const PAGE_LIMIT = 2;
-  const { difficulty, setDifficulty } = useSudokuStore();
+
+  const { setDifficulty } = useGameStateStore((state) => state.actions);
+
   const [difficultyData, setDifficultyData] = useState<DifficultySet[]>([
     { id: 0, type: "difficulty", data: "easy", clicked: true },
     { id: 1, type: "difficulty", data: "medium", clicked: false },
@@ -34,7 +34,7 @@ const PeerConnection = () => {
     if (connection) {
       setConnection(null);
       connection.close();
-      setDifficulty(null);
+      // setDifficulty();
     }
   }, []);
 
@@ -48,9 +48,7 @@ const PeerConnection = () => {
     if (selectedDif) {
       setDifficulty(selectedDif.data);
     }
-    setDifficultyData((state) =>
-      state.map((x) => ({ ...x, clicked: x.id === id }))
-    );
+    setDifficultyData((state) => state.map((x) => ({ ...x, clicked: x.id === id })));
   };
 
   const nextPage = () => {
@@ -82,10 +80,7 @@ const PeerConnection = () => {
               <p className="text-yellow-600 underline">{peerId}</p>
             </div>
             {isCopyClicked && <IconCheck className="-mr-4 text-green-600" />}
-            <button
-              className="bg-slate-400 text-sm text-white"
-              onClick={copyPeerId}
-            >
+            <button className="bg-slate-400 text-sm text-white" onClick={copyPeerId}>
               Copy
             </button>
           </div>
