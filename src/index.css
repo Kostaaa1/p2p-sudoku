@@ -21,7 +21,7 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: rgba(238, 238, 238, 0.784);
+  background-color: rgba(250, 243, 243, 0.784);
   overflow: hidden;
 }
 
@@ -35,7 +35,6 @@ button {
   background-color: #1a1a1a;
 }
 
-
 button:hover {
   border-color: #646cff;
 }
@@ -45,14 +44,6 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-/* input {
-  caret-color: white;  
-} */
-
-.custom-input {
-  @apply mx-2 bg-white px-2 py-1 font-bold text-black caret-gray-500 outline outline-1 outline-gray-300 placeholder:italic placeholder:font-normal;
-}
-
 input:focus,
 input:active {
   outline: none;
@@ -60,17 +51,16 @@ input:active {
 
 @keyframes pulse {
   50% {
-      opacity: .5;
+    opacity: 0.5;
   }
 }
 
 @keyframes spin {
   to {
-      transform: rotate(360deg);
+    transform: rotate(360deg);
   }
 }
 
-
-.load-animation {
-  animation: pulse .8s ease-in-out infinite, spin .8s linear infinite;
+.spinn {
+  animation: spin 1s infinite;
 }

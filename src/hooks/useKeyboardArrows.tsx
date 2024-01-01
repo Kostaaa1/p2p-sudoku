@@ -12,7 +12,6 @@ const useKeyboardArrows = (inputRefs: MutableRefObject<HTMLInputElement[]>) => {
   const sudoku = useSudokuStore((state) => state.sudoku);
 
   const focusInput = useCallback(() => {
-    if (!focusedCell) return;
     const { row, col } = focusedCell;
     const inputRef = inputRefs.current[row * 9 + col];
 
@@ -21,21 +20,6 @@ const useKeyboardArrows = (inputRefs: MutableRefObject<HTMLInputElement[]>) => {
       inputRef.setSelectionRange(1, 1);
     }
   }, [focusedCell]);
-
-  const handleInputClick = useCallback(
-    ({ colId, rowId, newValue }: { colId: number; rowId: number; newValue: string }) => {
-      if (isWinner !== null || !focusedCell) return;
-      const { col, row, value } = focusedCell;
-      if (value === newValue && row === rowId && col === colId) return;
-      focusInput();
-      setFocusedCell({
-        row: rowId,
-        col: colId,
-        value: newValue,
-      });
-    },
-    [isWinner, focusedCell, focusInput, setFocusedCell]
-  );
 
   // Keyboard Controls
   useEffect(() => {
@@ -98,7 +82,7 @@ const useKeyboardArrows = (inputRefs: MutableRefObject<HTMLInputElement[]>) => {
     }
   }, [focusedCell, focusInput]);
 
-  return { handleInputClick };
+  return null;
 };
 
 export default useKeyboardArrows;

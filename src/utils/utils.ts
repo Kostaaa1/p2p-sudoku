@@ -1,6 +1,6 @@
-import { DifficultySet, TCell, TFocusedCell, TParsedGameCache } from "../types/types";
+import { DifficultySet, TCell, TFocusedCell, TUnifiedGame } from "../types/types";
 
-export const getCached = (key: keyof TParsedGameCache) => {
+export const getCached = (key: keyof TUnifiedGame) => {
   const storedGame = localStorage.getItem("main_game");
   return storedGame ? JSON.parse(storedGame)[key] : null;
 };

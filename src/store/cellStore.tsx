@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { TCell, TFocusedCell } from "../types/types";
+import { TAnimationCellType, TCell, TFocusedCell } from "../types/types";
 import { getCached, isCellIncludedInStack, isObjectEqual } from "../utils/utils";
 import { useShallow } from "zustand/react/shallow";
 
@@ -20,9 +20,11 @@ type InsertedCellsActions = {
 type TUseSudokuStore = {
   lastInsertedCell: TCell | null;
   focusedCell: TFocusedCell;
+  animationType: null | TAnimationCellType;
   singleCellActions: {
     setFocusedCell: (cell: TCell) => void;
     setLastInsertedCell: (cell: TCell | null) => void;
+    setAnimationType: (cell: TAnimationCellType | null) => void;
   };
   invalidCells: TCell[];
   invalidCellsActions: InvalidCellsActions;
@@ -31,11 +33,13 @@ type TUseSudokuStore = {
 };
 
 const useCellStore = create<TUseSudokuStore>((set) => ({
+  animationType: null,
   lastInsertedCell: null,
   focusedCell: { col: 0, row: 0 },
   singleCellActions: {
     setFocusedCell: (cell: TCell) => set({ focusedCell: cell }),
     setLastInsertedCell: (cell: TCell | null) => set({ lastInsertedCell: cell }),
+    setAnimationType: (cell: TAnimationCellType | null) => set({ animationType: cell }),
   },
   invalidCells: getCached("invalidCells") || [],
   invalidCellsActions: {
@@ -67,6 +71,7 @@ const useCellStore = create<TUseSudokuStore>((set) => ({
 export const useSingleCell = () =>
   useCellStore(
     useShallow((state) => ({
+      animationType: state.animationType,
       focusedCell: state.focusedCell,
       lastInsertedCell: state.lastInsertedCell,
     }))

@@ -1,12 +1,18 @@
-import { useCallback, useMemo } from "react";
+import { FC, MutableRefObject, useCallback, useEffect, useMemo } from "react";
 import { twMerge } from "tailwind-merge";
-import { useSingleCell, useInsertedCells, useInvalidCells } from "../store/cellStore";
+import {
+  useSingleCell,
+  useInsertedCells,
+  useInvalidCells,
+  useSingleCellActions,
+} from "../store/cellStore";
 import { isCellIncludedInStack } from "../utils/utils";
 
 const useGenerateCellStyles = () => {
   const invalidCells = useInvalidCells();
   const insertedCells = useInsertedCells();
-  const { focusedCell } = useSingleCell();
+  const { lastInsertedCell, focusedCell, animationType } = useSingleCell();
+  const { setAnimationType } = useSingleCellActions();
 
   const shouldRenderRightBorder = (colId: number) => {
     if (colId !== 2 && colId % 2 === 0) return;
@@ -16,6 +22,17 @@ const useGenerateCellStyles = () => {
     if (rowId !== 2 && rowId % 2 === 0) return;
     return 3 * Math.floor(rowId / 3) + 2 === rowId && 3 * Math.floor(rowId / 3) + 2 !== 8;
   };
+  const generateBorderStyle = useMemo(
+    () => (rowId: number, colId: number) => {
+      console.log("ran");
+
+      return [
+        shouldRenderBottomBorder(rowId) && "border-b-2 border-b-gray-700",
+        shouldRenderRightBorder(colId) && "border-r-2 border-r-gray-700",
+      ].join(" ");
+    },
+    []
+  );
 
   const isFieldClicked = useMemo(() => {
     return (rowId: number, colId: number) => {
@@ -23,63 +40,45 @@ const useGenerateCellStyles = () => {
     };
   }, [focusedCell]);
 
-  const generateBorderStyle = (rowId: number, colId: number) => {
-    return [
-      "h-full border border-r-0 border-b-0 border-[#BEC6D4] cursor-pointer text-3xl bg-opacity-100 bg-transparent text-center w-full caret-transparent",
-      shouldRenderRightBorder(colId) && "border-r-2 border-r-blue-800",
-      shouldRenderBottomBorder(rowId) && "border-b-2 border-b-blue-800",
-    ].join(" ");
+  const highlightRow = (rowId: number) => rowId === focusedCell.row;
+  const highlightCol = (colId: number) => colId === focusedCell.col;
+  const highlight3x3Box = (rowId: number, colId: number) => {
+    return (
+      Math.floor(colId / 3) === Math.floor(focusedCell.col / 3) &&
+      Math.floor(rowId / 3) === Math.floor(focusedCell.row / 3)
+    );
   };
 
-  const highlightRow = useCallback(
-    (rowId: number) => {
-      return rowId === focusedCell?.row;
-    },
-    [focusedCell]
-  );
-  const highlightCol = useCallback(
-    (colId: number) => {
-      return colId === focusedCell?.col;
-    },
-    [focusedCell]
-  );
-  const highlight3x3Box = useCallback(
+  const generateHighlightStyle = useCallback(
     (rowId: number, colId: number) => {
-      if (!focusedCell) return;
       return (
-        Math.floor(colId / 3) === Math.floor(focusedCell.col / 3) &&
-        Math.floor(rowId / 3) === Math.floor(focusedCell.row / 3)
+        (highlightRow(rowId) || highlightCol(colId) || highlight3x3Box(rowId, colId)) &&
+        "bg-blue-100"
       );
     },
     [focusedCell]
   );
 
-  const generateHighlightStyle = (rowId: number, colId: number) => {
-    return [
-      highlightRow(rowId) && "bg-blue-100",
-      highlightCol(colId) && "bg-blue-100",
-      highlight3x3Box(rowId, colId) && "bg-blue-100",
-    ].join(" ");
-  };
-
   const generateCellStateStyle = (row: number, col: number, value: string) => {
     return twMerge(
       [
-        isCellIncludedInStack(insertedCells, { row, col, value }) && "text-green-600",
+        isCellIncludedInStack(insertedCells, { row, col, value }) && "text-blue-600",
         isCellIncludedInStack(invalidCells, { row, col, value }) &&
           isCellIncludedInStack(insertedCells, { row, col, value }) &&
           "text-red-700",
-        focusedCell.value &&
-          parseInt(focusedCell.value) === parseInt(value) &&
-          "bg-blue-900 bg-opacity-25",
+        focusedCell.value && parseInt(focusedCell.value) === parseInt(value) && "#a5ccf9",
         isCellIncludedInStack(invalidCells, { row, col, value }) &&
           "bg-red-300 bg-opacity-70",
-        isFieldClicked(row, col) && "bg-blue-300 bg-opacity-80",
       ].join(" ")
     );
   };
 
-  return { generateBorderStyle, generateHighlightStyle, generateCellStateStyle };
+  return {
+    isFieldClicked,
+    generateBorderStyle,
+    generateCellStateStyle,
+    generateHighlightStyle,
+  };
 };
 
 export default useGenerateCellStyles;
