@@ -1,9 +1,14 @@
+/* Add this to your CSS file or HTML head */
+@import url("https://fonts.googleapis.com/css?family=Quicksand:wght@400&display=swap");
+@import url("https://fonts.googleapis.com/css?family=Quicksand:wght@700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  /* font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif; */
+  font-family: "Quicksand", sans-serif;
   line-height: 1.5;
   font-weight: 400;
 

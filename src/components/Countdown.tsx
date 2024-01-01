@@ -46,23 +46,12 @@ const Countdown: FC<CountdownProps> = ({ startNewGame }) => {
   const { setInsertedCells } = useInsertedCellsActions();
   const { setSudoku } = useSudokuStore((state) => state.actions);
   const { setMistakes } = useMistakesStore((state) => state.actions);
-  // useEffect(() => {
-  //   if (
-  //     isWinner === null &&
-  //     mistakes === 0 &&
-  //     invalidCells.length === 0 &&
-  //     insertedCells.length === 0
-  //   ) {
-  //     localStorage.removeItem("main_game");
-  //   }
-  // }, [invalidCells, insertedCells, mistakes, isWinner]);
 
   useEffect(() => {
     // Saving current game cache before the window unload, only if cells are added or mistakes are not 0
     if (connection) return;
 
     const func = () => {
-      // if (mistakes === 0 || invalidCells.length === 0 || insertedCells.length === 0) return;
       if (mistakes > 0 || invalidCells.length > 0 || insertedCells.length > 0) {
         console.log("invalidCells", invalidCells);
         const data: TUnifiedGame = {

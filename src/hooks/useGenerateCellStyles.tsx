@@ -1,18 +1,12 @@
-import { FC, MutableRefObject, useCallback, useEffect, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { twMerge } from "tailwind-merge";
-import {
-  useSingleCell,
-  useInsertedCells,
-  useInvalidCells,
-  useSingleCellActions,
-} from "../store/cellStore";
+import { useSingleCell, useInsertedCells, useInvalidCells } from "../store/cellStore";
 import { isCellIncludedInStack } from "../utils/utils";
 
 const useGenerateCellStyles = () => {
   const invalidCells = useInvalidCells();
   const insertedCells = useInsertedCells();
-  const { lastInsertedCell, focusedCell, animationType } = useSingleCell();
-  const { setAnimationType } = useSingleCellActions();
+  const { focusedCell } = useSingleCell();
 
   const shouldRenderRightBorder = (colId: number) => {
     if (colId !== 2 && colId % 2 === 0) return;
@@ -24,8 +18,6 @@ const useGenerateCellStyles = () => {
   };
   const generateBorderStyle = useMemo(
     () => (rowId: number, colId: number) => {
-      console.log("ran");
-
       return [
         shouldRenderBottomBorder(rowId) && "border-b-2 border-b-gray-700",
         shouldRenderRightBorder(colId) && "border-r-2 border-r-gray-700",
@@ -66,15 +58,17 @@ const useGenerateCellStyles = () => {
         isCellIncludedInStack(invalidCells, { row, col, value }) &&
           isCellIncludedInStack(insertedCells, { row, col, value }) &&
           "text-red-700",
-        focusedCell.value && parseInt(focusedCell.value) === parseInt(value) && "#a5ccf9",
+        focusedCell.value &&
+          parseInt(focusedCell.value) === parseInt(value) &&
+          "bg-[#6585a9] bg-opacity-40",
         isCellIncludedInStack(invalidCells, { row, col, value }) &&
-          "bg-red-300 bg-opacity-70",
+          "bg-red-300 bg-opacity-60",
+        isFieldClicked(row, col) && "bg-blue-300 bg-opacity-80",
       ].join(" ")
     );
   };
 
   return {
-    isFieldClicked,
     generateBorderStyle,
     generateCellStateStyle,
     generateHighlightStyle,

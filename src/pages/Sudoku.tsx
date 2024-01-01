@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import useSudoku from "../hooks/useSudoku";
 import Cell from "../components/Cell";
 import Modal from "../components/Modal";
@@ -13,19 +13,17 @@ import useGameStateStore from "../store/gameStateStore";
 import useMistakesStore from "../store/mistakesStore";
 import useCountdownStore from "../store/countdownStore";
 import {
-  useInsertedCells,
   useInsertedCellsActions,
-  useInvalidCells,
   useInvalidCellsActions,
   useSingleCell,
   useSingleCellActions,
 } from "../store/cellStore";
-import { DifficultySet, TAnimationData, TStyleCellType, TUnifiedGame } from "../types/types";
+import { DifficultySet, TUnifiedGame } from "../types/types";
 import useToastStore from "../store/toastStore";
 import { useShallow } from "zustand/react/shallow";
 import { countdownSet, emptySudoku } from "../store/constants";
 import { generateSudokuBoard } from "../utils/generateSudoku";
-import { isCellIncludedInStack } from "../utils/utils";
+import Keyboard from "../components/Keyboard";
 
 function Sudoku() {
   const inputRefs = useRef<HTMLInputElement[]>([]);
@@ -37,15 +35,9 @@ function Sudoku() {
   const difficulty = useGameStateStore((state) => state.difficulty);
   const mistakes = useMistakesStore((state) => state.mistakes);
   const { animationType, lastInsertedCell } = useSingleCell();
-  const invalidCells = useInvalidCells();
-  const insertedCells = useInsertedCells();
 
-  const {
-    generateBorderStyle,
-    generateCellStateStyle,
-    generateHighlightStyle,
-    isFieldClicked,
-  } = useGenerateCellStyles();
+  const { generateBorderStyle, generateCellStateStyle, generateHighlightStyle } =
+    useGenerateCellStyles();
   const isCountdownActive = useCountdownStore((state) => state.isCountdownActive);
   const { handleChangeInput } = useSudoku();
   // const { handleInputClick } = useKeyboardArrows(inputRefs);
@@ -60,7 +52,6 @@ function Sudoku() {
   const { setSudoku } = useSudokuStore(useShallow((state) => state.actions));
   const { setFocusedCell, setLastInsertedCell, setAnimationType } = useSingleCellActions();
   const { setIsWinner } = useGameStateStore((state) => state.actions);
-  const { focusedCell } = useSingleCell();
 
   // // From usePersist storage:
   const setAll = (mainGame: string) => {
@@ -176,7 +167,7 @@ function Sudoku() {
 
   return (
     <div className="flex items-center justify-center font-semibold">
-      <div className="h-full px-4 text-center text-3xl font-bold text-gray-700">
+      <div className="h-full px-4 text-center text-3xl text-gray-700">
         S<br></br>U<br></br>D<br></br>O<br></br>K<br></br>U<br></br>
       </div>
       <div>
@@ -208,8 +199,7 @@ function Sudoku() {
                     className={twMerge(
                       generateBorderStyle(rowId, colId),
                       generateHighlightStyle(rowId, colId),
-                      generateCellStateStyle(rowId, colId, colVal),
-                      isFieldClicked(rowId, colId) && "bg-blue-300 bg-opacity-80"
+                      generateCellStateStyle(rowId, colId, colVal)
                     )}
                   />
                 </div>
@@ -217,7 +207,8 @@ function Sudoku() {
             </div>
           ))}
         </div>
-        <div className="flex w-full items-center justify-between pt-1 text-sm">
+        {/* <Keyboard /> */}
+        <div className="flex w-full items-center justify-between text-sm">
           <span className="text-md flex tracking-tighter text-black">
             PeerID:
             <p className="text-yellow-600" style={{ marginLeft: "8px" }}>

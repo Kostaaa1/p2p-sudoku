@@ -20,7 +20,6 @@ const useSudoku = () => {
 
   const invalidCells = useInvalidCells();
   const { addInvalidCell, removeInvalidCell } = useInvalidCellsActions();
-
   const insertedCells = useInsertedCells();
   const { addInsertedCell, removeInsertedCell } = useInsertedCellsActions();
 
@@ -44,7 +43,6 @@ const useSudoku = () => {
 
       console.log("called mutateinvalid");
       const { cell, type } = payload;
-      // console.log("checking cell: ", cell);
       const { col, row, value } = cell;
       const stack: TCell[] = [];
 
@@ -55,6 +53,9 @@ const useSudoku = () => {
           cellValue !== "" && cellValue === value ? { row, col: i, value } : -1
         )
         .filter((i) => i !== -1) as TCell[];
+
+      console.log("colValues ", colValues);
+      console.log("colInvalidValues: ", colInvalidValues);
 
       if (colInvalidValues.length > 1) {
         colInvalidValues.forEach((rowCell) => {
@@ -76,8 +77,8 @@ const useSudoku = () => {
         })
         .filter((x) => x !== -1) as TCell[];
 
-      // console.log(":rowValues ", rowValues);
-      // console.log("rowInvalidValues: ", rowInvalidValues);
+      console.log(":rowValues ", rowValues);
+      console.log("rowInvalidValues: ", rowInvalidValues);
 
       if (rowInvalidValues.length > 1) {
         rowInvalidValues.forEach((colCell) => {
@@ -110,7 +111,7 @@ const useSudoku = () => {
         }
       }
 
-      // console.log("gridInvalidValues", gridInvalidValues);
+      console.log("gridInvalidValues", gridInvalidValues);
       if (gridInvalidValues.length > 0) {
         gridInvalidValues.forEach((cell) => stack.push(cell));
       }
@@ -143,7 +144,7 @@ const useSudoku = () => {
       }
 
       if (type === "add" && stack.length > 1) {
-        // incrementMistakes();
+        incrementMistakes();
         stack.forEach((cell) => addInvalidCell(cell));
       }
 
