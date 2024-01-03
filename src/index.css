@@ -65,7 +65,3 @@ input:active {
     transform: rotate(360deg);
   }
 }
-
-.spinn {
-  animation: spin 1s infinite;
-}

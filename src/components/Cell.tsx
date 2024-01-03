@@ -24,7 +24,7 @@ const Cell: FC<FieldProps> = memo(
         onClick={() => setFocusedCell({ row: rowId, col: colId, value: colVal })}
         style={style}
         className={twMerge(
-          "text-gray-700 h-full animate-wave w-full border border-r-0 border-b-0 border-[#BEC6D4] cursor-pointer text-3xl bg-opacity-100 bg-transparent text-center caret-transparent",
+          "text-gray-700 h-full w-full border border-r-0 border-b-0 border-[#BEC6D4] cursor-pointer text-3xl bg-opacity-100 bg-transparent text-center caret-transparent",
           className
         )}
       />

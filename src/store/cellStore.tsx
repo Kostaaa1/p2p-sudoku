@@ -1,7 +1,8 @@
 import { create } from "zustand";
-import { TAnimationCellType, TCell, TFocusedCell } from "../types/types";
+import { TCell, TFocusedCell } from "../types/types";
 import { getCached, isCellIncludedInStack, isObjectEqual } from "../utils/utils";
 import { useShallow } from "zustand/react/shallow";
+import { set } from "lodash";
 
 type InvalidCellsActions = {
   addInvalidCell: (cell: TCell) => void;
@@ -18,13 +19,12 @@ type InsertedCellsActions = {
 };
 
 type TUseSudokuStore = {
-  lastInsertedCell: TCell | null;
+  // lastInsertedCell: TCell | null;
   focusedCell: TFocusedCell;
-  animationType: null | TAnimationCellType;
+  previousFocusedCell: TFocusedCell | null;
   singleCellActions: {
     setFocusedCell: (cell: TCell) => void;
-    setLastInsertedCell: (cell: TCell | null) => void;
-    setAnimationType: (cell: TAnimationCellType | null) => void;
+    // setLastInsertedCell: (cell: TCell | null) => void;
   };
   invalidCells: TCell[];
   invalidCellsActions: InvalidCellsActions;
@@ -33,13 +33,13 @@ type TUseSudokuStore = {
 };
 
 const useCellStore = create<TUseSudokuStore>((set) => ({
-  animationType: null,
-  lastInsertedCell: null,
+  previousFocusedCell: null,
+  // lastInsertedCell: null,
   focusedCell: { col: 0, row: 0 },
   singleCellActions: {
-    setFocusedCell: (cell: TCell) => set({ focusedCell: cell }),
-    setLastInsertedCell: (cell: TCell | null) => set({ lastInsertedCell: cell }),
-    setAnimationType: (cell: TAnimationCellType | null) => set({ animationType: cell }),
+    setFocusedCell: (cell: TCell) =>
+      set((state) => ({ previousFocusedCell: state.focusedCell, focusedCell: cell })),
+    // setLastInsertedCell: (cell: TCell | null) => set({ lastInsertedCell: cell }),
   },
   invalidCells: getCached("invalidCells") || [],
   invalidCellsActions: {
@@ -68,14 +68,17 @@ const useCellStore = create<TUseSudokuStore>((set) => ({
   },
 }));
 
-export const useSingleCell = () =>
-  useCellStore(
-    useShallow((state) => ({
-      animationType: state.animationType,
-      focusedCell: state.focusedCell,
-      lastInsertedCell: state.lastInsertedCell,
-    }))
-  );
+// export const useSingleCell = () =>
+//   useCellStore(
+//     useShallow((state) => ({
+//       focusedCell: state.focusedCell,
+//       previousFocusedCell: state.previousFocusedCell,
+//     }))
+//   );
+export const useFocusedCell = () => useCellStore((state) => state.focusedCell);
+export const usePreviousFocusedCell = () =>
+  useCellStore((state) => state.previousFocusedCell);
+
 export const useSingleCellActions = () => useCellStore((state) => state.singleCellActions);
 
 export const useInvalidCells = () => useCellStore((state) => state.invalidCells);

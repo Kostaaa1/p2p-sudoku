@@ -1,12 +1,12 @@
 import { useCallback, useMemo } from "react";
 import { twMerge } from "tailwind-merge";
-import { useSingleCell, useInsertedCells, useInvalidCells } from "../store/cellStore";
+import { useFocusedCell, useInsertedCells, useInvalidCells } from "../store/cellStore";
 import { isCellIncludedInStack } from "../utils/utils";
 
 const useGenerateCellStyles = () => {
   const invalidCells = useInvalidCells();
   const insertedCells = useInsertedCells();
-  const { focusedCell } = useSingleCell();
+  const focusedCell = useFocusedCell();
 
   const shouldRenderRightBorder = (colId: number) => {
     if (colId !== 2 && colId % 2 === 0) return;
@@ -26,7 +26,7 @@ const useGenerateCellStyles = () => {
     []
   );
 
-  const isFieldClicked = useMemo(() => {
+  const isCellFocused = useMemo(() => {
     return (rowId: number, colId: number) => {
       return focusedCell?.col === colId && focusedCell.row === rowId;
     };
@@ -61,9 +61,8 @@ const useGenerateCellStyles = () => {
         focusedCell.value &&
           parseInt(focusedCell.value) === parseInt(value) &&
           "bg-[#6585a9] bg-opacity-40",
-        isCellIncludedInStack(invalidCells, { row, col, value }) &&
-          "bg-red-300 bg-opacity-60",
-        isFieldClicked(row, col) && "bg-blue-300 bg-opacity-80",
+        isCellIncludedInStack(invalidCells, { row, col, value }) && "bg-red-300",
+        isCellFocused(row, col) && "bg-blue-300 bg-opacity-80",
       ].join(" ")
     );
   };

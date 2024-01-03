@@ -1,11 +1,11 @@
 import { MutableRefObject, useCallback, useEffect } from "react";
 import { ArrowFunctions } from "../types/types";
-import { useSingleCell, useSingleCellActions } from "../store/cellStore";
+import { useFocusedCell, useSingleCellActions } from "../store/cellStore";
 import useGameStateStore from "../store/gameStateStore";
 import useSudokuStore from "../store/sudokuStore";
 
 const useKeyboardArrows = (inputRefs: MutableRefObject<HTMLInputElement[]>) => {
-  const { focusedCell } = useSingleCell();
+  const focusedCell = useFocusedCell();
   const { setFocusedCell } = useSingleCellActions();
 
   const isWinner = useGameStateStore((state) => state.isWinner);

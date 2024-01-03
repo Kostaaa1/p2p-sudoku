@@ -20,6 +20,7 @@ export function generateSudokuBoard(difficulty: DifficultySet["data"]): string[]
   // Remove some numbers to create the puzzle
   createPuzzle(sudokuGrid, difficulty);
 
+  console.log("okdoksoakdo", sudokuGrid);
   return sudokuGrid;
 }
 

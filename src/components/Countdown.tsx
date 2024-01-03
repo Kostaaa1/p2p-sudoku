@@ -41,7 +41,7 @@ const Countdown: FC<CountdownProps> = ({ startNewGame }) => {
 
   // Actions:
   const { setTime } = useCountdownStore((state) => state.actions);
-  const { setFocusedCell, setLastInsertedCell } = useSingleCellActions();
+  const { setFocusedCell } = useSingleCellActions();
   const { setInvalidCells } = useInvalidCellsActions();
   const { setInsertedCells } = useInsertedCellsActions();
   const { setSudoku } = useSudokuStore((state) => state.actions);
@@ -74,7 +74,7 @@ const Countdown: FC<CountdownProps> = ({ startNewGame }) => {
         setInsertedCells(insertedCells);
         setMistakes(mistakes);
         setFocusedCell({ row: 0, col: 0, value: sudoku[0][0] });
-        setLastInsertedCell(null);
+        // setLastInsertedCell(null);
       }
     };
     window.addEventListener("beforeunload", func);
@@ -114,6 +114,7 @@ const Countdown: FC<CountdownProps> = ({ startNewGame }) => {
         } else if (start === 0) {
           localStorage.removeItem("main_game");
           setIsCountdownActive(false);
+          setIsWinner(false);
           return;
         }
       }, 1000);

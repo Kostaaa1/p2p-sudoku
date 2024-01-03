@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import useSudoku from "../hooks/useSudoku";
 import Cell from "../components/Cell";
 import Modal from "../components/Modal";
@@ -13,9 +13,10 @@ import useGameStateStore from "../store/gameStateStore";
 import useMistakesStore from "../store/mistakesStore";
 import useCountdownStore from "../store/countdownStore";
 import {
+  useFocusedCell,
   useInsertedCellsActions,
   useInvalidCellsActions,
-  useSingleCell,
+  usePreviousFocusedCell,
   useSingleCellActions,
 } from "../store/cellStore";
 import { DifficultySet, TUnifiedGame } from "../types/types";
@@ -23,7 +24,8 @@ import useToastStore from "../store/toastStore";
 import { useShallow } from "zustand/react/shallow";
 import { countdownSet, emptySudoku } from "../store/constants";
 import { generateSudokuBoard } from "../utils/generateSudoku";
-import Keyboard from "../components/Keyboard";
+import { useAnimationValues, useAnimationValuesActions } from "../store/animationStore";
+import { motion, stagger, useAnimate, useAnimation, useAnimationFrame } from "framer-motion";
 
 function Sudoku() {
   const inputRefs = useRef<HTMLInputElement[]>([]);
@@ -34,13 +36,15 @@ function Sudoku() {
   const isWinner = useGameStateStore((state) => state.isWinner);
   const difficulty = useGameStateStore((state) => state.difficulty);
   const mistakes = useMistakesStore((state) => state.mistakes);
-  const { animationType, lastInsertedCell } = useSingleCell();
+  const { resetAnimationValues } = useAnimationValuesActions();
+  const animationValues = useAnimationValues();
+  const focusedCell = useFocusedCell();
+  const previousFocusedCell = usePreviousFocusedCell();
 
   const { generateBorderStyle, generateCellStateStyle, generateHighlightStyle } =
     useGenerateCellStyles();
   const isCountdownActive = useCountdownStore((state) => state.isCountdownActive);
-  const { handleChangeInput } = useSudoku();
-  // const { handleInputClick } = useKeyboardArrows(inputRefs);
+  const { handleChangeInput, lastInsertedCell } = useSudoku();
   useKeyboardArrows(inputRefs);
 
   const { setIsOpponentReady } = usePeerStore((state) => state.actions);
@@ -50,8 +54,9 @@ function Sudoku() {
   const { setInvalidCells, resetInvalidCells } = useInvalidCellsActions();
   const { setInsertedCells, resetInsertedCells } = useInsertedCellsActions();
   const { setSudoku } = useSudokuStore(useShallow((state) => state.actions));
-  const { setFocusedCell, setLastInsertedCell, setAnimationType } = useSingleCellActions();
+  const { setFocusedCell } = useSingleCellActions();
   const { setIsWinner } = useGameStateStore((state) => state.actions);
+  const [scope, animate] = useAnimate();
 
   // // From usePersist storage:
   const setAll = (mainGame: string) => {
@@ -65,7 +70,6 @@ function Sudoku() {
       setIsWinner(isWinner);
       setSudoku(sudoku);
       setMistakes(mistakes);
-      setLastInsertedCell(null);
       setFocusedCell({ row: 0, col: 0, value: sudoku[0][0] });
     }
   };
@@ -102,7 +106,6 @@ function Sudoku() {
     const newGame = sudoku || generateSudokuBoard(diff);
     setAll(JSON.stringify({ ...emptyGame, sudoku: newGame }));
   };
-
   useEffect(() => {
     if (!connection) {
       const cachedGameData = localStorage.getItem("main_game");
@@ -116,54 +119,83 @@ function Sudoku() {
     }
   }, [difficulty]);
 
-  // // Animation:
+  ////////////////////////////////////
+  ///////////// Animation:////////////
+  ////////////////////////////////////
+  // useEffect(() => {
+  //   // console.log("focusedCell", focusedCell);
+  //   // console.log("previousFocusedCell", previousFocusedCell);
+  //   const { col, row } = focusedCell;
+  //   inputRefs.current[row * 9 + col].classList.add("animate-wave");
+
+  //   if (previousFocusedCell) {
+  //     const previousRef =
+  //       inputRefs.current[previousFocusedCell.row * 9 + previousFocusedCell.col];
+
+  //     // if (!previousRef.classList.contains("animate-wave")) {
+  //     previousRef.classList.add("animate-none");
+  //     // }
+  //   }
+  // }, [focusedCell, previousFocusedCell]);
+
+  // useEffect(() => {
+  //   console.log("focusedCell", focusedCell);
+  // const { row, col } = focusedCell;
+  // const focusedRef = inputRefs.current[row * 9 + col];
+  //
+  // }, [focusedCell]);
+
   useEffect(() => {
-    if (!animationType || !lastInsertedCell) return;
-    console.log("ran");
+    if (animationValues.length === 0 || !lastInsertedCell) return;
     const { col, row, value } = lastInsertedCell;
 
     if (value === "") return;
     const delay = 0.06;
 
-    const addAnimationToCell = (animatedCell: number, delayMultiplier: number) => {
-      const inputRef = inputRefs.current[animatedCell];
+    const addAnimationToCell = (cellId: number, delayMultiplier: number) => {
+      const inputRef = inputRefs.current[cellId];
+      animate(
+        inputRef,
+        // { background: "red" },
+        { background: ["rgb(152, 228, 255))", ""] },
+        { duration: 10, ease: "easeInOut", delay: delayMultiplier * 10 }
+      );
 
-      inputRef.style.animationDelay = "";
-      inputRef.classList.remove("animate-wave");
-      // Trigger a reflow (force a layout) before adding the class again
-      void inputRef.offsetWidth;
-
-      inputRef.classList.add("animate-wave");
-      inputRef.style.animationDelay = `${delayMultiplier}s`;
+      // inputRef.style.animationDelay = "";
+      // inputRef.classList.remove("animate-wave");
+      // void inputRef.offsetWidth;
+      // inputRef.classList.add("animate-wave");
+      // inputRef.style.animationDelay = `${delayMultiplier}s`;
     };
 
-    if (animationType === "row") {
+    if (animationValues.includes("row")) {
       for (let i = 0; i < 9; i++) {
         const rowDelay = Math.abs(col - i) * delay;
         addAnimationToCell(row * 9 + i, rowDelay);
       }
     }
 
-    if (animationType === "col") {
+    if (animationValues.includes("col")) {
       for (let i = 0; i < 9; i++) {
         const colDelay = Math.abs(row - i) * delay;
         addAnimationToCell(i * 9 + col, colDelay);
       }
     }
 
-    if (animationType === "grid") {
+    if (animationValues.includes("grid")) {
       const startRow = Math.floor(row / 3) * 3;
       const startCol = Math.floor(col / 3) * 3;
 
-      for (let i = startRow; i < startRow + 3; i++) {
-        for (let j = startCol; j < startCol + 3; j++) {
-          const gridDelay = (Math.abs(col - j) + Math.abs(row - i)) * delay;
-          addAnimationToCell(i * 9 + j, gridDelay);
-        }
+      for (let k = 0; k < 9; k++) {
+        const i = startRow + Math.floor(k / 3);
+        const j = startCol + (k % 3);
+
+        const gridDelay = k * delay;
+        addAnimationToCell(i * 9 + j, gridDelay);
       }
     }
-    setAnimationType(null);
-  }, [animationType, lastInsertedCell]);
+    resetAnimationValues();
+  }, [animationValues, lastInsertedCell]);
 
   return (
     <div className="flex items-center justify-center font-semibold">
@@ -185,10 +217,10 @@ function Sudoku() {
             </div>
           )} */}
           {sudoku?.map((rowVal, rowId) => (
-            <div key={rowId} className="flex h-full w-full">
+            <div ref={scope} key={rowId} className="flex h-full w-full">
               {rowVal.map((colVal, colId) => (
                 <div key={colId} className="flex h-full w-full items-center justify-center">
-                  <Cell
+                  {/* <Cell
                     cellRef={(el: HTMLInputElement) =>
                       (inputRefs.current[rowId * 9 + colId] = el!)
                     }
@@ -197,6 +229,21 @@ function Sudoku() {
                     rowId={rowId}
                     handleChangeInput={handleChangeInput}
                     className={twMerge(
+                      generateBorderStyle(rowId, colId),
+                      generateHighlightStyle(rowId, colId),
+                      generateCellStateStyle(rowId, colId, colVal)
+                    )}
+                  /> */}
+                  <motion.input
+                    ref={(el: HTMLInputElement) =>
+                      (inputRefs.current[rowId * 9 + colId] = el!)
+                    }
+                    type="text"
+                    value={colVal}
+                    onChange={(e) => handleChangeInput(e)}
+                    onClick={() => setFocusedCell({ row: rowId, col: colId, value: colVal })}
+                    className={twMerge(
+                      "text-gray-700 h-full w-full border border-r-0 border-b-0 border-[#BEC6D4] cursor-pointer text-3xl bg-opacity-100 bg-transparent text-center caret-transparent",
                       generateBorderStyle(rowId, colId),
                       generateHighlightStyle(rowId, colId),
                       generateCellStateStyle(rowId, colId, colVal)

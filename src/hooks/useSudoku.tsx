@@ -1,22 +1,25 @@
-import { ChangeEvent, useCallback, useEffect } from "react";
+import { ChangeEvent, useCallback, useEffect, useMemo } from "react";
 import { TCell } from "../types/types";
 import { isCellIncludedInStack, isObjectEqual } from "../utils/utils";
 import useSudokuStore from "../store/sudokuStore";
 import { useShallow } from "zustand/react/shallow";
 import useGameStateStore from "../store/gameStateStore";
 import {
+  useFocusedCell,
   useInsertedCells,
-  useSingleCell,
   useInsertedCellsActions,
   useInvalidCells,
   useInvalidCellsActions,
   useSingleCellActions,
 } from "../store/cellStore";
 import useMistakesStore from "../store/mistakesStore";
+import { useAnimationValuesActions } from "../store/animationStore";
 
 const useSudoku = () => {
-  const { focusedCell, lastInsertedCell, animationType } = useSingleCell();
-  const { setFocusedCell, setLastInsertedCell, setAnimationType } = useSingleCellActions();
+  const { addAnimationCol, addAnimationGrid, addAnimationRow } = useAnimationValuesActions();
+
+  const focusedCell = useFocusedCell();
+  const { setFocusedCell } = useSingleCellActions();
 
   const invalidCells = useInvalidCells();
   const { addInvalidCell, removeInvalidCell } = useInvalidCellsActions();
@@ -28,6 +31,15 @@ const useSudoku = () => {
 
   const isWinner = useGameStateStore((state) => state.isWinner);
   const { incrementMistakes } = useMistakesStore((state) => state.actions);
+
+  // useEffect(() => {
+  //   const lastInserted = insertedCells[0];
+  //   console.log(lastInserted);
+  // }, [insertedCells]);
+
+  const lastInsertedCell = useMemo(() => {
+    return insertedCells[0];
+  }, [insertedCells]);
 
   /////////////////////////////////////
   // const isLastCellEmpty = useMemo(() => {
@@ -54,8 +66,8 @@ const useSudoku = () => {
         )
         .filter((i) => i !== -1) as TCell[];
 
-      console.log("colValues ", colValues);
-      console.log("colInvalidValues: ", colInvalidValues);
+      // console.log("colValues ", colValues);
+      // console.log("colInvalidValues: ", colInvalidValues);
 
       if (colInvalidValues.length > 1) {
         colInvalidValues.forEach((rowCell) => {
@@ -77,8 +89,8 @@ const useSudoku = () => {
         })
         .filter((x) => x !== -1) as TCell[];
 
-      console.log(":rowValues ", rowValues);
-      console.log("rowInvalidValues: ", rowInvalidValues);
+      // console.log(":rowValues ", rowValues);
+      // console.log("rowInvalidValues: ", rowInvalidValues);
 
       if (rowInvalidValues.length > 1) {
         rowInvalidValues.forEach((colCell) => {
@@ -111,40 +123,38 @@ const useSudoku = () => {
         }
       }
 
-      console.log("gridInvalidValues", gridInvalidValues);
+      // console.log("gridInvalidValues", gridInvalidValues);
       if (gridInvalidValues.length > 0) {
         gridInvalidValues.forEach((cell) => stack.push(cell));
       }
 
       if (
-        !animationType &&
         colValues.length === 9 &&
         stack.length === 1 &&
         isObjectEqual(stack[0], lastInsertedCell)
       ) {
-        setAnimationType("row");
+        addAnimationRow();
       }
 
       if (
-        !animationType &&
         gridValues.length === 9 &&
         stack.length === 1 &&
         isObjectEqual(stack[0], lastInsertedCell)
       ) {
-        setAnimationType("grid");
+        // setAnimationType("grid");
+        addAnimationGrid();
       }
 
       if (
-        !animationType &&
         rowValues.length === 9 &&
         stack.length === 1 &&
         isObjectEqual(stack[0], lastInsertedCell)
       ) {
-        setAnimationType("col");
+        addAnimationCol();
       }
 
       if (type === "add" && stack.length > 1) {
-        incrementMistakes();
+        if (value !== "") incrementMistakes();
         stack.forEach((cell) => addInvalidCell(cell));
       }
 
@@ -217,8 +227,8 @@ const useSudoku = () => {
         : addInsertedCell(newCell);
 
       // Update Sudoku Cell:
+      // setLastInsertedCell(newCell);
       updateSudokuCell(newCell);
-      setLastInsertedCell(newCell);
       setFocusedCell(newCell);
     },
     [
@@ -227,7 +237,7 @@ const useSudoku = () => {
       insertedCells,
       addInsertedCell,
       updateSudokuCell,
-      setLastInsertedCell,
+      // setLastInsertedCell,
       setFocusedCell,
       deleteFocusedCell,
     ]
@@ -235,6 +245,7 @@ const useSudoku = () => {
 
   return {
     handleChangeInput,
+    lastInsertedCell,
     // resetGameState,
     // startNewGame,
   };
