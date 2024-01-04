@@ -4,7 +4,7 @@ import { DifficultySet } from "../types/types";
 import usePeerStore from "../store/peerStore";
 import useGameStateStore from "../store/gameStateStore";
 
-const DifficultyOptions = () => {
+const DifficultyDropdown = () => {
   const selectRef = useRef<HTMLSelectElement>(null);
   const connection = usePeerStore((state) => state.connection);
   const difficulty = useGameStateStore((state) => state.difficulty);
@@ -47,7 +47,8 @@ const DifficultyOptions = () => {
           >
             {diffOptions.map((opt) => (
               <option key={opt.id} value={opt.option}>
-                {opt.option[0].toUpperCase() + opt.option.slice(1, opt.option.length)}
+                {opt.option[0].toUpperCase() +
+                  opt.option.slice(1, opt.option.length)}
               </option>
             ))}
           </select>
@@ -59,4 +60,4 @@ const DifficultyOptions = () => {
   );
 };
 
-export default DifficultyOptions;
+export default DifficultyDropdown;

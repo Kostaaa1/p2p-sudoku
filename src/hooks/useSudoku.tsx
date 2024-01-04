@@ -16,7 +16,8 @@ import useMistakesStore from "../store/mistakesStore";
 import { useAnimationValuesActions } from "../store/animationStore";
 
 const useSudoku = () => {
-  const { addAnimationCol, addAnimationGrid, addAnimationRow } = useAnimationValuesActions();
+  const { addAnimationCol, addAnimationGrid, addAnimationRow } =
+    useAnimationValuesActions();
 
   const focusedCell = useFocusedCell();
   const { setFocusedCell } = useSingleCellActions();
@@ -27,51 +28,39 @@ const useSudoku = () => {
   const { addInsertedCell, removeInsertedCell } = useInsertedCellsActions();
 
   const sudoku = useSudokuStore((state) => state.sudoku);
-  const { updateSudokuCell } = useSudokuStore(useShallow((state) => state.actions));
-
+  const { updateSudokuCell } = useSudokuStore(
+    useShallow((state) => state.actions),
+  );
   const isWinner = useGameStateStore((state) => state.isWinner);
   const { incrementMistakes } = useMistakesStore((state) => state.actions);
-
-  // useEffect(() => {
-  //   const lastInserted = insertedCells[0];
-  //   console.log(lastInserted);
-  // }, [insertedCells]);
 
   const lastInsertedCell = useMemo(() => {
     return insertedCells[0];
   }, [insertedCells]);
 
   /////////////////////////////////////
-  // const isLastCellEmpty = useMemo(() => {
-  //   return sudoku?.flat().filter((x) => x === "").length === 1;
-  // }, [sudoku]);
-  // const allCellsFilled = useMemo(() => {
-  //   return sudoku?.flat().every((x) => x !== "");
-  // }, [sudoku]);
-  /////////////////////////////////////
   const mutateInvalidCells = useCallback(
     (payload: { type: "add" | "remove"; cell: TCell }) => {
       if (!lastInsertedCell) return;
 
-      console.log("called mutateinvalid");
       const { cell, type } = payload;
       const { col, row, value } = cell;
       const stack: TCell[] = [];
 
-      // // Checking column
+      // Checking column
       const colValues = sudoku[row].filter((x) => x !== "");
       const colInvalidValues = sudoku[row]
         .map((cellValue, i) =>
-          cellValue !== "" && cellValue === value ? { row, col: i, value } : -1
+          cellValue !== "" && cellValue === value ? { row, col: i, value } : -1,
         )
         .filter((i) => i !== -1) as TCell[];
 
-      // console.log("colValues ", colValues);
-      // console.log("colInvalidValues: ", colInvalidValues);
-
       if (colInvalidValues.length > 1) {
         colInvalidValues.forEach((rowCell) => {
-          if (rowCell.value === value && !isCellIncludedInStack(stack, rowCell)) {
+          if (
+            rowCell.value === value &&
+            !isCellIncludedInStack(stack, rowCell)
+          ) {
             stack.push(rowCell);
           }
         });
@@ -94,7 +83,10 @@ const useSudoku = () => {
 
       if (rowInvalidValues.length > 1) {
         rowInvalidValues.forEach((colCell) => {
-          if (colCell.value === value && !isCellIncludedInStack(stack, colCell)) {
+          if (
+            colCell.value === value &&
+            !isCellIncludedInStack(stack, colCell)
+          ) {
             stack.push(colCell);
           }
         });
@@ -123,7 +115,6 @@ const useSudoku = () => {
         }
       }
 
-      // console.log("gridInvalidValues", gridInvalidValues);
       if (gridInvalidValues.length > 0) {
         gridInvalidValues.forEach((cell) => stack.push(cell));
       }
@@ -141,7 +132,6 @@ const useSudoku = () => {
         stack.length === 1 &&
         isObjectEqual(stack[0], lastInsertedCell)
       ) {
-        // setAnimationType("grid");
         addAnimationGrid();
       }
 
@@ -160,7 +150,7 @@ const useSudoku = () => {
 
       if (type === "remove") {
         const removedFocusedStack = stack.filter(
-          (x) => !(x.row === row && x.col === col && x.value === value)
+          (x) => !(x.row === row && x.col === col && x.value === value),
         );
 
         console.log("removeFocusedStack", removedFocusedStack);
@@ -168,13 +158,12 @@ const useSudoku = () => {
       }
       return true;
     },
-    [lastInsertedCell]
+    [lastInsertedCell],
   );
 
   useEffect(() => {
-    if (!sudoku || isWinner !== null || !lastInsertedCell || lastInsertedCell.value === "")
+    if (isWinner !== null || !lastInsertedCell || lastInsertedCell.value === "")
       return;
-
     mutateInvalidCells({ type: "add", cell: lastInsertedCell });
   }, [lastInsertedCell]);
 
@@ -192,11 +181,12 @@ const useSudoku = () => {
         (x.row === row ||
           x.col === col ||
           (Math.floor(x.row / 3) === Math.floor(row / 3) &&
-            Math.floor(x.col / 3) === Math.floor(col / 3)))
+            Math.floor(x.col / 3) === Math.floor(col / 3))),
     );
 
     targettedCells.forEach((cell) => {
-      if (!mutateInvalidCells({ type: "remove", cell })) removeInvalidCell(cell);
+      if (!mutateInvalidCells({ type: "remove", cell }))
+        removeInvalidCell(cell);
     });
   }, [
     focusedCell,
@@ -227,7 +217,6 @@ const useSudoku = () => {
         : addInsertedCell(newCell);
 
       // Update Sudoku Cell:
-      // setLastInsertedCell(newCell);
       updateSudokuCell(newCell);
       setFocusedCell(newCell);
     },
@@ -237,17 +226,14 @@ const useSudoku = () => {
       insertedCells,
       addInsertedCell,
       updateSudokuCell,
-      // setLastInsertedCell,
       setFocusedCell,
       deleteFocusedCell,
-    ]
+    ],
   );
 
   return {
     handleChangeInput,
     lastInsertedCell,
-    // resetGameState,
-    // startNewGame,
   };
 };
 

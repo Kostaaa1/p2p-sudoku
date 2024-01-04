@@ -1,6 +1,8 @@
 import { DifficultySet } from "../types/types";
 
-export function generateSudokuBoard(difficulty: DifficultySet["data"]): string[][] {
+export function generateSudokuBoard(
+  difficulty: DifficultySet["data"],
+): string[][] {
   // return [
   //   ["5", "3", "4", "6", "7", "8", "9", "1", "2"],
   //   ["6", "7", "2", "1", "9", "5", "3", "4", "8"],
@@ -12,15 +14,15 @@ export function generateSudokuBoard(difficulty: DifficultySet["data"]): string[]
   //   ["2", "8", "7", "4", "1", "9", "6", "3", "5"],
   //   ["3", "4", "5", "2", "8", "6", "", "7", ""],
   // ];
-  const sudokuGrid: string[][] = Array.from({ length: 9 }, () => Array(9).fill(""));
+  const sudokuGrid: string[][] = Array.from({ length: 9 }, () =>
+    Array(9).fill(""),
+  );
   // Fill the diagonal 3x3 subgrids with random numbers
   fillDiagonalSubgrids(sudokuGrid);
   // Solve the Sudoku grid
   solveSudoku(sudokuGrid);
   // Remove some numbers to create the puzzle
   createPuzzle(sudokuGrid, difficulty);
-
-  console.log("okdoksoakdo", sudokuGrid);
   return sudokuGrid;
 }
 
@@ -69,7 +71,11 @@ function solveSudoku(grid: string[][]) {
     );
   }
 
-  function checkSubgrid(subgridRow: number, subgridCol: number, num: string): boolean {
+  function checkSubgrid(
+    subgridRow: number,
+    subgridCol: number,
+    num: string,
+  ): boolean {
     for (let i = 0; i < 3; i++) {
       for (let j = 0; j < 3; j++) {
         if (grid[subgridRow + i][subgridCol + j] === num) {

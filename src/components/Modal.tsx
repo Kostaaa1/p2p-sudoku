@@ -18,7 +18,6 @@ const Modal: FC<ModalProps> = ({ resetGameState, startNewGame }) => {
   const difficulty = useGameStateStore((state) => state.difficulty);
   const isWinner = useGameStateStore((state) => state.isWinner);
   const mistakes = useMistakesStore((state) => state.mistakes);
-
   const [isClicked, setIsClicked] = useState<boolean>(false);
 
   const playAgain = () => {
@@ -31,12 +30,13 @@ const Modal: FC<ModalProps> = ({ resetGameState, startNewGame }) => {
   };
 
   useEffect(() => {
-    if (isClicked && isOpponentReady && connection && difficulty) resetGameState(difficulty);
+    if (isClicked && isOpponentReady && connection && difficulty)
+      resetGameState(difficulty);
   }, [connection, difficulty, isClicked, isOpponentReady]);
 
   return (
-    <div className="absolute left-0 top-0 flex h-full w-full items-center justify-center bg-black bg-opacity-70 text-black">
-      <div className="z-10 flex h-max  w-[420px] flex-col items-center justify-between rounded-md bg-white p-2">
+    <div className="absolute left-0 top-0 z-50 flex h-full w-full items-center justify-center bg-black bg-opacity-70 text-black">
+      <div className="flex h-max  w-[420px] flex-col items-center justify-between rounded-md bg-white p-2">
         <div className="pb-4">
           {isWinner === false && (
             <div>
@@ -50,7 +50,9 @@ const Modal: FC<ModalProps> = ({ resetGameState, startNewGame }) => {
           )}
           {isWinner === true && (
             <div className="flex h-full flex-col items-center">
-              <h4 className="pb-2 text-2xl font-bold">🎉🎉🎉 Congratulations! 🎉🎉🎉</h4>
+              <h4 className="pb-2 text-2xl font-bold">
+                🎉🎉🎉 Congratulations! 🎉🎉🎉
+              </h4>
               <p className="font-semibold">You have won the game!</p>
             </div>
           )}
@@ -61,7 +63,7 @@ const Modal: FC<ModalProps> = ({ resetGameState, startNewGame }) => {
             disabled={isClicked}
             className={twMerge(
               "block h-max w-full items-center justify-center bg-blue-500 text-white transition-colors duration-100",
-              !isClicked ? "bg-blue-500 hover:bg-blue-800" : "bg-slate-400"
+              !isClicked ? "bg-blue-500 hover:bg-blue-800" : "bg-slate-400",
             )}
           >
             {connection && isClicked ? (

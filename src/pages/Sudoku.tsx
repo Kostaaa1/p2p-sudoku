@@ -1,9 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import useSudoku from "../hooks/useSudoku";
-import Cell from "../components/Cell";
 import Modal from "../components/Modal";
 import Countdown from "../components/Countdown";
-import DifficultyOptions from "../components/DifficultyOptions";
+import DifficultyDropdown from "../components/DifficultyDropdown";
 import useGenerateCellStyles from "../hooks/useGenerateCellStyles";
 import { twMerge } from "tailwind-merge";
 import useKeyboardArrows from "../hooks/useKeyboardArrows";
@@ -13,10 +12,8 @@ import useGameStateStore from "../store/gameStateStore";
 import useMistakesStore from "../store/mistakesStore";
 import useCountdownStore from "../store/countdownStore";
 import {
-  useFocusedCell,
   useInsertedCellsActions,
   useInvalidCellsActions,
-  usePreviousFocusedCell,
   useSingleCellActions,
 } from "../store/cellStore";
 import { DifficultySet, TUnifiedGame } from "../types/types";
@@ -24,8 +21,10 @@ import useToastStore from "../store/toastStore";
 import { useShallow } from "zustand/react/shallow";
 import { countdownSet, emptySudoku } from "../store/constants";
 import { generateSudokuBoard } from "../utils/generateSudoku";
-import { useAnimationValues, useAnimationValuesActions } from "../store/animationStore";
-import { motion, stagger, useAnimate, useAnimation, useAnimationFrame } from "framer-motion";
+import {
+  useAnimationValues,
+  useAnimationValuesActions,
+} from "../store/animationStore";
 
 function Sudoku() {
   const inputRefs = useRef<HTMLInputElement[]>([]);
@@ -38,30 +37,37 @@ function Sudoku() {
   const mistakes = useMistakesStore((state) => state.mistakes);
   const { resetAnimationValues } = useAnimationValuesActions();
   const animationValues = useAnimationValues();
-  const focusedCell = useFocusedCell();
-  const previousFocusedCell = usePreviousFocusedCell();
-
-  const { generateBorderStyle, generateCellStateStyle, generateHighlightStyle } =
-    useGenerateCellStyles();
-  const isCountdownActive = useCountdownStore((state) => state.isCountdownActive);
-  const { handleChangeInput, lastInsertedCell } = useSudoku();
-  useKeyboardArrows(inputRefs);
-
+  const isCountdownActive = useCountdownStore(
+    (state) => state.isCountdownActive,
+  );
   const { setIsOpponentReady } = usePeerStore((state) => state.actions);
-  const { resetMistakes, setMistakes } = useMistakesStore((state) => state.actions);
-  const { setIsCountdownActive, setTime } = useCountdownStore((state) => state.actions);
+  const { resetMistakes, setMistakes } = useMistakesStore(
+    (state) => state.actions,
+  );
+  const { setIsCountdownActive, setTime } = useCountdownStore(
+    (state) => state.actions,
+  );
   const { setIsToastRan } = useToastStore((state) => state.actions);
   const { setInvalidCells, resetInvalidCells } = useInvalidCellsActions();
   const { setInsertedCells, resetInsertedCells } = useInsertedCellsActions();
   const { setSudoku } = useSudokuStore(useShallow((state) => state.actions));
   const { setFocusedCell } = useSingleCellActions();
   const { setIsWinner } = useGameStateStore((state) => state.actions);
-  const [scope, animate] = useAnimate();
+
+  const { handleChangeInput, lastInsertedCell } = useSudoku();
+  const {
+    generateBorderStyle,
+    generateCellTextColor,
+    generateCellBackgroundColor,
+    generateHighlightStyle,
+  } = useGenerateCellStyles();
+  useKeyboardArrows(inputRefs);
 
   // // From usePersist storage:
   const setAll = (mainGame: string) => {
     const parsedData: TUnifiedGame = JSON.parse(mainGame);
-    const { time, insertedCells, invalidCells, isWinner, mistakes, sudoku } = parsedData;
+    const { time, insertedCells, invalidCells, isWinner, mistakes, sudoku } =
+      parsedData;
 
     if (time) {
       setTime(time);
@@ -74,7 +80,7 @@ function Sudoku() {
     }
   };
 
-  // Main Game Setter, whenever difficulty changes new game gets rendered ( only if there is nothing in storage, the storage gets saved before unloading):
+  // Main Game Setter, whenever difficulty changes new game gets rendered ( only if there is nothing in storage, the storage gets saved before unloading)j:
   const resetGameState = (difficulty: DifficultySet["data"]) => {
     localStorage.removeItem("main_game");
 
@@ -88,17 +94,20 @@ function Sudoku() {
     setIsWinner(null);
   };
 
-  const getEmptyUnifiedGame = useCallback((difficulty: DifficultySet["data"]) => {
-    const emptyGame: TUnifiedGame = {
-      sudoku: emptySudoku,
-      insertedCells: [],
-      invalidCells: [],
-      isWinner: null,
-      mistakes: 0,
-      time: countdownSet[difficulty],
-    };
-    return emptyGame;
-  }, []);
+  const getEmptyUnifiedGame = useCallback(
+    (difficulty: DifficultySet["data"]) => {
+      const emptyGame: TUnifiedGame = {
+        sudoku: emptySudoku,
+        insertedCells: [],
+        invalidCells: [],
+        isWinner: null,
+        mistakes: 0,
+        time: countdownSet[difficulty],
+      };
+      return emptyGame;
+    },
+    [],
+  );
 
   const startNewGame = (diff: DifficultySet["data"], sudoku?: string[][]) => {
     resetGameState(diff);
@@ -106,6 +115,7 @@ function Sudoku() {
     const newGame = sudoku || generateSudokuBoard(diff);
     setAll(JSON.stringify({ ...emptyGame, sudoku: newGame }));
   };
+
   useEffect(() => {
     if (!connection) {
       const cachedGameData = localStorage.getItem("main_game");
@@ -120,52 +130,23 @@ function Sudoku() {
   }, [difficulty]);
 
   ////////////////////////////////////
-  ///////////// Animation:////////////
+  //////////// Animation: ////////////
   ////////////////////////////////////
-  // useEffect(() => {
-  //   // console.log("focusedCell", focusedCell);
-  //   // console.log("previousFocusedCell", previousFocusedCell);
-  //   const { col, row } = focusedCell;
-  //   inputRefs.current[row * 9 + col].classList.add("animate-wave");
-
-  //   if (previousFocusedCell) {
-  //     const previousRef =
-  //       inputRefs.current[previousFocusedCell.row * 9 + previousFocusedCell.col];
-
-  //     // if (!previousRef.classList.contains("animate-wave")) {
-  //     previousRef.classList.add("animate-none");
-  //     // }
-  //   }
-  // }, [focusedCell, previousFocusedCell]);
-
-  // useEffect(() => {
-  //   console.log("focusedCell", focusedCell);
-  // const { row, col } = focusedCell;
-  // const focusedRef = inputRefs.current[row * 9 + col];
-  //
-  // }, [focusedCell]);
-
   useEffect(() => {
     if (animationValues.length === 0 || !lastInsertedCell) return;
     const { col, row, value } = lastInsertedCell;
-
     if (value === "") return;
-    const delay = 0.06;
 
+    const delay = 0.07;
     const addAnimationToCell = (cellId: number, delayMultiplier: number) => {
       const inputRef = inputRefs.current[cellId];
-      animate(
-        inputRef,
-        // { background: "red" },
-        { background: ["rgb(152, 228, 255))", ""] },
-        { duration: 10, ease: "easeInOut", delay: delayMultiplier * 10 }
-      );
+      inputRef.style.animationDelay = "";
 
-      // inputRef.style.animationDelay = "";
-      // inputRef.classList.remove("animate-wave");
-      // void inputRef.offsetWidth;
-      // inputRef.classList.add("animate-wave");
-      // inputRef.style.animationDelay = `${delayMultiplier}s`;
+      inputRef.classList.remove("animate-wave");
+      void inputRef.offsetWidth;
+      inputRef.classList.add("animate-wave");
+
+      inputRef.style.animationDelay = `${delayMultiplier}s`;
     };
 
     if (animationValues.includes("row")) {
@@ -198,55 +179,41 @@ function Sudoku() {
   }, [animationValues, lastInsertedCell]);
 
   return (
-    <div className="flex items-center justify-center font-semibold">
+    <div className="flex items-center justify-center font-semibold outline outline-1 outline-black">
       <div className="h-full px-4 text-center text-3xl text-gray-700">
         S<br></br>U<br></br>D<br></br>O<br></br>K<br></br>U<br></br>
       </div>
       <div>
-        <div className="h-12 flex w-full items-center justify-between">
-          <DifficultyOptions />
+        <div className="flex h-12 w-full items-center justify-between">
+          <DifficultyDropdown />
           <Countdown startNewGame={startNewGame} />
         </div>
         <div className="relative flex h-[540px] w-[540px] flex-col items-center justify-center overflow-hidden border-2 border-gray-700">
-          {/* {!allCellsFilled && (
-            <div className="absolute top-0 h-full w-full border border-gray-100 bg-gray-800 bg-opacity-10 bg-clip-padding backdrop-blur-sm backdrop-filter">
-              <div className="text-3xl italic text-white-900 flex items-center justify-center h-full">
-                <IconLoader2 className="h-10 w-10 animate-spin" />
-                <span> &nbsp; Loading...</span>
-              </div>
-            </div>
-          )} */}
           {sudoku?.map((rowVal, rowId) => (
-            <div ref={scope} key={rowId} className="flex h-full w-full">
+            <div key={rowId} className="flex h-full w-full">
               {rowVal.map((colVal, colId) => (
-                <div key={colId} className="flex h-full w-full items-center justify-center">
-                  {/* <Cell
-                    cellRef={(el: HTMLInputElement) =>
-                      (inputRefs.current[rowId * 9 + colId] = el!)
-                    }
-                    colId={colId}
-                    colVal={colVal}
-                    rowId={rowId}
-                    handleChangeInput={handleChangeInput}
-                    className={twMerge(
-                      generateBorderStyle(rowId, colId),
-                      generateHighlightStyle(rowId, colId),
-                      generateCellStateStyle(rowId, colId, colVal)
-                    )}
-                  /> */}
-                  <motion.input
+                <div
+                  key={colId}
+                  className={twMerge(
+                    "relative flex h-full w-full items-center justify-center",
+                    generateBorderStyle(rowId, colId),
+                    generateHighlightStyle(rowId, colId),
+                    generateCellBackgroundColor(rowId, colId, colVal),
+                  )}
+                >
+                  <input
                     ref={(el: HTMLInputElement) =>
                       (inputRefs.current[rowId * 9 + colId] = el!)
                     }
                     type="text"
                     value={colVal}
                     onChange={(e) => handleChangeInput(e)}
-                    onClick={() => setFocusedCell({ row: rowId, col: colId, value: colVal })}
+                    onClick={() =>
+                      setFocusedCell({ row: rowId, col: colId, value: colVal })
+                    }
                     className={twMerge(
-                      "text-gray-700 h-full w-full border border-r-0 border-b-0 border-[#BEC6D4] cursor-pointer text-3xl bg-opacity-100 bg-transparent text-center caret-transparent",
-                      generateBorderStyle(rowId, colId),
-                      generateHighlightStyle(rowId, colId),
-                      generateCellStateStyle(rowId, colId, colVal)
+                      "animate-wave absolute left-0 top-0 h-full w-full cursor-pointer border border-b-0 border-r-0 border-[#BEC6D4] bg-transparent text-center text-3xl text-gray-700 caret-transparent",
+                      generateCellTextColor(rowId, colId, colVal),
                     )}
                   />
                 </div>

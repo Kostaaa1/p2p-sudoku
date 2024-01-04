@@ -5,9 +5,17 @@ export default {
     extend: {
       keyframes: {
         wave: {
-          "0%": { background: "rgba(152, 228, 255, 0.9)" },
-          "70%": { background: "rgba(152, 228, 255, 0.2)" },
-          "100%": { background: "" },
+          "0%": {
+            backgroundColor: "rgba(134, 182, 246, 1)",
+          },
+
+          "60%": {
+            backgroundColor: "rgba(134, 182, 246, 0)",
+          },
+
+          "100%": {
+            backgroundColor: "",
+          },
         },
       },
       animation: {
