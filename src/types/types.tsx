@@ -4,14 +4,7 @@ export type TFocusedCell = {
   value?: string;
 };
 export type TCell = TFocusedCell & { value: string };
-
 export type TAnimationCellType = "row" | "col" | "grid";
-export type TAnimationData = {
-  [key in TAnimationCellType]: boolean;
-};
-export type TStyleCellType = {
-  [key in TAnimationCellType]: string;
-};
 
 export type PeerResponse =
   | {

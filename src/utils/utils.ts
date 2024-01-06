@@ -1,4 +1,9 @@
-import { DifficultySet, TCell, TFocusedCell, TUnifiedGame } from "../types/types";
+import {
+  DifficultySet,
+  TCell,
+  TFocusedCell,
+  TUnifiedGame,
+} from "../types/types";
 
 export const getCached = (key: keyof TUnifiedGame) => {
   const storedGame = localStorage.getItem("main_game");
@@ -12,12 +17,14 @@ export const getCachedDifficulty = (): DifficultySet["data"] | null => {
 
 export const isCellIncludedInStack = (stack: TCell[], cell: TCell) => {
   const { col, row, value } = cell;
-  return stack.some((obj) => obj.row === row && obj.col === col && obj.value === value);
+  return stack.some(
+    (obj) => obj.row === row && obj.col === col && obj.value === value,
+  );
 };
 
 export const isObjectEqual = (
   o1: TCell | TFocusedCell,
-  o2: TCell | TFocusedCell
+  o2: TCell | TFocusedCell,
 ): boolean => {
   const keys1 = Object.keys(o1) as (keyof TCell)[];
   const keys2 = Object.keys(o2) as (keyof TCell)[];

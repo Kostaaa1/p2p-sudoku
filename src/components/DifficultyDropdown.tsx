@@ -46,7 +46,11 @@ const DifficultyDropdown = () => {
             onChange={handleDifficulty}
           >
             {diffOptions.map((opt) => (
-              <option key={opt.id} value={opt.option}>
+              <option
+                key={opt.id}
+                value={opt.option}
+                className="font-semibold text-gray-700"
+              >
                 {opt.option[0].toUpperCase() +
                   opt.option.slice(1, opt.option.length)}
               </option>

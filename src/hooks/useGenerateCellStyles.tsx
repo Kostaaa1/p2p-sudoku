@@ -26,13 +26,16 @@ const useGenerateCellStyles = () => {
       3 * Math.floor(rowId / 3) + 2 !== 8
     );
   };
+
   const generateBorderStyle = useMemo(
     () => (rowId: number, colId: number) => {
-      return twMerge(
+      const styles = [
         shouldRenderBottomBorder(rowId) && "border-b-2 border-b-gray-700",
         shouldRenderRightBorder(colId) && "border-r-2 border-r-gray-700",
-      );
+      ].filter(Boolean);
+      return twMerge(...styles);
     },
+
     [],
   );
 
@@ -58,13 +61,14 @@ const useGenerateCellStyles = () => {
   );
 
   const generateCellTextColor = (row: number, col: number, value: string) => {
-    return twMerge(
+    const styles = [
       isCellIncludedInStack(insertedCells, { row, col, value }) &&
         "text-blue-600",
       isCellIncludedInStack(invalidCells, { row, col, value }) &&
         isCellIncludedInStack(insertedCells, { row, col, value }) &&
         "text-red-700",
-    );
+    ].filter(Boolean);
+    return twMerge(...styles);
   };
 
   const generateCellBackgroundColor = (
@@ -72,16 +76,18 @@ const useGenerateCellStyles = () => {
     col: number,
     value: string,
   ) => {
-    return twMerge(
+    const styles = [
       focusedCell.value &&
         parseInt(focusedCell.value) === parseInt(value) &&
         !isObjectEqual(focusedCell, { row, col, value }) &&
         "bg-[#6585a9] bg-opacity-40",
-      isCellIncludedInStack(invalidCells, { row, col, value }) && "bg-red-300",
+      isCellIncludedInStack(invalidCells, { row, col, value }) &&
+        "bg-red-400 bg-opacity-70",
       focusedCell.row === row &&
         focusedCell.col === col &&
         "bg-blue-300 bg-opacity-80",
-    );
+    ].filter(Boolean);
+    return twMerge(...styles);
   };
 
   return {

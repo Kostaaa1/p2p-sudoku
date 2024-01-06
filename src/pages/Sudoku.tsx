@@ -14,6 +14,7 @@ import useCountdownStore from "../store/countdownStore";
 import {
   useInsertedCellsActions,
   useInvalidCellsActions,
+  useLastInsertedCell,
   useSingleCellActions,
 } from "../store/cellStore";
 import { DifficultySet, TUnifiedGame } from "../types/types";
@@ -54,7 +55,8 @@ function Sudoku() {
   const { setFocusedCell } = useSingleCellActions();
   const { setIsWinner } = useGameStateStore((state) => state.actions);
 
-  const { handleChangeInput, lastInsertedCell } = useSudoku();
+  const lastInsertedCell = useLastInsertedCell();
+  const { handleChangeInput } = useSudoku();
   const {
     generateBorderStyle,
     generateCellTextColor,
@@ -179,16 +181,21 @@ function Sudoku() {
   }, [animationValues, lastInsertedCell]);
 
   return (
-    <div className="flex items-center justify-center font-semibold outline outline-1 outline-black">
+    // <div className="flex w-screen items-center justify-center">
+    //   <div className="w-[540px] outline outline-1 outline-black">
+    //     <p className="text-black">DSAKODKos</p>
+    //   </div>
+    // </div>
+    <div className="flex w-screen items-center justify-center font-semibold">
       <div className="h-full px-4 text-center text-3xl text-gray-700">
         S<br></br>U<br></br>D<br></br>O<br></br>K<br></br>U<br></br>
       </div>
-      <div>
+      <div className="flex w-[540px] flex-col items-center justify-center">
         <div className="flex h-12 w-full items-center justify-between">
           <DifficultyDropdown />
           <Countdown startNewGame={startNewGame} />
         </div>
-        <div className="relative flex h-[540px] w-[540px] flex-col items-center justify-center overflow-hidden border-2 border-gray-700">
+        <div className="relative flex h-[540px] w-full flex-col items-center justify-center overflow-hidden border-2 border-gray-700 bg-white">
           {sudoku?.map((rowVal, rowId) => (
             <div key={rowId} className="flex h-full w-full">
               {rowVal.map((colVal, colId) => (
@@ -212,7 +219,7 @@ function Sudoku() {
                       setFocusedCell({ row: rowId, col: colId, value: colVal })
                     }
                     className={twMerge(
-                      "animate-wave absolute left-0 top-0 h-full w-full cursor-pointer border border-b-0 border-r-0 border-[#BEC6D4] bg-transparent text-center text-3xl text-gray-700 caret-transparent",
+                      "absolute left-0 top-0 h-full w-full animate-wave cursor-pointer border border-b-0 border-r-0 border-[#BEC6D4] bg-transparent text-center text-3xl text-gray-700 caret-transparent",
                       generateCellTextColor(rowId, colId, colVal),
                     )}
                   />
@@ -221,7 +228,6 @@ function Sudoku() {
             </div>
           ))}
         </div>
-        {/* <Keyboard /> */}
         <div className="flex w-full items-center justify-between text-sm">
           <span className="text-md flex tracking-tighter text-black">
             PeerID:
