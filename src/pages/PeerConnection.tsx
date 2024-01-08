@@ -5,6 +5,7 @@ import { IconArrowLeft, IconCheck } from "@tabler/icons-react";
 import { twMerge } from "tailwind-merge";
 import usePeerStore from "../store/peerStore";
 import useGameStateStore from "../store/gameStateStore";
+import usePeer from "../hooks/usePeer";
 
 const PeerConnection = () => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -15,7 +16,7 @@ const PeerConnection = () => {
   const { setConnection } = usePeerStore((state) => state.actions);
   const peerId = usePeerStore((state) => state.peerId);
 
-  // const { resetGame } = useSudoku();
+  const { handleConnect } = usePeer();
   const [isCopyClicked, setIsCopyClicked] = useState<boolean>(false);
   const [page, setPage] = useState<number>(0);
   const PAGE_LIMIT = 2;
@@ -48,7 +49,9 @@ const PeerConnection = () => {
     if (selectedDif) {
       setDifficulty(selectedDif.data);
     }
-    setDifficultyData((state) => state.map((x) => ({ ...x, clicked: x.id === id })));
+    setDifficultyData((state) =>
+      state.map((x) => ({ ...x, clicked: x.id === id })),
+    );
   };
 
   const nextPage = () => {
@@ -80,7 +83,10 @@ const PeerConnection = () => {
               <p className="text-yellow-600 underline">{peerId}</p>
             </div>
             {isCopyClicked && <IconCheck className="-mr-4 text-green-600" />}
-            <button className="bg-slate-400 text-sm text-white" onClick={copyPeerId}>
+            <button
+              className="bg-slate-400 text-sm text-white"
+              onClick={copyPeerId}
+            >
               Copy
             </button>
           </div>
@@ -93,17 +99,17 @@ const PeerConnection = () => {
               onChange={(e) => setInput(e.target.value)}
               value={input}
               placeholder="Id"
-              className="custom-input w-full"
+              className="ml-2 h-7 w-full bg-white pl-2 outline outline-2 outline-gray-300"
             />
           </div>
         </>
       )}
       {page === 1 && (
         <div>
-          <p className="inline-flex items-center justify-center w-full">
+          <p className="inline-flex w-full items-center justify-center">
             Before you start, select the game difficulty:
           </p>
-          <div className="flex my-2 w-full justify-between">
+          <div className="my-2 flex w-full justify-between">
             {difficultyData.map((x, id) => (
               <button
                 key={x.id}
@@ -111,7 +117,7 @@ const PeerConnection = () => {
                 className={twMerge(
                   "w-full bg-slate-400 text-sm text-white transition-all duration-200 hover:bg-green-600",
                   id % 2 !== 0 && "mx-2",
-                  x.clicked && "bg-green-600"
+                  x.clicked && "bg-green-600",
                 )}
               >
                 {x.data.charAt(0).toUpperCase() + x.data.slice(1)}
@@ -122,7 +128,7 @@ const PeerConnection = () => {
       )}
       <button
         className="bg-slate-400 text-sm text-white"
-        // onClick={() => (page === 0 ? nextPage() : handleConnect(input))}
+        onClick={() => (page === 0 ? nextPage() : handleConnect(input))}
       >
         {page === 0 ? "Connect" : "Continue"}
       </button>

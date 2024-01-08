@@ -8,5 +8,5 @@ export const countdownSet: { [key in DifficultySet["data"]]: string } = {
 };
 
 export const emptySudoku = Array.from({ length: 9 }, () =>
-  Array.from({ length: 9 }, () => "")
+  Array.from({ length: 9 }, () => ""),
 );

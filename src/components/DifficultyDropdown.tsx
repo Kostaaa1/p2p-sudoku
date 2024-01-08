@@ -22,8 +22,6 @@ const DifficultyDropdown = () => {
   };
 
   useEffect(() => {
-    if (!connection) return;
-
     const activeValue = selectRef.current?.value;
     if (activeValue) {
       setDifficulty(activeValue as DifficultySet["data"]);
@@ -32,7 +30,7 @@ const DifficultyDropdown = () => {
     if (difficulty && selectRef.current) {
       selectRef.current.value = difficulty;
     }
-  }, [connection, difficulty]);
+  }, [difficulty]);
 
   return (
     <div>

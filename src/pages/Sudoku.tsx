@@ -72,7 +72,7 @@ function Sudoku() {
       parsedData;
 
     if (time) {
-      setTime(time);
+      setTime(difficulty);
       setInvalidCells(invalidCells);
       setInsertedCells(insertedCells);
       setIsWinner(isWinner);
@@ -82,7 +82,7 @@ function Sudoku() {
     }
   };
 
-  // Main Game Setter, whenever difficulty changes new game gets rendered ( only if there is nothing in storage, the storage gets saved before unloading)j:
+  // Main Game Setter, whenever difficulty changes new game gets created ( only if there is nothing in storage, the storage gets saved before unloading)j:
   const resetGameState = (difficulty: DifficultySet["data"]) => {
     localStorage.removeItem("main_game");
 
@@ -92,7 +92,7 @@ function Sudoku() {
     resetMistakes();
     resetInsertedCells();
     resetInvalidCells();
-    setTime(countdownSet[difficulty]);
+    setTime(difficulty);
     setIsWinner(null);
   };
 
@@ -129,7 +129,7 @@ function Sudoku() {
       if (!difficulty || isWinner !== null) return;
       startNewGame(difficulty);
     }
-  }, [difficulty]);
+  }, [difficulty, connection]);
 
   ////////////////////////////////////
   //////////// Animation: ////////////
@@ -181,11 +181,6 @@ function Sudoku() {
   }, [animationValues, lastInsertedCell]);
 
   return (
-    // <div className="flex w-screen items-center justify-center">
-    //   <div className="w-[540px] outline outline-1 outline-black">
-    //     <p className="text-black">DSAKODKos</p>
-    //   </div>
-    // </div>
     <div className="flex w-screen items-center justify-center font-semibold">
       <div className="h-full px-4 text-center text-3xl text-gray-700">
         S<br></br>U<br></br>D<br></br>O<br></br>K<br></br>U<br></br>

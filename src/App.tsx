@@ -15,13 +15,18 @@ import hornPath from "./assets/horn.mp3";
 
 function App() {
   const navigate = useNavigate();
-  const { setIsWinner } = useGameStateStore((state) => state.actions);
+  const { setIsWinner, setDifficulty } = useGameStateStore(
+    (state) => state.actions,
+  );
   const peer = usePeerStore((state) => state.peer);
   const { setSudoku } = useSudokuStore((state) => state.actions);
   const { booRef, hornRef } = useEndGameConditions();
-  const { updateCountdown } = useCountdownStore((state) => state.actions);
+  // const time = useCountdownStore((state) => state.time);
+  const { updateCountdown, setTime } = useCountdownStore(
+    (state) => state.actions,
+  );
   const { setConnection, setPeerId, setIsOpponentReady } = usePeerStore(
-    (state) => state.actions
+    (state) => state.actions,
   );
 
   useEffect(() => {
@@ -37,10 +42,15 @@ function App() {
 
       conn.on("data", (res) => {
         const { data, type } = res as PeerResponse;
+        if (type !== "countdown") {
+          console.log("App recieved data: ", data);
+        }
+
         if (type === "sudoku") {
           const { board, difficulty } = data;
           setSudoku(board);
-          // resetGameState(difficulty);
+          setDifficulty(difficulty);
+          setTime(difficulty);
         }
 
         if (type === "ready") {
@@ -48,7 +58,7 @@ function App() {
         }
 
         if (type === "end_game") {
-          const { isWinner, message } = data;
+          const { isWinner } = data;
           setIsWinner(isWinner);
         }
 

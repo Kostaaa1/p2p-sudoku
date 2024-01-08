@@ -5,7 +5,6 @@ import {
   isCellIncludedInStack,
   isObjectEqual,
 } from "../utils/utils";
-import { useShallow } from "zustand/react/shallow";
 
 type InvalidCellsActions = {
   addInvalidCell: (cell: TCell) => void;

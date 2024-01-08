@@ -29,9 +29,11 @@ const Countdown: FC<CountdownProps> = ({ startNewGame }) => {
   const connection = usePeerStore((state) => state.connection);
 
   const time = useCountdownStore((state) => state.time);
-  const isCountdownActive = useCountdownStore((state) => state.isCountdownActive);
+  const isCountdownActive = useCountdownStore(
+    (state) => state.isCountdownActive,
+  );
   const { updateCountdown, setIsCountdownActive } = useCountdownStore(
-    (state) => state.actions
+    (state) => state.actions,
   );
 
   const insertedCells = useInsertedCells();
@@ -54,7 +56,7 @@ const Countdown: FC<CountdownProps> = ({ startNewGame }) => {
     const func = () => {
       if (mistakes > 0 || invalidCells.length > 0 || insertedCells.length > 0) {
         console.log("invalidCells", invalidCells);
-        const data: TUnifiedGame = {
+        const dataCollectior: TUnifiedGame = {
           insertedCells,
           invalidCells,
           isWinner,
@@ -63,11 +65,11 @@ const Countdown: FC<CountdownProps> = ({ startNewGame }) => {
           time: time as string,
         };
 
-        localStorage.setItem("main_game", JSON.stringify(data));
+        localStorage.setItem("main_game", JSON.stringify(dataCollectior));
         localStorage.setItem("difficulty", JSON.stringify(difficulty));
         // setAll(JSON.stringify(data));
 
-        setTime(time as string);
+        setTime(difficulty);
         setInvalidCells(invalidCells);
         setIsWinner(isWinner);
         setSudoku(sudoku);
@@ -81,7 +83,16 @@ const Countdown: FC<CountdownProps> = ({ startNewGame }) => {
     return () => {
       window.removeEventListener("beforeunload", func);
     };
-  }, [insertedCells, time, difficulty, invalidCells, sudoku, mistakes, isWinner, connection]);
+  }, [
+    insertedCells,
+    time,
+    difficulty,
+    invalidCells,
+    sudoku,
+    mistakes,
+    isWinner,
+    connection,
+  ]);
 
   const resetCount = async () => {
     if (difficulty && isWinner === null && !connection) {
@@ -93,13 +104,15 @@ const Countdown: FC<CountdownProps> = ({ startNewGame }) => {
   };
 
   useEffect(() => {
-    if (!isCountdownActive || isWinner !== null || !time || !difficulty) return;
+    if (!isCountdownActive || isWinner !== null || !time) return;
+    console.log(isCountdownActive, time, "start countdown effect");
 
     let start = parseInt(time.split(":")[0]) * 60;
     const seconds = parseInt(time.split(":")[1]);
     if (seconds > 0) start += seconds;
 
     const handleCountdown = (connection: DataConnection | null) => {
+      console.log("handleCountdown called: ");
       return setInterval(() => {
         if (start > 0) {
           start--;
@@ -124,7 +137,8 @@ const Countdown: FC<CountdownProps> = ({ startNewGame }) => {
     return () => {
       clearInterval(interval);
     };
-  }, [connection ? time && connection : time, isCountdownActive]);
+  }, [isCountdownActive, time]);
+  // }, [connection ? time && connection : time, isCountdownActive]);
 
   return (
     <div className="text-3xl">
@@ -133,7 +147,7 @@ const Countdown: FC<CountdownProps> = ({ startNewGame }) => {
           className={twMerge(
             "mr-4 w-20 text-center italic",
             time === "00:00" && "animate-bounce text-red-500",
-            isCountdownActive ? "text-green-600" : "text-blue-600"
+            isCountdownActive ? "text-green-600" : "text-blue-600",
           )}
         >
           {time}

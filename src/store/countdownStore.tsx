@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { getCached } from "../utils/utils";
 import { countdownSet } from "./constants";
 import useGameStateStore from "./gameStateStore";
+import { DifficultySet } from "../types/types";
 
 type TStore = {
   isCountdownActive: boolean;
@@ -9,7 +10,7 @@ type TStore = {
   time: string | null;
   actions: {
     setIsCountdownActive: (val: boolean) => void;
-    setTime: (time: string) => void;
+    setTime: (diff: DifficultySet['data']) => void;
     updateCountdown: (time: number) => void;
   };
 };
@@ -31,7 +32,8 @@ const useCountdownStore = create<TStore>((set) => ({
 
       set({ time: formattedTime });
     },
-    setTime: (time: string) => set({ time }),
+    setTime: (difficulty: DifficultySet['data']) => set({ time: countdownSet[difficulty] }),
+    // setTime: (time: string) => set({ time }),
     setIsCountdownActive: (isCountdownActive: boolean) =>
       set((state) => ({
         ...state,
