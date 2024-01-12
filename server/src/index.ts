@@ -35,7 +35,6 @@ io.on("connection", (socket) => {
       // socket.leave(socket.id);
       socket.join(room);
       console.log(`User ${player} joined room: ${room}. Current socketId: ${socket.id}`);
-
       if (player) {
         io.to(player).emit("clientId", { type: "room", room, player: socket.id, difficulty });
       } else {
@@ -43,6 +42,11 @@ io.on("connection", (socket) => {
       }
     }
   );
+
+  socket.on("endGame", (data) => {
+    const { player } = data;
+    io.to(player).emit("endGame", data);
+  });
 
   socket.on("roomData", (roomData) => {
     console.log("roomData called", roomData);

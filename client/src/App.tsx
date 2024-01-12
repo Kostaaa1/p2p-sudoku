@@ -71,6 +71,13 @@ function App() {
     });
 
     socket.on(
+      "endGame",
+      (data: { player: string; message: string; isWinner: boolean }) => {
+        console.log("endGame", data);
+      },
+    );
+
+    socket.on(
       "roomData",
       (roomData: {
         room: string;
