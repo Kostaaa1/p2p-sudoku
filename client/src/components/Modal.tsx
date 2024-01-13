@@ -6,6 +6,7 @@ import useSocketStore from "../store/socketStore";
 import useGameStateStore from "../store/gameStateStore";
 import { DifficultySet } from "../types/types";
 import useMistakesStore from "../store/mistakesStore";
+import { useSocket } from "../context/SocketProvider";
 
 interface ModalProps {
   startNewGame: (dif: DifficultySet["data"]) => void;
@@ -14,18 +15,20 @@ interface ModalProps {
 
 const Modal: FC<ModalProps> = ({ resetGameState, startNewGame }) => {
   const roomId = useSocketStore((state) => state.roomId);
+
   const isOpponentReady = useSocketStore((state) => state.isOpponentReady);
   const difficulty = useGameStateStore((state) => state.difficulty);
   const isWinner = useGameStateStore((state) => state.isWinner);
   const mistakes = useMistakesStore((state) => state.mistakes);
   const [isClicked, setIsClicked] = useState<boolean>(false);
+  const socket = useSocket();
 
   const playAgain = () => {
-    // if (roomId) {
-    //   roomId.send({ type: "ready", data: true });
-    // } else {
-    if (difficulty) startNewGame(difficulty);
-    // }
+    if (roomId) {
+      socket?.emit("onReady", { type: "ready", data: true });
+    } else {
+      if (difficulty) startNewGame(difficulty);
+    }
     setIsClicked(true);
   };
 
@@ -59,8 +62,8 @@ const Modal: FC<ModalProps> = ({ resetGameState, startNewGame }) => {
         </div>
         <div className="flex w-full flex-col items-center justify-center">
           <button
-            onClick={playAgain}
             disabled={isClicked}
+            onClick={playAgain}
             className={twMerge(
               "block h-max w-full items-center justify-center bg-blue-500 text-white transition-colors duration-100",
               !isClicked ? "bg-blue-500 hover:bg-blue-800" : "bg-slate-400",
@@ -68,7 +71,7 @@ const Modal: FC<ModalProps> = ({ resetGameState, startNewGame }) => {
           >
             {roomId && isClicked ? (
               <div className="flex items-center justify-center">
-                <IconLoaderQuarter className="load-animation mr-3 text-gray-200" />
+                <IconLoaderQuarter className="mr-3 animate-spin text-gray-200" />
                 Waiting for the other player
               </div>
             ) : (

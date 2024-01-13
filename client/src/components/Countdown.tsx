@@ -4,6 +4,10 @@ import useCountdownStore from "../store/countdownStore";
 import toast from "react-hot-toast";
 import useSocketStore from "../store/socketStore";
 import useGameStateStore from "../store/gameStateStore";
+import useMistakesStore from "../store/mistakesStore";
+import useSudokuStore from "../store/sudokuStore";
+import { DifficultySet, TUnifiedGame } from "../types/types";
+import { useSocket } from "../context/SocketProvider";
 import {
   useInsertedCells,
   useInsertedCellsActions,
@@ -11,10 +15,6 @@ import {
   useInvalidCellsActions,
   useSingleCellActions,
 } from "../store/cellStore";
-import useMistakesStore from "../store/mistakesStore";
-import useSudokuStore from "../store/sudokuStore";
-import { DifficultySet, TUnifiedGame } from "../types/types";
-import { useSocket } from "../context/SocketProvider";
 
 type CountdownProps = {
   startNewGame: (diff: DifficultySet["data"], sudoku?: string[][]) => void;
@@ -104,7 +104,7 @@ const Countdown: FC<CountdownProps> = ({ startNewGame }) => {
   };
 
   useEffect(() => {
-    if (!socket || !time) return;
+    if (!socket || !time || !isCountdownActive) return;
     let checkInitialUser: boolean | null = null;
     if (roomId && player1) {
       checkInitialUser = roomId.split(player1)[0].length === 0;
@@ -123,7 +123,7 @@ const Countdown: FC<CountdownProps> = ({ startNewGame }) => {
     return () => {
       clearInterval(interval);
     };
-  }, []);
+  }, [isCountdownActive]);
 
   useEffect(() => {
     if (!time) return;

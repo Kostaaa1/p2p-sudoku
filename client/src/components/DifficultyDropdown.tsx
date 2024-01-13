@@ -9,7 +9,6 @@ const DifficultyDropdown = () => {
   const roomId = useSocketStore((state) => state.roomId);
   const difficulty = useGameStateStore((state) => state.difficulty);
   const { setDifficulty } = useGameStateStore((state) => state.actions);
-
   const diffOptions = Object.entries(countdownSet).map((x, id) => ({
     id,
     option: x[0],

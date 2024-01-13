@@ -26,6 +26,7 @@ const PeerConnection = () => {
     { id: 1, type: "difficulty", data: "medium", clicked: false },
     { id: 2, type: "difficulty", data: "hard", clicked: false },
   ]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setDifficultyData((state) =>
@@ -34,6 +35,10 @@ const PeerConnection = () => {
   }, [difficulty]);
 
   const handleConnect = (p2Id: string) => {
+    if (!p2Id) {
+      setError("You need to provde an ID in order to connect.");
+    }
+
     const newRoomId = [player1 + p2Id].sort().join("");
     setPlayer2(p2Id);
     setRoomId(newRoomId);
@@ -89,13 +94,15 @@ const PeerConnection = () => {
               <label>My peer id: &nbsp;</label>
               <p className="text-yellow-600 underline">{player1}</p>
             </div>
-            {isCopyClicked && <IconCheck className="-mr-4 text-green-600" />}
-            <button
-              className="bg-slate-400 text-sm text-white"
-              onClick={copyPeerId}
-            >
-              Copy
-            </button>
+            <div className="flex items-center justify-center">
+              {isCopyClicked && <IconCheck className="mr-1 text-green-600" />}
+              <button
+                className="bg-slate-400 text-sm text-white"
+                onClick={copyPeerId}
+              >
+                Copy
+              </button>
+            </div>
           </div>
           <div className="flex w-full items-center justify-center py-2">
             <label>Connect to id: </label>

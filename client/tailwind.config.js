@@ -19,7 +19,7 @@ export default {
         },
       },
       animation: {
-        wave: "wave 1s ease-in-out",
+        wave: "wave 1.2s ease-in-out",
       },
     },
   },

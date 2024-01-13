@@ -2,8 +2,8 @@ import express from "express";
 import http from "http";
 import cors from "cors";
 import { Server } from "socket.io";
-import "dotenv/config";
 const { CLIENT_URL } = process.env;
+import "dotenv/config";
 
 const app = express();
 const server = http.createServer(app);
@@ -21,8 +21,7 @@ const io = new Server(server, {
 });
 
 // Prep:
-// Initially on reander, the serever socket sends socket id and imm joins the room
-// TODO: connect 2 sockets to one room, so they can have shared data:
+// Sockets can be implemented better, maybe i do not need to join the sockets like this (in a single room), everything would probably work with only connecting one socket.id to another.
 io.on("connection", (socket) => {
   socket.join(socket.id);
   socket.emit("clientId", { type: "client", room: socket.id });
@@ -48,9 +47,9 @@ io.on("connection", (socket) => {
     io.to(player).emit("endGame", data);
   });
 
-  socket.on("roomData", (roomData) => {
+  socket.on("roomData", (roomData: { room: string; data: any }) => {
     console.log("roomData called", roomData);
-    io.to(roomData.room).emit("roomData", roomData);
+    io.to(roomData.room).emit("roomData", roomData.data);
   });
 
   socket.on("countdown", (room) => {
@@ -60,11 +59,6 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log(`User disconnected with custom ID: ${socket.id}`);
   });
-});
-
-// Routes
-app.get("/api/test", (req, res) => {
-  res.json({ message: "Yooo from test route." });
 });
 
 const PORT = process.env.PORT || 8000;

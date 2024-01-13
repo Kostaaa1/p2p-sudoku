@@ -49,7 +49,7 @@ const useSudoku = () => {
       ) => {
         // Maybe i do not need new array for this to work ?????
         const invalidValues = values.filter((x) => x.value === value);
-        if (invalidValues.length > 1) {
+        if (invalidValues.length > 0) {
           invalidValues.forEach((cell) => {
             if (!isCellIncludedInStack(stack, cell)) stack.push(cell);
           });

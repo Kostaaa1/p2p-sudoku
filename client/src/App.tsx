@@ -14,24 +14,22 @@ import hornPath from "./assets/horn.mp3";
 import { useSocket } from "./context/SocketProvider";
 import { generateSudokuBoard } from "./utils/generateSudoku";
 import { DifficultySet } from "./types/types";
+import useToastStore from "./store/toastStore";
 
 function App() {
   const socket = useSocket();
   const navigate = useNavigate();
   const { booRef, hornRef } = useEndGameConditions();
-  const { setTime, decrementCountdown } = useCountdownStore(
-    (state) => state.actions,
-  );
-  // const time = useCountdownStore((state) => state.time);
-  const difficulty = useGameStateStore((state) => state.difficulty);
+  const { setTime, decrementCountdown, setIsCountdownActive } =
+    useCountdownStore((state) => state.actions);
   const { setSudoku } = useSudokuStore((state) => state.actions);
   const { setIsWinner, setDifficulty } = useGameStateStore(
     (state) => state.actions,
   );
-  const player1 = useSocketStore((state) => state.player1);
-  const player2 = useSocketStore((state) => state.player2);
-  const roomId = useSocketStore((state) => state.roomId);
   const { setPlayer1, setPlayer2, setRoomId } = useSocketStore(
+    (state) => state.actions,
+  );
+  const { callSuccessToast, callErrorToast } = useToastStore(
     (state) => state.actions,
   );
 
@@ -59,8 +57,7 @@ function App() {
     });
 
     socket.on("onJoin", (roomData) => {
-      console.log("onJoin: ", roomData);
-      const { room, player, difficulty } = roomData;
+      const { room, difficulty } = roomData;
       const board = generateSudokuBoard(difficulty);
       const newData = { board, difficulty };
       socket.emit("roomData", { room, data: newData });
@@ -74,18 +71,20 @@ function App() {
       "endGame",
       (data: { player: string; message: string; isWinner: boolean }) => {
         console.log("endGame", data);
+        const { isWinner, message, player } = data;
+        setIsWinner(isWinner);
+        setIsCountdownActive(false);
+        isWinner
+          ? callSuccessToast(isWinner, message)
+          : callErrorToast(isWinner, message);
       },
     );
 
     socket.on(
       "roomData",
-      (roomData: {
-        room: string;
-        data: { board: string[][]; difficulty: DifficultySet["data"] };
-      }) => {
+      (roomData: { board: string[][]; difficulty: DifficultySet["data"] }) => {
         console.log("roomData: ", roomData);
-        const { data, room } = roomData;
-        const { board, difficulty } = data;
+        const { board, difficulty } = roomData;
         setSudoku(board);
         setDifficulty(difficulty);
         setTime(difficulty);
@@ -95,7 +94,6 @@ function App() {
 
     return () => {
       socket.disconnect();
-      console.log("Disconnected from socket");
     };
   }, [socket]);
 

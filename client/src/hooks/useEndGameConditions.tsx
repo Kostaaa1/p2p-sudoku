@@ -12,7 +12,6 @@ const useEndGameConditions = () => {
   const booRef = useRef<HTMLAudioElement>(null);
   const hornRef = useRef<HTMLAudioElement>(null);
 
-  const roomId = useSocketStore((state) => state.roomId);
   const player2 = useSocketStore((state) => state.player2);
   const mistakes = useMistakesStore((state) => state.mistakes);
 

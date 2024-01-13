@@ -126,7 +126,6 @@ function Sudoku() {
         setAll(cachedGameData);
         return;
       }
-
       if (!difficulty || isWinner !== null) return;
       startNewGame(difficulty);
     }
@@ -169,13 +168,12 @@ function Sudoku() {
     if (animationValues.includes("grid")) {
       const startRow = Math.floor(row / 3) * 3;
       const startCol = Math.floor(col / 3) * 3;
-
-      for (let k = 0; k < 9; k++) {
-        const i = startRow + Math.floor(k / 3);
-        const j = startCol + (k % 3);
-
-        const gridDelay = k * delay;
-        addAnimationToCell(i * 9 + j, gridDelay);
+      for (let i = startRow; i < startRow + 3; i++) {
+        for (let j = startCol; j < startCol + 3; j++) {
+          const gridDelay =
+            (Math.abs(col - j) + Math.abs(row - i)) * (delay + 0.03);
+          addAnimationToCell(i * 9 + j, gridDelay);
+        }
       }
     }
     resetAnimationValues();
@@ -186,12 +184,12 @@ function Sudoku() {
       {/* <div className="h-full px-4 text-center text-3xl text-gray-700">
         S<br></br>U<br></br>D<br></br>O<br></br>K<br></br>U<br></br>
       </div> */}
-      <div className="flex w-[540px] flex-col items-center justify-center">
+      <div className="flex flex-col items-center justify-center">
         <div className="flex h-12 w-full items-center justify-between">
           <DifficultyDropdown />
           <Countdown startNewGame={startNewGame} />
         </div>
-        <div className="relative flex h-[540px] w-full flex-col items-center justify-center overflow-hidden border-2 border-gray-700 bg-white">
+        <div className="relative flex h-[540px] w-[540px] flex-col items-center justify-center overflow-hidden border-2 border-gray-700 bg-white">
           {sudoku?.map((rowVal, rowId) => (
             <div key={rowId} className="flex h-full w-full">
               {rowVal.map((colVal, colId) => (
@@ -226,7 +224,7 @@ function Sudoku() {
         </div>
         <div className="flex w-full items-center justify-between text-sm">
           <span className="text-md flex tracking-tighter text-black">
-            SocketID:
+            My Id:
             <p className="ml-2 text-yellow-600">{player1}</p>
           </span>
           <span className="flex text-lg tracking-tighter text-black">
