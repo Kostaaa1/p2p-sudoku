@@ -25,7 +25,6 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   socket.join(socket.id);
   socket.emit("clientId", { type: "client", room: socket.id });
-
   socket.on(
     "joinRoom",
     (roomData: { room: string; player: string | null; difficulty: string }) => {
@@ -41,6 +40,10 @@ io.on("connection", (socket) => {
       }
     }
   );
+
+  socket.on("isOpponentReady", (player) => {
+    io.to(player).emit("isOpponentReady");
+  });
 
   socket.on("endGame", (data) => {
     const { player } = data;

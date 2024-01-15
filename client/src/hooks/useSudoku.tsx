@@ -2,7 +2,6 @@ import { ChangeEvent, useCallback, useEffect } from "react";
 import { TCell } from "../types/types";
 import { isCellIncludedInStack, isObjectEqual } from "../utils/utils";
 import useSudokuStore from "../store/sudokuStore";
-import { useShallow } from "zustand/react/shallow";
 import useGameStateStore from "../store/gameStateStore";
 import {
   useFocusedCell,
@@ -21,82 +20,128 @@ const useSudoku = () => {
   const focusedCell = useFocusedCell();
   const lastInsertedCell = useLastInsertedCell();
   const { setFocusedCell, setLastInsertedCell } = useSingleCellActions();
-
   const invalidCells = useInvalidCells();
   const { addInvalidCell, removeInvalidCell } = useInvalidCellsActions();
   const insertedCells = useInsertedCells();
-  const { addInsertedCell, removeInsertedCell } = useInsertedCellsActions();
-
   const sudoku = useSudokuStore((state) => state.sudoku);
-  const { updateSudokuCell } = useSudokuStore(
-    useShallow((state) => state.actions),
-  );
+  const { updateSudokuCell } = useSudokuStore((state) => state.actions);
   const isWinner = useGameStateStore((state) => state.isWinner);
   const { incrementMistakes } = useMistakesStore((state) => state.actions);
+  const { addInsertedCell, removeInsertedCell } = useInsertedCellsActions();
 
-  /////////////////////////////////////
   const mutateInvalidCells = useCallback(
     (payload: { type: "add" | "remove"; cell: TCell }) => {
-      if (!lastInsertedCell) return true;
+      if (!lastInsertedCell) return;
 
+      console.log("called mutateinvalid");
       const { cell, type } = payload;
       const { col, row, value } = cell;
       const stack: TCell[] = [];
 
-      const checkInvalidValues = (
-        values: TCell[],
-        type: "row" | "col" | "grid",
-      ) => {
-        // Maybe i do not need new array for this to work ?????
-        const invalidValues = values.filter((x) => x.value === value);
-        if (invalidValues.length > 0) {
-          invalidValues.forEach((cell) => {
-            if (!isCellIncludedInStack(stack, cell)) stack.push(cell);
-          });
-        }
+      // Checking column
+      const colValues = sudoku[row].filter((x) => x !== "");
+      const colInvalidValues = sudoku[row]
+        .map((cellValue, i) =>
+          cellValue !== "" && cellValue === value ? { row, col: i, value } : -1,
+        )
+        .filter((i) => i !== -1) as TCell[];
 
-        const allValuesExist = !values.some((x) => x.value === "");
-        if (
-          allValuesExist &&
-          invalidValues.length === 1 &&
-          isObjectEqual(invalidValues[0], lastInsertedCell)
-        ) {
-          addAnimationValue(type);
-        }
-      };
+      if (colInvalidValues.length > 1) {
+        colInvalidValues.forEach((rowCell) => {
+          if (
+            rowCell.value === value &&
+            !isCellIncludedInStack(stack, rowCell)
+          ) {
+            stack.push(rowCell);
+          }
+        });
+      }
+
+      // // Checking row
+      const rowValues = sudoku
+        .map((row) => (row[col] !== "" ? row[col] : -1))
+        .filter((x) => x !== -1);
+
+      const rowInvalidValues = sudoku
+        .map((row, i) => {
+          const newCell = { row: i, col, value };
+          return row[col] !== "" && row[col] === value ? newCell : -1;
+        })
+        .filter((x) => x !== -1) as TCell[];
+
+      if (rowInvalidValues.length > 1) {
+        rowInvalidValues.forEach((colCell) => {
+          if (
+            colCell.value === value &&
+            !isCellIncludedInStack(stack, colCell)
+          ) {
+            stack.push(colCell);
+          }
+        });
+      }
 
       // // Checking 3x3 Box
       const startRow = Math.floor(row / 3) * 3;
       const startCol = Math.floor(col / 3) * 3;
-      const gridValues = Array.from({ length: 3 }, (_, i) =>
-        Array.from({ length: 3 }, (_, j) => ({
-          row: startRow + i,
-          col: startCol + j,
-          value: sudoku[startRow + i][startCol + j],
-        })),
-      ).flat();
 
-      const rowValues = sudoku[row].map((x, i) => ({ row, col: i, value: x }));
-      const colValues = sudoku.map((row, i) => ({
-        row: i,
-        col,
-        value: row[col],
-      }));
+      const gridValues = [];
+      const gridInvalidValues = [];
+      for (let i = startRow; i < startRow + 3; i++) {
+        for (let j = startCol; j < startCol + 3; j++) {
+          const gridVal = sudoku?.[i][j];
+          const gridCell = { row: i, col: j, value: gridVal };
 
-      checkInvalidValues(rowValues, "row");
-      checkInvalidValues(colValues, "col");
-      checkInvalidValues(gridValues, "grid");
+          if (gridVal !== "") gridValues.push(gridVal);
+          if (
+            gridVal !== "" &&
+            gridVal === value &&
+            !isCellIncludedInStack(stack, gridCell)
+          ) {
+            gridInvalidValues.push(gridCell);
+          }
+        }
+      }
+
+      if (gridInvalidValues.length > 0) {
+        gridInvalidValues.forEach((cell) => stack.push(cell));
+      }
+
+      if (
+        colValues.length === 9 &&
+        stack.length === 1 &&
+        isObjectEqual(stack[0], lastInsertedCell)
+      ) {
+        addAnimationValue("row");
+      }
+
+      if (
+        gridValues.length === 9 &&
+        stack.length === 1 &&
+        isObjectEqual(stack[0], lastInsertedCell)
+      ) {
+        addAnimationValue("grid");
+      }
+
+      if (
+        rowValues.length === 9 &&
+        stack.length === 1 &&
+        isObjectEqual(stack[0], lastInsertedCell)
+      ) {
+        addAnimationValue("col");
+      }
 
       if (type === "add" && stack.length > 1) {
-        if (value !== "") incrementMistakes();
+        // incrementMistakes();
         stack.forEach((cell) => addInvalidCell(cell));
       }
 
       if (type === "remove") {
-        return !stack.some(
-          (x) => x.row === row && x.col === col && x.value === value,
+        const removedFocusedStack = stack.filter(
+          (x) => !(x.row === row && x.col === col && x.value === value),
         );
+        if (removedFocusedStack.length === 1) return false;
       }
+
       return true;
     },
     [lastInsertedCell],
@@ -108,7 +153,8 @@ const useSudoku = () => {
     mutateInvalidCells({ type: "add", cell: lastInsertedCell });
   }, [lastInsertedCell]);
 
-  const deleteFocusedCell = useCallback(() => {
+  const deleteFocusedCell = () => {
+    console.log("deleting cell");
     const { row, col, value } = focusedCell;
     if (!value || !sudoku) return;
 
@@ -129,14 +175,7 @@ const useSudoku = () => {
       if (!mutateInvalidCells({ type: "remove", cell }))
         removeInvalidCell(cell);
     });
-  }, [
-    focusedCell,
-    sudoku,
-    removeInvalidCell,
-    removeInsertedCell,
-    invalidCells,
-    mutateInvalidCells,
-  ]);
+  };
 
   const handleChangeInput = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -153,14 +192,15 @@ const useSudoku = () => {
         return;
 
       const newCell = { row: rowId, col: colId, value };
-      focusedValue && focusedValue.length > value.length
-        ? deleteFocusedCell()
-        : addInsertedCell(newCell);
-
+      console.log("new Cell", newCell);
       // Update Sudoku Cell:
       setLastInsertedCell(newCell);
       updateSudokuCell(newCell);
       setFocusedCell(newCell);
+
+      focusedValue && focusedValue.length > value.length
+        ? deleteFocusedCell()
+        : addInsertedCell(newCell);
     },
     [
       isWinner,

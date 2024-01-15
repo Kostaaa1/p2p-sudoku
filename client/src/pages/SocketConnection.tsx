@@ -7,14 +7,12 @@ import usePeerStore from "../store/socketStore";
 import useGameStateStore from "../store/gameStateStore";
 import { useSocket } from "../context/SocketProvider";
 
-const PeerConnection = () => {
+const SocketConnection = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [input, setInput] = useState<string>("");
   const navigate = useNavigate();
-
   const player1 = usePeerStore((state) => state.player1);
   const { setPlayer2, setRoomId } = usePeerStore((state) => state.actions);
-
   const [isCopyClicked, setIsCopyClicked] = useState<boolean>(false);
   const [page, setPage] = useState<number>(0);
   const PAGE_LIMIT = 2;
@@ -26,7 +24,6 @@ const PeerConnection = () => {
     { id: 1, type: "difficulty", data: "medium", clicked: false },
     { id: 2, type: "difficulty", data: "hard", clicked: false },
   ]);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setDifficultyData((state) =>
@@ -34,27 +31,13 @@ const PeerConnection = () => {
     );
   }, [difficulty]);
 
-  const handleConnect = (p2Id: string) => {
-    if (!p2Id) {
-      setError("You need to provde an ID in order to connect.");
-    }
-
+  const handleSocketConnection = (p2Id: string) => {
     const newRoomId = [player1 + p2Id].sort().join("");
+    console.log("called handleSocketConnection", newRoomId);
     setPlayer2(p2Id);
     setRoomId(newRoomId);
     socket?.emit("joinRoom", { room: newRoomId, player: p2Id, difficulty });
   };
-
-  // useEffect(() =>{
-  // clearing connection ??????????
-  //   console.log("ran");
-  //   localStorage.removeItem("difficulty");
-  //   if (connection) {
-  //     setConnection(null);
-  //     // connection.close();
-  //     // setDifficulty();
-  //   }
-  // }, []);
 
   const copyPeerId = () => {
     if (player1) {
@@ -142,9 +125,11 @@ const PeerConnection = () => {
       )}
       <button
         className="h-8 bg-slate-400 text-sm text-white"
-        onClick={() => (page === 0 ? nextPage() : handleConnect(input))}
+        onClick={() =>
+          page === 0 ? nextPage() : handleSocketConnection(input)
+        }
       >
-        {page === 0 ? "Connect" : "Continue"}
+        {page === 0 ? "Continue" : "Connect"}
       </button>
       <button
         className="flex h-8 items-center justify-center bg-red-400 text-sm text-white transition-colors duration-200 [--p:259_94%_51%]"
@@ -156,4 +141,4 @@ const PeerConnection = () => {
   );
 };
 
-export default PeerConnection;
+export default SocketConnection;

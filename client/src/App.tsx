@@ -1,9 +1,9 @@
-import { Route, Routes, useNavigate } from "react-router-dom";
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import Sudoku from "./pages/Sudoku";
 import Modes from "./pages/Modes";
-import PeerConnection from "./pages/PeerConnection";
+import SocketConnection from "./pages/SocketConnection";
 import { Toaster } from "react-hot-toast";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import useCountdownStore from "./store/countdownStore";
 import useGameStateStore from "./store/gameStateStore";
 import useSocketStore from "./store/socketStore";
@@ -13,36 +13,98 @@ import booPath from "./assets/boo.mp3";
 import hornPath from "./assets/horn.mp3";
 import { useSocket } from "./context/SocketProvider";
 import { generateSudokuBoard } from "./utils/generateSudoku";
-import { DifficultySet } from "./types/types";
+import { DifficultySet, TUnifiedGame } from "./types/types";
 import useToastStore from "./store/toastStore";
+import { countdownSet, emptySudoku } from "./store/constants";
+import {
+  useInsertedCellsActions,
+  useInvalidCellsActions,
+  useSingleCellActions,
+} from "./store/cellStore";
+import useMistakesStore from "./store/mistakesStore";
 
 function App() {
   const socket = useSocket();
   const navigate = useNavigate();
+  const location = useLocation();
   const { booRef, hornRef } = useEndGameConditions();
-  const { setTime, decrementCountdown, setIsCountdownActive } =
-    useCountdownStore((state) => state.actions);
+  const { decrementTime } = useCountdownStore((state) => state.actions);
   const { setSudoku } = useSudokuStore((state) => state.actions);
   const { setIsWinner, setDifficulty } = useGameStateStore(
     (state) => state.actions,
   );
-  const { setPlayer1, setPlayer2, setRoomId } = useSocketStore(
+  const { setIsCountdownActive, setTime, updateCountdown } = useCountdownStore(
     (state) => state.actions,
   );
+  const { setIsOpponentReady, setPlayer1, setPlayer2, setRoomId } =
+    useSocketStore((state) => state.actions);
   const { callSuccessToast, callErrorToast } = useToastStore(
     (state) => state.actions,
   );
+  const { setInvalidCells, resetInvalidCells } = useInvalidCellsActions();
+  const { setMistakes, resetMistakes } = useMistakesStore(
+    (state) => state.actions,
+  );
+  const { setInsertedCells, resetInsertedCells } = useInsertedCellsActions();
+  const { setFocusedCell } = useSingleCellActions();
+  const { setIsToastRan } = useToastStore((state) => state.actions);
+
+  const setAll = (mainGame: string) => {
+    const parsedData: TUnifiedGame = JSON.parse(mainGame);
+    const { time, insertedCells, invalidCells, isWinner, mistakes, sudoku } =
+      parsedData;
+
+    updateCountdown(time);
+    setInvalidCells(invalidCells);
+    setInsertedCells(insertedCells);
+    setIsWinner(isWinner);
+    setSudoku(sudoku);
+    setMistakes(mistakes);
+    setFocusedCell({ row: 0, col: 0, value: sudoku[0][0] });
+  };
+
+  const resetGameState = (difficulty: DifficultySet["data"]) => {
+    localStorage.removeItem("main_game");
+    setIsToastRan(false);
+    setIsCountdownActive(true);
+    setIsOpponentReady(false);
+    resetMistakes();
+    resetInsertedCells();
+    resetInvalidCells();
+    setTime(difficulty);
+    setIsWinner(null);
+  };
+
+  const getEmptyUnifiedGame = useCallback(
+    (difficulty: DifficultySet["data"]) => {
+      const emptyGame: TUnifiedGame = {
+        sudoku: emptySudoku,
+        insertedCells: [],
+        invalidCells: [],
+        isWinner: null,
+        mistakes: 0,
+        time: countdownSet[difficulty],
+      };
+      return emptyGame;
+    },
+    [],
+  );
+
+  const startNewGame = (diff: DifficultySet["data"], sudoku?: string[][]) => {
+    resetGameState(diff);
+    const emptyGame = getEmptyUnifiedGame(diff);
+    const newGame = sudoku || generateSudokuBoard(diff);
+    setAll(JSON.stringify({ ...emptyGame, sudoku: newGame }));
+  };
 
   // socket test:
   useEffect(() => {
     if (!socket) return;
-
     socket.on("connect", () => {
       console.log("Connected to socket");
     });
 
     socket.on("clientId", (clientData) => {
-      console.log("clientD  data ", clientData);
       const { room, type, difficulty } = clientData;
       switch (type) {
         case "client":
@@ -64,7 +126,7 @@ function App() {
     });
 
     socket.on("countdown", () => {
-      decrementCountdown();
+      decrementTime();
     });
 
     socket.on(
@@ -80,18 +142,25 @@ function App() {
       },
     );
 
+    socket.on("isOpponentReady", () => {
+      console.log("Opponent is ready");
+      setIsOpponentReady(true);
+    });
+
     socket.on(
       "roomData",
       (roomData: { board: string[][]; difficulty: DifficultySet["data"] }) => {
-        console.log("roomData: ", roomData);
         const { board, difficulty } = roomData;
+        resetGameState(difficulty);
         setSudoku(board);
         setDifficulty(difficulty);
         setTime(difficulty);
-        navigate("/sudoku");
+
+        if (location.pathname !== "/sudoku") {
+          navigate("/sudoku");
+        }
       },
     );
-
     return () => {
       socket.disconnect();
     };
@@ -102,9 +171,11 @@ function App() {
       <div className="flex h-full w-screen items-center justify-center">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<Modes />} />
-          <Route path="/sudoku/peer-connect" element={<PeerConnection />} />
-          <Route path="/sudoku" element={<Sudoku />} />
-          <Route path="/sudoku/:roomId" element={<Sudoku />} />
+          <Route path="/sudoku/peer-connect" element={<SocketConnection />} />
+          <Route
+            path="/sudoku"
+            element={<Sudoku startNewGame={startNewGame} setAll={setAll} />}
+          />
         </Routes>
       </div>
       <audio ref={booRef}>

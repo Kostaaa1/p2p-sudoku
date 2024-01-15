@@ -1,21 +1,20 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useState } from "react";
 import Confetti from "react-confetti";
 import { twMerge } from "tailwind-merge";
 import { IconLoaderQuarter } from "@tabler/icons-react";
 import useSocketStore from "../store/socketStore";
 import useGameStateStore from "../store/gameStateStore";
-import { DifficultySet } from "../types/types";
 import useMistakesStore from "../store/mistakesStore";
 import { useSocket } from "../context/SocketProvider";
+import { DifficultySet } from "../types/types";
 
 interface ModalProps {
-  startNewGame: (dif: DifficultySet["data"]) => void;
-  resetGameState: (dif: DifficultySet["data"]) => void;
+  startNewGame: (difficulty: DifficultySet["data"]) => void;
 }
 
-const Modal: FC<ModalProps> = ({ resetGameState, startNewGame }) => {
+const Modal: FC<ModalProps> = ({ startNewGame }) => {
   const roomId = useSocketStore((state) => state.roomId);
-
+  const player2 = useSocketStore((state) => state.player2);
   const isOpponentReady = useSocketStore((state) => state.isOpponentReady);
   const difficulty = useGameStateStore((state) => state.difficulty);
   const isWinner = useGameStateStore((state) => state.isWinner);
@@ -24,18 +23,21 @@ const Modal: FC<ModalProps> = ({ resetGameState, startNewGame }) => {
   const socket = useSocket();
 
   const playAgain = () => {
-    if (roomId) {
-      socket?.emit("onReady", { type: "ready", data: true });
-    } else {
-      if (difficulty) startNewGame(difficulty);
+    if (isOpponentReady) {
+      console.log(
+        "Opponent is ready should create new game and send it to room",
+      );
+      socket?.emit("joinRoom", { room: roomId, player: null, difficulty });
+      return;
     }
-    setIsClicked(true);
-  };
 
-  useEffect(() => {
-    if (isClicked && isOpponentReady && roomId && difficulty)
-      resetGameState(difficulty);
-  }, [roomId, difficulty, isClicked, isOpponentReady]);
+    if (roomId) {
+      socket?.emit("isOpponentReady", player2);
+      setIsClicked(true);
+    } else {
+      startNewGame(difficulty);
+    }
+  };
 
   return (
     <div className="absolute left-0 top-0 z-50 flex h-full w-full items-center justify-center bg-black bg-opacity-70 text-black">

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { FC, useEffect, useRef } from "react";
 import useSudoku from "../hooks/useSudoku";
 import Modal from "../components/Modal";
 import Countdown from "../components/Countdown";
@@ -11,25 +11,20 @@ import useSudokuStore from "../store/sudokuStore";
 import useGameStateStore from "../store/gameStateStore";
 import useMistakesStore from "../store/mistakesStore";
 import useCountdownStore from "../store/countdownStore";
-import {
-  useInsertedCellsActions,
-  useInvalidCellsActions,
-  useLastInsertedCell,
-  useSingleCellActions,
-} from "../store/cellStore";
-import { DifficultySet, TUnifiedGame } from "../types/types";
-import useToastStore from "../store/toastStore";
-import { useShallow } from "zustand/react/shallow";
-import { countdownSet, emptySudoku } from "../store/constants";
-import { generateSudokuBoard } from "../utils/generateSudoku";
+import { useLastInsertedCell, useSingleCellActions } from "../store/cellStore";
 import {
   useAnimationValues,
   useAnimationValuesActions,
 } from "../store/animationStore";
+import { DifficultySet } from "../types/types";
 
-function Sudoku() {
+interface SudokuProps {
+  setAll: (mainGame: string) => void;
+  startNewGame: (diff: DifficultySet["data"], sudoku?: string[][]) => void;
+}
+
+const Sudoku: FC<SudokuProps> = ({ setAll, startNewGame }) => {
   const inputRefs = useRef<HTMLInputElement[]>([]);
-
   const player1 = useSocketStore((state) => state.player1);
   const player2 = useSocketStore((state) => state.player2);
   const roomId = useSocketStore((state) => state.roomId);
@@ -42,22 +37,8 @@ function Sudoku() {
   const isCountdownActive = useCountdownStore(
     (state) => state.isCountdownActive,
   );
-  const { setIsOpponentReady } = useSocketStore((state) => state.actions);
-  const { resetMistakes, setMistakes } = useMistakesStore(
-    (state) => state.actions,
-  );
-  const { setIsCountdownActive, setTime } = useCountdownStore(
-    (state) => state.actions,
-  );
-  const { setIsToastRan } = useToastStore((state) => state.actions);
-  const { setInvalidCells, resetInvalidCells } = useInvalidCellsActions();
-  const { setInsertedCells, resetInsertedCells } = useInsertedCellsActions();
-  const { setSudoku } = useSudokuStore(useShallow((state) => state.actions));
   const { setFocusedCell } = useSingleCellActions();
-  const { setIsWinner } = useGameStateStore((state) => state.actions);
-
   const lastInsertedCell = useLastInsertedCell();
-  const { handleChangeInput } = useSudoku();
   const {
     generateBorderStyle,
     generateCellTextColor,
@@ -65,62 +46,11 @@ function Sudoku() {
     generateHighlightStyle,
   } = useGenerateCellStyles();
   useKeyboardArrows(inputRefs);
-
-  // // From usePersist storage:
-  const setAll = (mainGame: string) => {
-    const parsedData: TUnifiedGame = JSON.parse(mainGame);
-    const { time, insertedCells, invalidCells, isWinner, mistakes, sudoku } =
-      parsedData;
-
-    if (time) {
-      setTime(difficulty);
-      setInvalidCells(invalidCells);
-      setInsertedCells(insertedCells);
-      setIsWinner(isWinner);
-      setSudoku(sudoku);
-      setMistakes(mistakes);
-      setFocusedCell({ row: 0, col: 0, value: sudoku[0][0] });
-    }
-  };
+  const { handleChangeInput } = useSudoku();
 
   // Main Game Setter, whenever difficulty changes new game gets created ( only if there is nothing in storage, the storage gets saved before unloading)j:
-  const resetGameState = (difficulty: DifficultySet["data"]) => {
-    localStorage.removeItem("main_game");
-    setIsToastRan(false);
-    setIsCountdownActive(true);
-    setIsOpponentReady(false);
-    resetMistakes();
-    resetInsertedCells();
-    resetInvalidCells();
-    setTime(difficulty);
-    setIsWinner(null);
-  };
-
-  const getEmptyUnifiedGame = useCallback(
-    (difficulty: DifficultySet["data"]) => {
-      const emptyGame: TUnifiedGame = {
-        sudoku: emptySudoku,
-        insertedCells: [],
-        invalidCells: [],
-        isWinner: null,
-        mistakes: 0,
-        time: countdownSet[difficulty],
-      };
-      return emptyGame;
-    },
-    [],
-  );
-
-  const startNewGame = (diff: DifficultySet["data"], sudoku?: string[][]) => {
-    resetGameState(diff);
-    const emptyGame = getEmptyUnifiedGame(diff);
-    const newGame = sudoku || generateSudokuBoard(diff);
-    setAll(JSON.stringify({ ...emptyGame, sudoku: newGame }));
-  };
-
   useEffect(() => {
     if (!roomId) {
-      console.log("started kdoskaodkos");
       const cachedGameData = localStorage.getItem("main_game");
       if (cachedGameData) {
         setAll(cachedGameData);
@@ -243,10 +173,10 @@ function Sudoku() {
         S<br></br>U<br></br>D<br></br>O<br></br>K<br></br>U<br></br>
       </div> */}
       {!isCountdownActive && isWinner !== null && (
-        <Modal startNewGame={startNewGame} resetGameState={resetGameState} />
+        <Modal startNewGame={startNewGame} />
       )}
     </div>
   );
-}
+};
 
 export default Sudoku;

@@ -15,6 +15,7 @@ import {
   useInvalidCellsActions,
   useSingleCellActions,
 } from "../store/cellStore";
+import { formatCountdown } from "../utils/utils";
 
 type CountdownProps = {
   startNewGame: (diff: DifficultySet["data"], sudoku?: string[][]) => void;
@@ -24,19 +25,16 @@ const Countdown: FC<CountdownProps> = ({ startNewGame }) => {
   const isWinner = useGameStateStore((state) => state.isWinner);
   const difficulty = useGameStateStore((state) => state.difficulty);
   const { setIsWinner } = useGameStateStore((state) => state.actions);
-
   const roomId = useSocketStore((state) => state.roomId);
   const player1 = useSocketStore((state) => state.player1);
-
   const time = useCountdownStore((state) => state.time);
   const isCountdownActive = useCountdownStore(
     (state) => state.isCountdownActive,
   );
-  const { setIsCountdownActive, decrementCountdown } = useCountdownStore(
+  const { decrementTime, setIsCountdownActive } = useCountdownStore(
     (state) => state.actions,
   );
-  const { setTime } = useCountdownStore((state) => state.actions);
-
+  const { updateCountdown } = useCountdownStore((state) => state.actions);
   const insertedCells = useInsertedCells();
   const invalidCells = useInvalidCells();
   const mistakes = useMistakesStore((state) => state.mistakes);
@@ -47,8 +45,8 @@ const Countdown: FC<CountdownProps> = ({ startNewGame }) => {
   const { setInsertedCells } = useInsertedCellsActions();
   const { setSudoku } = useSudokuStore((state) => state.actions);
   const { setMistakes } = useMistakesStore((state) => state.actions);
-  const [countdown, setCountdown] = useState("");
   const socket = useSocket();
+  const [countdown, setCountdown] = useState("");
 
   useEffect(() => {
     // Saving current game cache before the window unload,only if cells are added or mistakes are not
@@ -56,7 +54,6 @@ const Countdown: FC<CountdownProps> = ({ startNewGame }) => {
 
     const func = () => {
       if (mistakes > 0 || invalidCells.length > 0 || insertedCells.length > 0) {
-        console.log("invalidCells", invalidCells);
         const dataCollectior: TUnifiedGame = {
           insertedCells,
           invalidCells,
@@ -70,7 +67,9 @@ const Countdown: FC<CountdownProps> = ({ startNewGame }) => {
         localStorage.setItem("difficulty", JSON.stringify(difficulty));
 
         // setAll(JSON.stringify(data));
-        setTime(difficulty);
+        // setTime(difficulty);
+        updateCountdown(time);
+        setInvalidCells(invalidCells);
         setInvalidCells(invalidCells);
         setIsWinner(isWinner);
         setSudoku(sudoku);
@@ -109,29 +108,26 @@ const Countdown: FC<CountdownProps> = ({ startNewGame }) => {
     if (roomId && player1) {
       checkInitialUser = roomId.split(player1)[0].length === 0;
     }
+
     const interval = setInterval(() => {
-      if (time > 0) {
+      if (time >= 0) {
         if (checkInitialUser === true) socket.emit("countdown", roomId);
-        if (checkInitialUser === null) decrementCountdown();
-      } else if (time === 0) {
-        localStorage.removeItem("main_game");
-        setIsCountdownActive(false);
-        clearInterval(interval);
-        return;
+        if (checkInitialUser === null) decrementTime();
       }
     }, 1000);
+
     return () => {
       clearInterval(interval);
     };
   }, [isCountdownActive]);
 
   useEffect(() => {
-    if (!time) return;
-    const minutes = Math.floor(time / 60);
-    const remainingSeconds = time % 60;
-    const formattedTime = `${String(minutes).padStart(2, "0")}:${String(
-      remainingSeconds,
-    ).padStart(2, "0")}`;
+    if (time === 0) {
+      setIsWinner(false);
+      setIsCountdownActive(false);
+    }
+
+    const formattedTime = formatCountdown(time);
     setCountdown(formattedTime);
   }, [time]);
 
@@ -141,7 +137,7 @@ const Countdown: FC<CountdownProps> = ({ startNewGame }) => {
         <p
           className={twMerge(
             "mr-4 w-20 text-center italic",
-            time === 0 && "animate-bounce text-red-500",
+            countdown === "00:00" && "animate-bounce text-red-500",
             isCountdownActive ? "text-green-600" : "text-blue-600",
           )}
         >

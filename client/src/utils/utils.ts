@@ -22,6 +22,16 @@ export const isCellIncludedInStack = (stack: TCell[], cell: TCell) => {
   );
 };
 
+export const formatCountdown = (time: number) => {
+  const minutes = Math.floor(time / 60);
+  const remainingSeconds = time % 60;
+  const formattedTime = `${String(minutes).padStart(2, "0")}:${String(
+    remainingSeconds,
+  ).padStart(2, "0")}`;
+
+  return formattedTime;
+};
+
 export const isObjectEqual = (
   o1: TCell | TFocusedCell,
   o2: TCell | TFocusedCell,
