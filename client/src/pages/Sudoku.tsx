@@ -11,7 +11,7 @@ import useSudokuStore from "../store/sudokuStore";
 import useGameStateStore from "../store/gameStateStore";
 import useMistakesStore from "../store/mistakesStore";
 import useCountdownStore from "../store/countdownStore";
-import { useLastInsertedCell, useSingleCellActions } from "../store/cellStore";
+import { useFocusedCell, useSingleCellActions } from "../store/cellStore";
 import {
   useAnimationValues,
   useAnimationValuesActions,
@@ -38,7 +38,8 @@ const Sudoku: FC<SudokuProps> = ({ setAll, startNewGame }) => {
     (state) => state.isCountdownActive,
   );
   const { setFocusedCell } = useSingleCellActions();
-  const lastInsertedCell = useLastInsertedCell();
+  // const lastInsertedCell = useLastInsertedCell();
+  const focusedCell = useFocusedCell();
   const {
     generateBorderStyle,
     generateCellTextColor,
@@ -65,8 +66,9 @@ const Sudoku: FC<SudokuProps> = ({ setAll, startNewGame }) => {
   //////////// Animation: ////////////
   ////////////////////////////////////
   useEffect(() => {
-    if (animationValues.length === 0 || !lastInsertedCell) return;
-    const { col, row, value } = lastInsertedCell;
+    if (animationValues.length === 0) return;
+    console.log(focusedCell);
+    const { col, row, value } = focusedCell;
     if (value === "") return;
 
     const delay = 0.07;
@@ -107,7 +109,7 @@ const Sudoku: FC<SudokuProps> = ({ setAll, startNewGame }) => {
       }
     }
     resetAnimationValues();
-  }, [animationValues, lastInsertedCell]);
+  }, [animationValues]);
 
   return (
     <div className="flex w-full items-center justify-center font-semibold">

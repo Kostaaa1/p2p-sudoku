@@ -22,10 +22,10 @@ type InsertedCellsActions = {
 
 type TUseSudokuStore = {
   focusedCell: TFocusedCell;
-  lastInsertedCell: TCell | null;
+  // lastInsertedCell: TCell | null;
   singleCellActions: {
     setFocusedCell: (cell: TCell) => void;
-    setLastInsertedCell: (cell: TCell) => void;
+    // setLastInsertedCell: (cell: TCell) => void;
   };
   invalidCells: TCell[];
   invalidCellsActions: InvalidCellsActions;
@@ -35,9 +35,9 @@ type TUseSudokuStore = {
 
 const useCellStore = create<TUseSudokuStore>((set) => ({
   focusedCell: { col: 0, row: 0 },
-  lastInsertedCell: null,
+  // lastInsertedCell: null,
   singleCellActions: {
-    setLastInsertedCell: (cell: TCell) => set({ lastInsertedCell: cell }),
+    // setLastInsertedCell: (cell: TCell) => set({ lastInsertedCell: cell }),
     setFocusedCell: (cell: TCell) => set({ focusedCell: cell }),
   },
   invalidCells: getCached("invalidCells") || [],
@@ -62,7 +62,9 @@ const useCellStore = create<TUseSudokuStore>((set) => ({
   insertedCellsActions: {
     setInsertedCells: (cells: TCell[]) => set({ insertedCells: cells }),
     addInsertedCell: (cell: TCell) =>
-      set((state) => ({ insertedCells: [cell, ...state.insertedCells] })),
+      set((state) => ({
+        insertedCells: [cell, ...state.insertedCells],
+      })),
     removeInsertedCell: (newCell: TCell) =>
       set((state) => ({
         insertedCells: state.insertedCells.filter(
@@ -73,17 +75,9 @@ const useCellStore = create<TUseSudokuStore>((set) => ({
   },
 }));
 
-// const useSingleCell = () =>
-//   useCellStore(
-//     useShallow((state) => ({
-//       focusedCell: state.focusedCell,
-//       lastInsertedCell: state.lastInsertedCell,
-//     })),
-//   );
-
 export const useFocusedCell = () => useCellStore((state) => state.focusedCell);
-export const useLastInsertedCell = () =>
-  useCellStore((state) => state.lastInsertedCell);
+// export const useLastInsertedCell = () =>
+//   useCellStore((state) => state.lastInsertedCell);
 
 export const useSingleCellActions = () =>
   useCellStore((state) => state.singleCellActions);

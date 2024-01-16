@@ -2,23 +2,23 @@ import express from "express";
 import http from "http";
 import cors from "cors";
 import { Server } from "socket.io";
-const { CLIENT_URL } = process.env;
 import "dotenv/config";
 
 const app = express();
 const server = http.createServer(app);
 
-app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// app.use(cors());
+// app.use(express.urlencoded({ extended: false }));
 
 // Init Socket:
-const io = new Server(server, {
-  cors: {
-    origin: CLIENT_URL,
-    methods: ["GET", "POST"],
-  },
-});
+const io = new Server(server);
+// const io = new Server(server, {
+//   cors: {
+//     origin: "http://localhost:5173",
+//     methods: ["GET", "POST"],
+//   },
+// });
 
 // Prep:
 // Sockets can be implemented better, maybe i do not need to join the sockets like this (in a single room), everything would probably work with only connecting one socket.id to another.
@@ -64,7 +64,6 @@ io.on("connection", (socket) => {
   });
 });
 
-const PORT = process.env.PORT || 8000;
-server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+server.listen(3000, () => {
+  console.log(`Server is running on ${3000}`);
 });

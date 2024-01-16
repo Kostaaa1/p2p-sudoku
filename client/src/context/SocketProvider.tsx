@@ -14,7 +14,7 @@ export const SocketContext = createContext<SocketContextProps | undefined>(
 );
 
 export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
-  const socket = io(import.meta.env.EXPRESS_SERVER_URL);
+  const socket = io();
   return (
     <SocketContext.Provider value={{ socket }}>
       {children}
