@@ -44,6 +44,10 @@ export type TUnifiedGame = {
   time: number;
 };
 
+export type TCheckDupliactes =
+  | { cells: string[]; type: "row" | "col" }
+  | { cells: TCell[]; type: "grid" };
+
 export type TimeLimitSet = {
   type: "time_limit";
   id: number;

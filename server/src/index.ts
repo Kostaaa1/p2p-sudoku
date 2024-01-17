@@ -23,6 +23,7 @@ const io = new Server(server);
 // Prep:
 // Sockets can be implemented better, maybe i do not need to join the sockets like this (in a single room), everything would probably work with only connecting one socket.id to another.
 io.on("connection", (socket) => {
+  console.log('User joined: ', socket.id)
   socket.join(socket.id);
   socket.emit("clientId", { type: "client", room: socket.id });
   socket.on(
