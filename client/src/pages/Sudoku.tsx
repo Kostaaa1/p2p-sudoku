@@ -1,22 +1,22 @@
-import { FC, useEffect, useRef } from "react";
-import useSudoku from "../hooks/useSudoku";
+import { FC, useEffect, useRef, useState } from "react";
 import Modal from "../components/Modal";
 import Countdown from "../components/Countdown";
 import DifficultyDropdown from "../components/DifficultyDropdown";
-import useGenerateCellStyles from "../hooks/useGenerateCellStyles";
-import { twMerge } from "tailwind-merge";
 import useKeyboardArrows from "../hooks/useKeyboardArrows";
 import useSocketStore from "../store/socketStore";
 import useSudokuStore from "../store/sudokuStore";
 import useGameStateStore from "../store/gameStateStore";
 import useMistakesStore from "../store/mistakesStore";
 import useCountdownStore from "../store/countdownStore";
-import { useFocusedCell, useSingleCellActions } from "../store/cellStore";
+import { useFocusedCell } from "../store/cellStore";
 import {
   useAnimationValues,
   useAnimationValuesActions,
 } from "../store/animationStore";
 import { DifficultySet } from "../types/types";
+import { cn } from "../utils/utils";
+import Cell from "../components/Cell";
+import _ from "lodash";
 
 interface SudokuProps {
   setAll: (mainGame: string) => void;
@@ -25,6 +25,8 @@ interface SudokuProps {
 
 const Sudoku: FC<SudokuProps> = ({ setAll, startNewGame }) => {
   const inputRefs = useRef<HTMLInputElement[]>([]);
+  const boardRef = useRef<HTMLDivElement>(null);
+
   const player1 = useSocketStore((state) => state.player1);
   const player2 = useSocketStore((state) => state.player2);
   const roomId = useSocketStore((state) => state.roomId);
@@ -37,17 +39,9 @@ const Sudoku: FC<SudokuProps> = ({ setAll, startNewGame }) => {
   const isCountdownActive = useCountdownStore(
     (state) => state.isCountdownActive,
   );
-  const { setFocusedCell } = useSingleCellActions();
   // const lastInsertedCell = useLastInsertedCell();
   const focusedCell = useFocusedCell();
-  const {
-    generateBorderStyle,
-    generateCellTextColor,
-    generateCellBackgroundColor,
-    generateHighlightStyle,
-  } = useGenerateCellStyles();
   useKeyboardArrows(inputRefs);
-  const { handleChangeInput } = useSudoku();
 
   // Main Game Setter, whenever difficulty changes new game gets created ( only if there is nothing in storage, the storage gets saved before unloading)j:
   useEffect(() => {
@@ -102,8 +96,7 @@ const Sudoku: FC<SudokuProps> = ({ setAll, startNewGame }) => {
       const startCol = Math.floor(col / 3) * 3;
       for (let i = startRow; i < startRow + 3; i++) {
         for (let j = startCol; j < startCol + 3; j++) {
-          const gridDelay =
-            (Math.abs(col - j) + Math.abs(row - i)) * (delay + 0.03);
+          const gridDelay = (Math.abs(col - j) + Math.abs(row - i)) * delay;
           addAnimationToCell(i * 9 + j, gridDelay);
         }
       }
@@ -111,45 +104,52 @@ const Sudoku: FC<SudokuProps> = ({ setAll, startNewGame }) => {
     resetAnimationValues();
   }, [animationValues]);
 
+  ///////////////////////////
+  const [boardSize, setBoardSize] = useState<number>(540);
+
+  useEffect(() => {
+    const test = () => {
+      if (window.innerWidth <= 550) {
+        console.log(window.innerWidth);
+        setBoardSize(window.innerWidth);
+      }
+    };
+
+    window.addEventListener("resize", test);
+    return () => {
+      window.removeEventListener("resize", test);
+    };
+  }, []);
+
   return (
-    <div className="flex w-full items-center justify-center font-semibold">
-      {/* <div className="h-full px-4 text-center text-3xl text-gray-700">
-        S<br></br>U<br></br>D<br></br>O<br></br>K<br></br>U<br></br>
-      </div> */}
-      <div className="flex flex-col items-center justify-center">
+    <main className="flex w-full items-center justify-center font-semibold">
+      <div className="p-2">
         <div className="flex h-12 w-full items-center justify-between">
           <DifficultyDropdown />
           <Countdown startNewGame={startNewGame} />
         </div>
-        <div className="relative flex h-[540px] w-[540px] flex-col items-center justify-center overflow-hidden border-2 border-gray-700 bg-white">
+        <div
+          ref={boardRef}
+          style={{
+            width: boardSize,
+            height: boardSize,
+          }}
+          className={cn(
+            `relative flex h-full w-full flex-col items-center justify-center overflow-hidden border-2 border-gray-700 bg-white`,
+          )}
+        >
           {sudoku?.map((rowVal, rowId) => (
             <div key={rowId} className="flex h-full w-full">
               {rowVal.map((colVal, colId) => (
-                <div
+                <Cell
                   key={colId}
-                  className={twMerge(
-                    "relative flex h-full w-full items-center justify-center",
-                    generateBorderStyle(rowId, colId),
-                    generateHighlightStyle(rowId, colId),
-                    generateCellBackgroundColor(rowId, colId, colVal),
-                  )}
-                >
-                  <input
-                    ref={(el: HTMLInputElement) =>
-                      (inputRefs.current[rowId * 9 + colId] = el!)
-                    }
-                    type="text"
-                    value={colVal}
-                    onChange={(e) => handleChangeInput(e)}
-                    onClick={() =>
-                      setFocusedCell({ row: rowId, col: colId, value: colVal })
-                    }
-                    className={twMerge(
-                      "absolute left-0 top-0 h-full w-full animate-wave cursor-pointer border border-b-0 border-r-0 border-[#BEC6D4] bg-transparent text-center text-3xl text-gray-700 caret-transparent",
-                      generateCellTextColor(rowId, colId, colVal),
-                    )}
-                  />
-                </div>
+                  rowId={rowId}
+                  colId={colId}
+                  colVal={colVal}
+                  cellRef={(el: HTMLInputElement) =>
+                    (inputRefs.current[rowId * 9 + colId] = el!)
+                  }
+                />
               ))}
             </div>
           ))}
@@ -177,7 +177,7 @@ const Sudoku: FC<SudokuProps> = ({ setAll, startNewGame }) => {
       {!isCountdownActive && isWinner !== null && (
         <Modal startNewGame={startNewGame} />
       )}
-    </div>
+    </main>
   );
 };
 

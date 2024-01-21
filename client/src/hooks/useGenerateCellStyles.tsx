@@ -1,11 +1,10 @@
 import { useCallback, useMemo } from "react";
-import { twMerge } from "tailwind-merge";
 import {
   useFocusedCell,
   useInsertedCells,
   useInvalidCells,
 } from "../store/cellStore";
-import { isCellIncludedInStack, isObjectEqual } from "../utils/utils";
+import { cn, isCellIncludedInStack, isObjectEqual } from "../utils/utils";
 
 const useGenerateCellStyles = () => {
   const invalidCells = useInvalidCells();
@@ -29,13 +28,11 @@ const useGenerateCellStyles = () => {
 
   const generateBorderStyle = useMemo(
     () => (rowId: number, colId: number) => {
-      const styles = [
+      return cn(
         shouldRenderBottomBorder(rowId) && "border-b-2 border-b-gray-700",
         shouldRenderRightBorder(colId) && "border-r-2 border-r-gray-700",
-      ].filter(Boolean);
-      return twMerge(...styles);
+      );
     },
-
     [],
   );
 
@@ -61,14 +58,13 @@ const useGenerateCellStyles = () => {
   );
 
   const generateCellTextColor = (row: number, col: number, value: string) => {
-    const styles = [
+    return cn(
       isCellIncludedInStack(insertedCells, { row, col, value }) &&
         "text-blue-600",
       isCellIncludedInStack(invalidCells, { row, col, value }) &&
         isCellIncludedInStack(insertedCells, { row, col, value }) &&
         "text-red-700",
-    ].filter(Boolean);
-    return twMerge(...styles);
+    );
   };
 
   const generateCellBackgroundColor = (
@@ -76,7 +72,7 @@ const useGenerateCellStyles = () => {
     col: number,
     value: string,
   ) => {
-    const styles = [
+    return cn(
       focusedCell.value &&
         parseInt(focusedCell.value) === parseInt(value) &&
         !isObjectEqual(focusedCell, { row, col, value }) &&
@@ -86,8 +82,7 @@ const useGenerateCellStyles = () => {
       focusedCell.row === row &&
         focusedCell.col === col &&
         "bg-blue-300 bg-opacity-80",
-    ].filter(Boolean);
-    return twMerge(...styles);
+    );
   };
 
   return {

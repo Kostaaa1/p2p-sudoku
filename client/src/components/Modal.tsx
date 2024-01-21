@@ -1,12 +1,12 @@
 import { FC, useState } from "react";
 import Confetti from "react-confetti";
-import { twMerge } from "tailwind-merge";
 import { IconLoaderQuarter } from "@tabler/icons-react";
 import useSocketStore from "../store/socketStore";
 import useGameStateStore from "../store/gameStateStore";
 import useMistakesStore from "../store/mistakesStore";
 import { useSocket } from "../context/SocketProvider";
 import { DifficultySet } from "../types/types";
+import { cn } from "../utils/utils";
 
 interface ModalProps {
   startNewGame: (difficulty: DifficultySet["data"]) => void;
@@ -66,7 +66,7 @@ const Modal: FC<ModalProps> = ({ startNewGame }) => {
           <button
             disabled={isClicked}
             onClick={playAgain}
-            className={twMerge(
+            className={cn(
               "block h-max w-full items-center justify-center bg-blue-500 text-white transition-colors duration-100",
               !isClicked ? "bg-blue-500 hover:bg-blue-800" : "bg-slate-400",
             )}

@@ -133,7 +133,7 @@ function App() {
       "endGame",
       (data: { player: string; message: string; isWinner: boolean }) => {
         console.log("endGame", data);
-        const { isWinner, message, player } = data;
+        const { isWinner, message } = data;
         setIsWinner(isWinner);
         setIsCountdownActive(false);
         isWinner

@@ -1,5 +1,4 @@
 import { FC, useEffect, useState } from "react";
-import { twMerge } from "tailwind-merge";
 import useCountdownStore from "../store/countdownStore";
 import toast from "react-hot-toast";
 import useSocketStore from "../store/socketStore";
@@ -15,7 +14,7 @@ import {
   useInvalidCellsActions,
   useSingleCellActions,
 } from "../store/cellStore";
-import { formatCountdown } from "../utils/utils";
+import { cn, formatCountdown } from "../utils/utils";
 
 type CountdownProps = {
   startNewGame: (diff: DifficultySet["data"], sudoku?: string[][]) => void;
@@ -135,7 +134,7 @@ const Countdown: FC<CountdownProps> = ({ startNewGame }) => {
     <div className="text-3xl">
       <div className="flex items-center justify-center text-white">
         <p
-          className={twMerge(
+          className={cn(
             "mr-4 w-20 text-center italic",
             countdown === "00:00" && "animate-bounce text-red-500",
             isCountdownActive ? "text-green-600" : "text-blue-600",

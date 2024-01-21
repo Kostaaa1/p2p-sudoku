@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { DifficultySet } from "../types/types";
 import { IconCheck } from "@tabler/icons-react";
-import { twMerge } from "tailwind-merge";
 import usePeerStore from "../store/socketStore";
 import useGameStateStore from "../store/gameStateStore";
 import { useSocket } from "../context/SocketProvider";
+import { cn } from "../utils/utils";
 
 const SocketConnection = () => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -111,7 +111,7 @@ const SocketConnection = () => {
               <button
                 key={x.id}
                 onClick={() => difficultyBtnClick(x.id)}
-                className={twMerge(
+                className={cn(
                   "w-full bg-slate-400 text-sm text-white transition-all duration-200 hover:bg-green-600",
                   id % 2 !== 0 && "mx-2",
                   x.clicked && "bg-green-600",
